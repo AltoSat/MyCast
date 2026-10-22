@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MyCast">
+<meta name="theme-color" content="#0a0a0c">
+<meta name="color-scheme" content="dark">
+<meta name="format-detection" content="telephone=no">
+<title>MyCast</title>
+<link rel="apple-touch-icon" id="appleIcon">
+<link rel="manifest" id="manifestLink">
+<style>
+  :root{
+    --bg:#0a0a0c; --bg2:#131316; --card:#1c1c1e; --card2:#2c2c2e;
+    --text:#fff; --text2:#8e8e93; --text3:#48484a;
+    --accent:#0a84ff; --accent2:#5e5ce6; --accent-soft:rgba(10,132,255,.15);
+    --grad:linear-gradient(135deg,#5b6cff,#9a6cff);
+    --grad-soft:linear-gradient(140deg,rgba(91,108,255,.14),rgba(176,108,255,.06));
+    --green:#30d158; --red:#ff453a;
+    --border:rgba(255,255,255,.08);
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+    min-height:100%;overscroll-behavior:none}
+  body{
+    padding:calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 260px);
+    max-width:480px;margin:0 auto;min-height:100dvh;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+    touch-action:manipulation;
+  }
+  input,textarea{-webkit-user-select:text;user-select:text}
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(120% 55% at 50% -12%, rgba(91,108,255,.16), transparent 62%),
+      radial-gradient(90% 45% at 105% 108%, rgba(176,108,255,.10), transparent 62%);
+  }
+  .app-wrap{position:relative;z-index:1}
+
+  /* ── Topbar ── */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:4px 0 12px;gap:12px}
+  .titleWrap{min-width:0}
+  .topbar h1{font-size:26px;font-weight:800;margin:0;letter-spacing:-.03em;line-height:1.1}
+  .subtitle{margin:3px 0 0;font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.02em}
+  .topbar-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+  .icon-btn{width:40px;height:40px;border-radius:50%;background:var(--card);border:none;color:var(--text);
+    font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;
+    position:relative;z-index:2;transition:transform .12s,background .12s}
+  .icon-btn:active{transform:scale(.92);background:var(--card2)}
+
+  /* ── Section ── */
+  .section{margin-bottom:18px}
+  .step-label{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--text2);
+    margin-bottom:10px;letter-spacing:.04em;flex-wrap:wrap}
+  .step-num{display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);
+    font-size:12px;font-weight:700;flex-shrink:0}
+  .step-label.is-active{color:var(--accent)}
+  .step-label.is-active .step-num{background:var(--accent);color:#fff}
+  .hint{color:var(--text3);font-weight:400;font-size:11px;margin-left:4px}
+
+  /* ── Tags ── */
+  .tags{display:flex;flex-wrap:wrap;gap:8px}
+  .tag{padding:9px 16px;border-radius:999px;background:var(--card);border:1px solid var(--border);
+    color:var(--text);font-size:14px;font-family:inherit;cursor:pointer;max-width:100%;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    transition:background .15s,border-color .15s,transform .1s;
+    -webkit-appearance:none;appearance:none;touch-action:manipulation;
+    -webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+  .tag:active{transform:scale(.96)}
+  .tag[data-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .tag[data-selected="true"]::before{content:'✓ ';font-weight:700}
+
+  /* ── Generate button ── */
+  .genBtn{
+    display:block;width:100%;min-height:100px;padding:18px 20px;
+    background:var(--grad);color:#fff;border:none;border-radius:20px;
+    text-align:center;box-sizing:border-box;cursor:pointer;
+    box-shadow:0 10px 28px rgba(91,108,255,.40);
+    transition:transform .12s,opacity .12s;font-family:inherit;
+    -webkit-appearance:none;appearance:none;
+  }
+  .genBtn:active{transform:scale(.98);opacity:.9}
+  .genBtn .icon{display:block;font-size:32px;line-height:1;margin-bottom:6px;color:#fff}
+  .genBtn .main{display:block;font-size:17px;font-weight:700;line-height:1.4;color:#fff}
+  .genBtn .sub{display:block;font-size:11.5px;line-height:1.4;margin-top:4px;color:#fff;opacity:.9}
+
+  /* ── History ── */
+  .history{display:flex;flex-direction:column;gap:8px}
+  .history-item{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;
+    background:var(--card);border-radius:16px;border:1px solid var(--border);
+    transition:background .18s,border-color .18s,transform .12s,opacity .2s;
+    cursor:pointer;position:relative;overflow:hidden;
+  }
+  .history-item:active{transform:scale(.985)}
+  .history-item.playing{background:rgba(91,108,255,.15);border-color:rgba(91,108,255,.38)}
+  .history-item.read:not(.playing){opacity:.55}
+  .history-item .thumb{
+    flex:0 0 42px;width:42px;height:42px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--grad-soft);border:1px solid rgba(91,108,255,.20);
+    color:#c8cfff;font-size:15px;font-weight:700;cursor:pointer;
+    -webkit-appearance:none;appearance:none;padding:0;font-family:inherit;
+    transition:transform .12s,background .12s;
+  }
+  .history-item .thumb:active{transform:scale(.92)}
+  .history-item.playing .thumb{background:var(--grad);color:#fff;border-color:transparent}
+  .history-item .thumb svg{width:18px;height:18px}
+  .history-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .history-title{
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    font-size:14px;font-weight:600;line-height:1.35;word-break:break-word;
+  }
+  .history-num{color:var(--accent);font-weight:800;margin-right:3px;font-variant-numeric:tabular-nums}
+  .history-item.playing .history-num{color:#c8cfff}
+  .history-sub{font-size:11.5px;color:var(--text2);overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .history-del{flex:0 0 32px;width:32px;height:32px;border-radius:50%;background:transparent;
+    border:none;color:var(--text2);font-size:14px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-family:inherit;padding:0;-webkit-appearance:none;appearance:none;
+    transition:background .12s,color .12s}
+  .history-del:active{background:rgba(255,69,58,.15);color:var(--red)}
+  .history-bar{position:absolute;left:0;bottom:0;height:2px;background:var(--grad);
+    border-radius:0 1px 1px 0;transition:width .3s linear}
+  .empty{color:var(--text3);font-size:13.5px;padding:18px 0;text-align:center}
+  .empty small{display:block;font-size:12px;margin-top:6px;color:var(--text3)}
+
+  .eq{display:flex;align-items:flex-end;justify-content:center;gap:2.5px;height:14px;color:#fff}
+  .eq i{display:block;width:2.5px;border-radius:1.5px;background:currentColor;
+    transform-origin:bottom;animation:eqb .85s ease-in-out infinite alternate;
+    animation-play-state:paused}
+  .eq i:nth-child(1){height:45%;animation-delay:-.20s}
+  .eq i:nth-child(2){height:92%;animation-delay:-.52s}
+  .eq i:nth-child(3){height:64%;animation-delay:-.08s}
+  .eq i:nth-child(4){height:100%;animation-delay:-.70s}
+  .history-item.playing .eq i{animation-play-state:running}
+  .player.show .pthumb .eq i{animation-play-state:running}
+  @keyframes eqb{from{transform:scaleY(.22)}to{transform:scaleY(1)}}
+
+  /* ── Player ── */
+  .player{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    padding:10px 14px calc(var(--safe-bottom) + 10px);
+    background:rgba(20,20,25,.82);
+    backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
+    border-top:1px solid rgba(255,255,255,.09);
+    box-shadow:0 -12px 40px rgba(0,0,0,.55);
+    transform:translateY(115%);
+    transition:transform .38s cubic-bezier(.32,.72,0,1);
+    will-change:transform;
+  }
+  .player.show{transform:translateY(0)}
+
+  .phead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .pthumb{width:40px;height:40px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;color:#fff;
+    background:var(--grad);box-shadow:0 6px 16px rgba(91,108,255,.30)}
+  .pmeta{flex:1;min-width:0}
+  .ptitle{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    font-size:14px;font-weight:650;line-height:1.3;word-break:break-word}
+  .psub{font-size:11px;color:var(--text2);margin-top:2px;font-variant-numeric:tabular-nums}
+
+  .seekRow{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+  .seek{-webkit-appearance:none;appearance:none;flex:1;height:20px;margin:0;background:transparent}
+  .seek::-webkit-slider-runnable-track{height:5px;border-radius:3px;
+    background:linear-gradient(90deg,#5b6cff 0%,#9a6cff var(--p,0%),rgba(255,255,255,.13) var(--p,0%),rgba(255,255,255,.13) 100%)}
+  .seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;
+    margin-top:-4.5px;box-shadow:0 2px 8px rgba(0,0,0,.6)}
+  .seek::-moz-range-track{height:5px;border-radius:3px;background:rgba(255,255,255,.13)}
+  .seek::-moz-range-thumb{width:14px;height:14px;border:none;border-radius:50%;background:#fff}
+  .ptime{font-size:11px;font-weight:600;color:var(--text2);
+    font-variant-numeric:tabular-nums;letter-spacing:.02em;flex:0 0 auto;min-width:78px;text-align:right}
+
+  .pctrl{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 4px}
+  .btn{width:44px;height:44px;border:none;background:transparent;color:var(--text);
+    display:grid;place-items:center;border-radius:50%;padding:0;
+    transition:transform .12s,opacity .12s,background .12s}
+  .btn:active{transform:scale(.9);opacity:.65}
+  .btn svg{width:20px;height:20px}
+  .btn.play{width:52px;height:52px;border-radius:50%;color:#fff;background:var(--grad);
+    box-shadow:0 8px 22px rgba(91,108,255,.42)}
+  .btn.play svg{width:22px;height:22px}
+  #playBtn .ico-pause{display:none}
+  body.is-playing #playBtn .ico-play{display:none}
+  body.is-playing #playBtn .ico-pause{display:block}
+  .skipBtn{width:48px;height:48px;border-radius:50%;
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);
+    color:var(--text);font-size:13px;font-weight:700;letter-spacing:-.02em;
+    display:grid;place-items:center;padding:0;
+    transition:transform .12s,background .12s;font-family:inherit}
+  .skipBtn:active{transform:scale(.9);background:rgba(91,108,255,.22)}
+
+  .pfoot{display:flex;align-items:center;gap:8px;padding:0 2px}
+  .repBtn{position:relative;width:34px;height:34px;border-radius:50%;flex:0 0 auto;
+    background:transparent;border:none;color:var(--text2);
+    display:grid;place-items:center;padding:0;transition:color .15s,background .15s}
+  .repBtn svg{width:17px;height:17px}
+  .repBtn.on{color:#c8cfff;background:rgba(91,108,255,.18)}
+  .repNum{position:absolute;bottom:2px;right:2px;font-size:8px;font-weight:800;color:#fff;
+    background:var(--accent2);width:11px;height:11px;border-radius:50%;
+    display:none;place-items:center;line-height:1}
+  .repBtn.one .repNum{display:grid}
+  .spdLabel{font-size:11px;font-weight:600;color:var(--text2);flex:0 0 auto}
+  .spdRange{flex:1;-webkit-appearance:none;appearance:none;height:18px;margin:0;background:transparent}
+  .spdRange::-webkit-slider-runnable-track{height:4px;border-radius:2px;
+    background:linear-gradient(90deg,#5b6cff 0%,#9a6cff var(--p,20%),rgba(255,255,255,.13) var(--p,20%),rgba(255,255,255,.13) 100%)}
+  .spdRange::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#fff;
+    margin-top:-4.5px;box-shadow:0 2px 6px rgba(0,0,0,.6)}
+  .spdRange::-moz-range-track{height:4px;border-radius:2px;background:rgba(255,255,255,.13)}
+  .spdRange::-moz-range-thumb{width:13px;height:13px;border:none;border-radius:50%;background:#fff}
+  .spdValue{font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;
+    min-width:40px;text-align:right;flex:0 0 auto;letter-spacing:-.01em}
+  .miniBtn{height:26px;padding:0 9px;border-radius:8px;border:none;
+    background:rgba(255,255,255,.08);color:var(--text);
+    font-size:11px;font-weight:650;flex:0 0 auto;font-family:inherit}
+  .miniBtn:active{background:rgba(91,108,255,.28)}
+
+  /* ── Modal ── */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;z-index:100;
+    opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility .2s}
+  .modal.show{opacity:1;visibility:visible;pointer-events:auto}
+  .modal-card{width:100%;max-height:92vh;background:var(--bg2);border-radius:24px 24px 0 0;
+    display:flex;flex-direction:column;overflow:hidden}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;
+    padding:20px 16px 14px;flex:0 0 auto}
+  .modal-head h2{font-size:20px;font-weight:700;margin:0}
+
+  .tabs{display:flex;gap:6px;background:var(--card);padding:4px;border-radius:12px;
+    margin:0 16px 14px;flex:0 0 auto}
+  .tab-btn{flex:1;padding:10px;border-radius:9px;border:none;background:transparent;color:var(--text2);
+    font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+  .tab-btn.is-active{background:var(--accent);color:#fff}
+  .tab-panel[hidden]{display:none}
+  .tab-scroll{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:0 16px calc(var(--safe-bottom) + 20px);overscroll-behavior:contain}
+
+  .field{margin-bottom:20px}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px}
+  .hint2{color:var(--text3);font-weight:400;font-size:12px;margin-left:6px}
+  textarea,input[type="text"]{width:100%;background:var(--card);border:1px solid var(--border);
+    border-radius:12px;color:var(--text);padding:12px;font-size:15px;font-family:inherit;
+    resize:vertical;outline:none;box-sizing:border-box;-webkit-appearance:none;line-height:1.5}
+  textarea:focus,input[type="text"]:focus{border-color:var(--accent)}
+
+  .theme-list{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+  .theme-card{background:var(--card);border-radius:14px;padding:10px;border:1px solid var(--border);
+    display:flex;flex-direction:column;gap:8px;transition:box-shadow .35s ease}
+  .theme-card.flash{box-shadow:0 0 0 2px var(--accent)}
+  .theme-card-head{display:flex;gap:8px}
+  .theme-card-head input{flex:1}
+  .theme-card textarea{font-size:14px;min-height:150px}
+  .del-btn{background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;
+    width:36px;height:36px;border-radius:8px;flex:0 0 36px}
+  .del-btn:active{background:rgba(255,69,58,.1)}
+  .add-btn{width:100%;padding:14px;border-radius:12px;background:var(--accent-soft);color:var(--accent);
+    border:1px dashed var(--accent);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer}
+
+  .note{color:var(--text3);font-size:12px;line-height:1.6;margin:0 0 12px}
+  .data-btn{display:block;width:100%;padding:14px;border-radius:12px;background:var(--accent-soft);
+    color:var(--accent);border:1px solid var(--border);font-size:15px;font-weight:600;
+    font-family:inherit;cursor:pointer;margin-bottom:10px;-webkit-appearance:none;appearance:none}
+  .data-btn:active{background:rgba(10,132,255,.28)}
+
+  /* ── Toast ── */
+  .toast{position:fixed;left:50%;bottom:calc(var(--safe-bottom) + 260px);
+    transform:translateX(-50%) translateY(20px);background:var(--card2);color:var(--text);
+    padding:11px 18px;border-radius:999px;font-size:13px;font-weight:500;opacity:0;
+    transition:opacity .2s,transform .2s;pointer-events:none;z-index:200;white-space:nowrap;
+    box-shadow:0 4px 16px rgba(0,0,0,.4);max-width:90vw;overflow:hidden;text-overflow:ellipsis;
+    display:flex;align-items:center;gap:10px}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+  .toast span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .toastAction{border:none;background:rgba(91,108,255,.32);color:#c8cfff;
+    font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:8px;flex:0 0 auto;white-space:nowrap}
+  .toastAction:active{background:rgba(91,108,255,.5)}
+
+  /* ── Drop overlay ── */
+  .drop-overlay{position:fixed;inset:0;z-index:80;display:grid;place-items:center;
+    background:rgba(0,0,0,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    opacity:0;pointer-events:none;transition:opacity .18s}
+  .drop-overlay.show{opacity:1}
+  .drop-overlay div{padding:44px 56px;border:2px dashed rgba(140,150,255,.75);border-radius:28px;
+    font-size:17px;font-weight:700;color:#cfd4ff;background:rgba(91,108,255,.10)}
+</style>
+</head>
+<body>
+
+<div class="app-wrap">
+  <header class="topbar">
+    <div class="titleWrap">
+      <h1>MyCast</h1>
+      <p class="subtitle" id="subtitle">音声解説 × プレイヤー</p>
+    </div>
+    <div class="topbar-actions">
+      <button id="notebookBtn" type="button" class="icon-btn" aria-label="NotebookLM を開く" title="NotebookLM を開く">📓</button>
+      <button id="settingsBtn" type="button" class="icon-btn" aria-label="設定">⚙︎</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ① プロンプト選択 -->
+    <section class="section">
+      <div class="step-label is-active"><span class="step-num">1</span>プロンプトを選択<span class="hint">長押しで編集</span></div>
+      <div id="promptTags" class="tags"></div>
+    </section>
+
+    <!-- ② テーマ選択 -->
+    <section class="section">
+      <div class="step-label is-active"><span class="step-num">2</span>テーマを選択<span class="hint">長押しで編集</span></div>
+      <div id="tags" class="tags"></div>
+    </section>
+
+    <!-- ③ 生成 -->
+    <section class="section">
+      <div class="step-label is-active"><span class="step-num">3</span>音声解説を生成する</div>
+      <button id="shareBtn" type="button" class="genBtn" aria-label="音声解説を生成する">
+        <span class="icon">🎙</span>
+        <span class="main" id="shareBtnTitle">【001】音声解説を生成する</span>
+        <span class="sub">プロンプトをコピー &amp; ソースを共有</span>
+      </button>
+    </section>
+
+    <!-- ④ 履歴 -->
+    <section class="section">
+      <div class="step-label"><span class="step-num">4</span>履歴<span class="hint">音声を取り込んで再生</span></div>
+      <div id="historyList" class="history"></div>
+    </section>
+  </main>
+</div>
+
+<!-- プレイヤー -->
+<div class="player" id="player">
+  <div class="phead">
+    <div class="pthumb"><div class="eq"><i></i><i></i><i></i><i></i></div></div>
+    <div class="pmeta">
+      <div class="ptitle" id="pTitle">—</div>
+      <div class="psub" id="pSub">—</div>
+    </div>
+  </div>
+  <div class="seekRow">
+    <input id="seek" class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="再生位置">
+    <span class="ptime" id="pTime">0:00 / 0:00</span>
+  </div>
+  <div class="pctrl">
+    <button class="skipBtn" id="back5Btn" aria-label="5秒戻す">−5</button>
+    <button class="btn play" id="playBtn" aria-label="再生 / 一時停止">
+      <svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72c0 .8.87 1.29 1.56.9l10.9-6.86a1.05 1.05 0 0 0 0-1.8L9.56 4.24A1.05 1.05 0 0 0 8 5.14Z"/></svg>
+      <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4.6" height="15" rx="1.7"/><rect x="13.4" y="4.5" width="4.6" height="15" rx="1.7"/></svg>
+    </button>
+    <button class="skipBtn" id="fwd5Btn" aria-label="5秒進む">+5</button>
+  </div>
+  <div class="pfoot">
+    <button class="repBtn" id="repeatBtn" aria-label="リピート切替">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
+        <path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>
+      </svg>
+      <span class="repNum" id="repNum">1</span>
+    </button>
+    <span class="spdLabel">速度</span>
+    <input type="range" class="spdRange" id="speedSlider" min="0.5" max="3" step="0.1" value="1" aria-label="再生速度">
+    <span class="spdValue" id="speedValue">1.0×</span>
+    <button class="miniBtn" id="resetSpeedBtn">1×</button>
+  </div>
+</div>
+
+<!-- 設定モーダル -->
+<div id="settingsModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>設定</h2>
+      <button id="closeSettings" type="button" class="icon-btn" aria-label="閉じる">✕</button>
+    </div>
+
+    <div class="tabs">
+      <button type="button" class="tab-btn is-active" data-tab="theme">テーマ</button>
+      <button type="button" class="tab-btn" data-tab="prompt">プロンプト</button>
+      <button type="button" class="tab-btn" data-tab="data">データ</button>
+    </div>
+
+    <div class="tab-scroll">
+      <div id="tabTheme" class="tab-panel">
+        <div class="field">
+          <label>テーマ一覧（タグ名＋ソース）</label>
+          <div id="themeList" class="theme-list"></div>
+          <button id="addThemeBtn" type="button" class="add-btn">+ テーマを追加</button>
+        </div>
+      </div>
+
+      <div id="tabPrompt" class="tab-panel" hidden>
+        <div class="field">
+          <label>共通プロンプト<span class="hint2">個別プロンプトと結合してコピーされます</span></label>
+          <textarea id="commonPromptInput" rows="5" placeholder="共通プロンプト本文（{theme} でテーマ名を差し込み）"></textarea>
+        </div>
+        <div class="field">
+          <label>個別プロンプト一覧<span class="hint2">{theme} でテーマ名を差し込み</span></label>
+          <div id="promptList" class="theme-list"></div>
+          <button id="addPromptBtn" type="button" class="add-btn">+ プロンプトを追加</button>
+        </div>
+      </div>
+
+      <div id="tabData" class="tab-panel" hidden>
+        <div class="field">
+          <label>バックアップ</label>
+          <p class="note">テーマ・プロンプト・履歴を JSON ファイルに保存できます。インポートすると現在のデータは上書きされます。音声ファイル本体はバックアップに含まれません。</p>
+          <button id="exportBtn" type="button" class="data-btn">エクスポート（ファイルに保存）</button>
+          <button id="importBtn" type="button" class="data-btn">インポート（ファイルから復元）</button>
+          <input id="importFile" type="file" accept=".json,application/json" hidden>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="drop-overlay" id="dropOverlay"><div>ここにドロップして音声を取り込み</div></div>
+<div id="toast" class="toast"></div>
+
+<input type="file" id="fileInput" accept="audio/*,.m4a,.mp3,.aac,.wav,.m4b,.ogg,.oga,.flac,.opus" hidden>
+<audio id="audio" playsinline preload="metadata"></audio>
+
+<script>
+(function(){
+'use strict';
+
+/* ═════════════════════════════════════════════
+   MyCast — 音声解説 × プレイヤー 統合版
+   ═════════════════════════════════════════════ */
+
+var STORAGE_KEY = 'mycast.v1';
+var MAX_HISTORY = 100;
+var REUSE_WINDOW_MS = 30000;
+var NOTEBOOK_URL = 'https://notebooklm.google.com/';
+var LONG_PRESS_MS = 550;
+var DEFAULT_PROMPT = '以下のソースを参考に、テーマ「{theme}」について音声でわかりやすく解説してください。';
+var ICON_FILE = 'icon.png';
+
+function $(s, r){ return (r||document).querySelector(s); }
+function $$(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); }
+
+/* ── State ── */
+var state = {
+  commonPrompt: '',
+  prompts: [],
+  themes: [],
+  history: [],
+  selectedPromptId: null,
+  selectedThemeId: null,
+  lastGenAt: 0,
+  lastGenId: null,
+  nextNumber: 1,
+  rate: 1,
+  repeatMode: 'off'
+};
+
+var currentId = null;
+var audioUrls = {};
+var audioPositions = {};
+var scrubbing = false;
+var toastTimer = null;
+var suppressClickUntil = 0;
+var db = null;
+var ICON_ABS = '';
+
+/* ── Utilities ── */
+function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function formatNum(n){ return String(n).padStart(3, '0'); }
+function numTag(n){ return '【' + formatNum(n) + '】'; }
+function safeId(v){ return (typeof v === 'string' && /^[A-Za-z0-9_-]+$/.test(v)) ? v : null; }
+function fmtTime(s){
+  if(!isFinite(s) || s < 0) return '0:00';
+  s = Math.floor(s);
+  var h = Math.floor(s/3600);
+  var m = Math.floor((s%3600)/60);
+  var ss = String(s%60).padStart(2,'0');
+  return h > 0 ? (h+':'+String(m).padStart(2,'0')+':'+ss) : (m+':'+ss);
+}
+function formatDateLabel(d){
+  var days = ['日','月','火','水','木','金','土'];
+  return (d.getMonth()+1)+'月'+d.getDate()+'日('+days[d.getDay()]+') '+
+    String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function fmtRate(r){ return r.toFixed(1) + '×'; }
+
+function showToast(msg, actionLabel, actionFn, duration){
+  var el = $('#toast'); if(!el) return;
+  el.innerHTML = '';
+  var span = document.createElement('span');
+  span.textContent = msg;
+  el.appendChild(span);
+  if(actionLabel && actionFn){
+    var btn = document.createElement('button');
+    btn.className = 'toastAction';
+    btn.textContent = actionLabel;
+    btn.addEventListener('click', function(){
+      actionFn();
+      hideToast();
+    });
+    el.appendChild(btn);
+  }
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, duration || (actionLabel ? 5000 : 2200));
+}
+function hideToast(){
+  var el = $('#toast'); if(el) el.classList.remove('show');
+  clearTimeout(toastTimer);
+}
+
+/* ── Icons / Manifest ── */
+function roundRect(g, x, y, w, h, r){
+  g.beginPath();
+  if(typeof g.roundRect === 'function'){ g.roundRect(x, y, w, h, r); return; }
+  r = Math.min(r, w/2, h/2);
+  g.moveTo(x+r, y);
+  g.arcTo(x+w, y, x+w, y+h, r);
+  g.arcTo(x+w, y+h, x, y+h, r);
+  g.arcTo(x, y+h, x, y, r);
+  g.arcTo(x, y, x+w, y, r);
+  g.closePath();
+}
+function drawFallbackIcon(size){
+  var c = document.createElement('canvas');
+  c.width = c.height = size;
+  var g = c.getContext('2d');
+  var grad = g.createLinearGradient(0,0,size,size);
+  grad.addColorStop(0, '#5b6cff');
+  grad.addColorStop(1, '#b06cff');
+  g.fillStyle = grad; g.fillRect(0,0,size,size);
+  var hs = [0.26,0.46,0.62,0.44,0.30];
+  var bw = size*0.088, gap = size*0.055;
+  var total = hs.length*bw + (hs.length-1)*gap;
+  var x = (size-total)/2;
+  g.fillStyle = 'rgba(255,255,255,.96)';
+  for(var i=0;i<hs.length;i++){
+    var bh = size*hs[i];
+    roundRect(g, x, (size-bh)/2, bw, bh, bw/2);
+    g.fill();
+    x += bw + gap;
+  }
+  return c.toDataURL('image/png');
+}
+function buildAssets(){
+  var iconAbs;
+  try{ iconAbs = new URL(ICON_FILE, location.href).href; }catch(e){ iconAbs = ICON_FILE; }
+  var appleIcon = document.getElementById('appleIcon');
+  if(appleIcon) appleIcon.href = ICON_FILE;
+  var manifest = {
+    name: 'MyCast',
+    short_name: 'MyCast',
+    description: '音声解説の生成と再生をひとつに。',
+    start_url: location.href,
+    scope: './',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#0a0a0c',
+    theme_color: '#0a0a0c',
+    icons: [
+      { src: iconAbs, sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: iconAbs, sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: iconAbs, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+    ]
+  };
+  try{
+    var blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+    document.getElementById('manifestLink').href = URL.createObjectURL(blob);
+  }catch(e){}
+  return iconAbs;
+}
+
+/* ── IndexedDB ── */
+function openDB(){
+  return new Promise(function(res, rej){
+    var req = indexedDB.open('mycast-db', 1);
+    req.onupgradeneeded = function(e){
+      var d = e.target.result;
+      if(!d.objectStoreNames.contains('audio')) d.createObjectStore('audio', { keyPath: 'id' });
+      if(!d.objectStoreNames.contains('positions')) d.createObjectStore('positions', { keyPath: 'id' });
+    };
+    req.onsuccess = function(){ res(req.result); };
+    req.onerror = function(){ rej(req.error); };
+  });
+}
+function dbPutAudio(id, blob, name){
+  return new Promise(function(res, rej){
+    var r = db.transaction('audio','readwrite').objectStore('audio').put({ id: id, blob: blob, name: name, addedAt: Date.now() });
+    r.onsuccess = function(){ res(); };
+    r.onerror = function(){ rej(r.error); };
+  });
+}
+function dbGetAudio(id){
+  return new Promise(function(res, rej){
+    var r = db.transaction('audio','readonly').objectStore('audio').get(id);
+    r.onsuccess = function(){ res(r.result || null); };
+    r.onerror = function(){ rej(r.error); };
+  });
+}
+function dbDelAudio(id){
+  return new Promise(function(res, rej){
+    var r = db.transaction('audio','readwrite').objectStore('audio').delete(id);
+    r.onsuccess = function(){ res(); };
+    r.onerror = function(){ rej(r.error); };
+  });
+}
+function dbAllPositions(){
+  return new Promise(function(res, rej){
+    var r = db.transaction('positions','readonly').objectStore('positions').getAll();
+    r.onsuccess = function(){ res(r.result || []); };
+    r.onerror = function(){ rej(r.error); };
+  });
+}
+function dbSavePos(id, pos){
+  if(!db) return Promise.resolve();
+  return new Promise(function(res, rej){
+    var r = db.transaction('positions','readwrite').objectStore('positions').put({ id: id, position: pos });
+    r.onsuccess = function(){ res(); };
+    r.onerror = function(){ rej(r.error); };
+  });
+}
+function dbDelPos(id){
+  if(!db) return Promise.resolve();
+  return new Promise(function(res, rej){
+    var r = db.transaction('positions','readwrite').objectStore('positions').delete(id);
+    r.onsuccess = function(){ res(); };
+    r.onerror = function(){ rej(r.error); };
+  });
+}
+
+/* ── State persistence ── */
+function save(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e){ console.warn('save failed', e); showToast('保存に失敗しました'); }
+}
+
+function getSelectedTheme(){
+  return state.themes.find(function(t){ return t.id === state.selectedThemeId; }) || null;
+}
+function getSelectedPrompt(){
+  return state.prompts.find(function(p){ return p.id === state.selectedPromptId; }) || null;
+}
+function getEntry(id){
+  return state.history.find(function(h){ return h.id === id; }) || null;
+}
+
+function normalize(){
+  if(typeof state.commonPrompt !== 'string') state.commonPrompt = '';
+
+  if(!Array.isArray(state.prompts) || state.prompts.length === 0){
+    state.prompts = [{ id: uid(), name: '標準', text: '' }];
+    if(!state.commonPrompt.trim()) state.commonPrompt = DEFAULT_PROMPT;
+  }
+  if(!Array.isArray(state.themes) || state.themes.length === 0){
+    state.themes = [{ id: uid(), name: 'サンプルテーマ',
+      source: 'ここにソーステキストを入力してください。Notebook に渡したい本文を貼り付けます。' }];
+  }
+  if(!Array.isArray(state.history)) state.history = [];
+
+  state.prompts.forEach(function(p){
+    if(!safeId(p.id)) p.id = uid();
+    if(typeof p.name !== 'string') p.name = '';
+    if(typeof p.text !== 'string') p.text = '';
+  });
+  state.themes.forEach(function(t){
+    if(!safeId(t.id)) t.id = uid();
+    if(typeof t.name !== 'string') t.name = '';
+    if(typeof t.source !== 'string') t.source = '';
+  });
+  state.history.forEach(function(h){
+    if(!safeId(h.id)) h.id = uid();
+    if(typeof h.number !== 'number' || !isFinite(h.number)) h.number = 0;
+    if(typeof h.title !== 'string') h.title = '';
+    if(typeof h.date !== 'string') h.date = '';
+    if(typeof h.time !== 'number') h.time = 0;
+    if(typeof h.read !== 'boolean') h.read = false;
+    if(typeof h.hasAudio !== 'boolean') h.hasAudio = false;
+    if(typeof h.audioDuration !== 'number') h.audioDuration = 0;
+  });
+
+  if(typeof state.nextNumber !== 'number' || !isFinite(state.nextNumber) || state.nextNumber < 1){
+    var maxNum = 0;
+    state.history.forEach(function(h){
+      if(h.number > maxNum) maxNum = h.number;
+    });
+    state.nextNumber = maxNum + 1;
+  }
+  if(typeof state.rate !== 'number' || state.rate < 0.5 || state.rate > 3) state.rate = 1;
+  if(['off','all','one'].indexOf(state.repeatMode) === -1) state.repeatMode = 'off';
+
+  if(!state.prompts.some(function(p){ return p.id === state.selectedPromptId; })){
+    state.selectedPromptId = state.prompts[0].id;
+  }
+  if(!state.themes.some(function(t){ return t.id === state.selectedThemeId; })){
+    state.selectedThemeId = state.themes[0].id;
+  }
+
+  if(state.history.length > MAX_HISTORY) trimHistory();
+}
+
+function trimHistory(){
+  if(state.history.length <= MAX_HISTORY) return;
+  var removed = state.history.slice(MAX_HISTORY);
+  removed.forEach(function(r){
+    if(audioUrls[r.id]){ try{ URL.revokeObjectURL(audioUrls[r.id]); }catch(e){} delete audioUrls[r.id]; }
+    delete audioPositions[r.id];
+    if(db){ dbDelAudio(r.id).catch(function(){}); dbDelPos(r.id).catch(function(){}); }
+  });
+  state.history = state.history.slice(0, MAX_HISTORY);
+}
+
+function load(){
+  var parsed = null;
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) parsed = JSON.parse(raw);
+  }catch(e){ parsed = null; }
+
+  if(parsed && typeof parsed === 'object'){
+    if(typeof parsed.commonPrompt === 'string') state.commonPrompt = parsed.commonPrompt;
+    if(Array.isArray(parsed.prompts)) state.prompts = parsed.prompts;
+    if(Array.isArray(parsed.themes)) state.themes = parsed.themes;
+    if(Array.isArray(parsed.history)) state.history = parsed.history;
+    if(parsed.selectedPromptId) state.selectedPromptId = parsed.selectedPromptId;
+    if(parsed.selectedThemeId) state.selectedThemeId = parsed.selectedThemeId;
+    if(typeof parsed.lastGenAt === 'number') state.lastGenAt = parsed.lastGenAt;
+    if(typeof parsed.lastGenId === 'string') state.lastGenId = parsed.lastGenId;
+    if(typeof parsed.nextNumber === 'number') state.nextNumber = parsed.nextNumber;
+    if(typeof parsed.rate === 'number') state.rate = parsed.rate;
+    if(typeof parsed.repeatMode === 'string') state.repeatMode = parsed.repeatMode;
+  }
+  normalize();
+  save();
+}
+
+/* ── Rendering ── */
+var SVG_IMPORT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>';
+var SVG_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72c0 .8.87 1.29 1.56.9l10.9-6.86a1.05 1.05 0 0 0 0-1.8L9.56 4.24A1.05 1.05 0 0 0 8 5.14Z"/></svg>';
+var SVG_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4.6" height="15" rx="1.7"/><rect x="13.4" y="4.5" width="4.6" height="15" rx="1.7"/></svg>';
+
+function renderTagRow(container, items, selectedId){
+  if(!container) return;
+  container.innerHTML = '';
+  items.forEach(function(it){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tag';
+    b.dataset.id = it.id;
+    if(it.id === selectedId) b.dataset.selected = 'true';
+    b.textContent = it.name || '(無題)';
+    container.appendChild(b);
+  });
+}
+function renderThemeTags(){ renderTagRow($('#tags'), state.themes, state.selectedThemeId); }
+function renderPromptTags(){ renderTagRow($('#promptTags'), state.prompts, state.selectedPromptId); }
+
+function renderShareBtn(){
+  var label = numTag(state.nextNumber) + '音声解説を生成する';
+  var titleEl = $('#shareBtnTitle');
+  if(titleEl) titleEl.textContent = label;
+  var btn = $('#shareBtn');
+  if(btn) btn.setAttribute('aria-label', label);
+}
+
+function renderHistory(){
+  var el = $('#historyList'); if(!el) return;
+  el.innerHTML = '';
+  if(!state.history.length){
+    el.innerHTML = '<div class="empty">履歴はまだありません<small>「音声解説を生成する」から始めましょう</small></div>';
+    return;
+  }
+
+  state.history.forEach(function(h){
+    var isPlaying = (h.id === currentId) && !audio.paused && !audio.ended;
+    var row = document.createElement('div');
+    row.className = 'history-item' +
+      (isPlaying ? ' playing' : '') +
+      (h.read && !isPlaying ? ' read' : '');
+    row.dataset.id = h.id;
+
+    var thumb;
+    if(h.hasAudio){
+      thumb = isPlaying
+        ? '<div class="eq"><i></i><i></i><i></i><i></i></div>'
+        : SVG_PLAY;
+    }else{
+      thumb = SVG_IMPORT;
+    }
+
+    var durTxt = '';
+    if(h.hasAudio && h.audioDuration > 0) durTxt = ' · ' + fmtTime(h.audioDuration);
+    else if(h.hasAudio) durTxt = ' · 音声あり';
+    var sub = (h.date || '') + durTxt;
+
+    var pct = 0;
+    if(h.id === currentId && h.audioDuration > 0){
+      pct = Math.min(100, ((audio.currentTime || 0) / h.audioDuration) * 100);
+    } else if(h.hasAudio && audioPositions[h.id] > 0){
+      pct = Math.min(100, (audioPositions[h.id] / (h.audioDuration || 1)) * 100);
+    }
+
+    row.innerHTML =
+      '<button type="button" class="thumb" aria-label="' + (h.hasAudio ? '再生' : '音声を取り込む') + '">' + thumb + '</button>' +
+      '<div class="history-text">' +
+        '<div class="history-title"><span class="history-num">' + esc(numTag(h.number)) + '</span>' + esc(h.title) + '</div>' +
+        '<div class="history-sub">' + esc(sub) + '</div>' +
+      '</div>' +
+      '<button type="button" class="history-del" aria-label="削除">✕</button>' +
+      (pct > 0.5 ? '<div class="history-bar" style="width:' + pct.toFixed(1) + '%"></div>' : '');
+
+    el.appendChild(row);
+  });
+
+  document.body.classList.toggle('is-playing', !audio.paused && !audio.ended && !!audio.src);
+}
+
+function renderAll(){
+  renderPromptTags();
+  renderThemeTags();
+  renderShareBtn();
+  renderHistory();
+  updatePlayer();
+}
+
+/* ── Settings editors ── */
+function renderCommonPrompt(){
+  var el = $('#commonPromptInput'); if(!el) return;
+  if(document.activeElement !== el) el.value = state.commonPrompt;
+}
+
+function renderThemeEditor(){
+  var el = $('#themeList'); if(!el) return;
+  el.innerHTML = '';
+  state.themes.forEach(function(t){
+    var card = document.createElement('div');
+    card.className = 'theme-card';
+    card.dataset.editId = t.id;
+    card.innerHTML =
+      '<div class="theme-card-head">' +
+        '<input class="edit-name" type="text" placeholder="テーマ名" value="' + esc(t.name) + '">' +
+        '<button type="button" class="del-btn" aria-label="削除">✕</button>' +
+      '</div>' +
+      '<textarea class="edit-text" rows="6" placeholder="ソーステキスト（Notebook に渡す内容）">' + esc(t.source) + '</textarea>';
+
+    card.querySelector('.edit-name').addEventListener('input', function(e){
+      t.name = e.target.value; save(); renderThemeTags();
+    });
+    card.querySelector('.edit-text').addEventListener('input', function(e){
+      t.source = e.target.value; save();
+    });
+    card.querySelector('.del-btn').addEventListener('click', function(){
+      if(!confirm('このテーマを削除しますか？')) return;
+      state.themes = state.themes.filter(function(x){ return x.id !== t.id; });
+      if(state.selectedThemeId === t.id){
+        state.selectedThemeId = state.themes[0] ? state.themes[0].id : null;
+      }
+      save(); renderThemeEditor(); renderThemeTags();
+    });
+    el.appendChild(card);
+  });
+}
+
+function renderPromptEditor(){
+  var el = $('#promptList'); if(!el) return;
+  el.innerHTML = '';
+  state.prompts.forEach(function(p){
+    var card = document.createElement('div');
+    card.className = 'theme-card';
+    card.dataset.editId = p.id;
+    card.innerHTML =
+      '<div class="theme-card-head">' +
+        '<input class="edit-name" type="text" placeholder="プロンプト名" value="' + esc(p.name) + '">' +
+        '<button type="button" class="del-btn" aria-label="削除">✕</button>' +
+      '</div>' +
+      '<textarea class="edit-text" rows="6" placeholder="プロンプト本文（{theme} でテーマ名を差し込み）">' + esc(p.text) + '</textarea>';
+
+    card.querySelector('.edit-name').addEventListener('input', function(e){
+      p.name = e.target.value; save(); renderPromptTags();
+    });
+    card.querySelector('.edit-text').addEventListener('input', function(e){
+      p.text = e.target.value; save();
+    });
+    card.querySelector('.del-btn').addEventListener('click', function(){
+      if(!confirm('このプロンプトを削除しますか？')) return;
+      state.prompts = state.prompts.filter(function(x){ return x.id !== p.id; });
+      if(state.selectedPromptId === p.id){
+        state.selectedPromptId = state.prompts[0] ? state.prompts[0].id : null;
+      }
+      save(); renderPromptEditor(); renderPromptTags();
+    });
+    el.appendChild(card);
+  });
+}
+
+/* ── Long-press to edit ── */
+function openEditorFor(id){
+  if(!id) return;
+  var isTheme = state.themes.some(function(t){ return t.id === id; });
+  var isPrompt = !isTheme && state.prompts.some(function(p){ return p.id === id; });
+  if(!isTheme && !isPrompt) return;
+
+  renderThemeEditor();
+  renderPromptEditor();
+  renderCommonPrompt();
+  switchTab(isTheme ? 'theme' : 'prompt');
+  var modal = $('#settingsModal');
+  if(modal) modal.classList.add('show');
+
+  setTimeout(function(){
+    var panel = isTheme ? $('#tabTheme') : $('#tabPrompt');
+    if(!panel) return;
+    var cards = panel.querySelectorAll('.theme-card');
+    var card = null;
+    for(var i=0;i<cards.length;i++){
+      if(cards[i].dataset.editId === id){ card = cards[i]; break; }
+    }
+    if(!card) return;
+    try{ card.scrollIntoView({ behavior:'smooth', block:'center' }); }catch(e){ card.scrollIntoView(); }
+    card.classList.add('flash');
+    setTimeout(function(){ card.classList.remove('flash'); }, 1300);
+  }, 280);
+}
+
+function initTagInteractions(){
+  var pressTimer = null;
+  var pendingBtn = null;
+  var startX = 0, startY = 0;
+
+  function reset(){
+    clearTimeout(pressTimer); pressTimer = null; pendingBtn = null;
+  }
+
+  document.addEventListener('pointerdown', function(e){
+    var btn = e.target.closest ? e.target.closest('button.tag') : null;
+    if(!btn) return;
+    startX = e.clientX; startY = e.clientY;
+    pendingBtn = null;
+    clearTimeout(pressTimer);
+    pressTimer = setTimeout(function(){
+      pressTimer = null;
+      pendingBtn = btn;
+      if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(err){} }
+    }, LONG_PRESS_MS);
+  }, { passive:true });
+
+  document.addEventListener('pointermove', function(e){
+    if(!pressTimer && !pendingBtn) return;
+    if(Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) reset();
+  }, { passive:true });
+
+  document.addEventListener('pointerup', function(){
+    clearTimeout(pressTimer); pressTimer = null;
+    if(pendingBtn){
+      var id = pendingBtn.dataset.id;
+      pendingBtn = null;
+      suppressClickUntil = Date.now() + 800;
+      openEditorFor(id);
+    }
+  });
+
+  document.addEventListener('pointercancel', reset);
+
+  document.addEventListener('click', function(e){
+    if(Date.now() < suppressClickUntil){
+      e.preventDefault();
+      e.stopPropagation();
+      if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+    }
+  }, true);
+
+  document.addEventListener('contextmenu', function(e){
+    if(e.target && e.target.closest && e.target.closest('button.tag')) e.preventDefault();
+  });
+}
+
+/* ── Copy / Open external ── */
+function fallbackCopy(text){
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  var ok = false;
+  try{ ok = document.execCommand('copy'); }catch(e){}
+  ta.remove();
+  return ok;
+}
+function copyQuiet(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    return navigator.clipboard.writeText(text).catch(function(){ fallbackCopy(text); });
+  }
+  fallbackCopy(text);
+  return Promise.resolve();
+}
+
+function openExternal(url){
+  var ua = navigator.userAgent;
+  var isIOS = /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var standalone = (window.navigator.standalone === true) ||
+    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+
+  if(isIOS && standalone){
+    var navigated = false;
+    var onVis = function(){ if(document.visibilityState === 'hidden') navigated = true; };
+    document.addEventListener('visibilitychange', onVis);
+    try{ window.location.href = 'x-safari-' + url; }catch(e){}
+    setTimeout(function(){
+      document.removeEventListener('visibilitychange', onVis);
+      if(navigated || document.visibilityState === 'hidden') return;
+      window.open(url, '_blank');
+    }, 1000);
+    return;
+  }
+
+  var a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){
+    if(a.parentNode) a.parentNode.removeChild(a);
+  }, 2000);
+}
+
+/* ── Generate (Step 3) ── */
+function buildPromptText(prompt, theme){
+  var parts = [];
+  var common = (state.commonPrompt || '').trim();
+  if(common) parts.push(common);
+  var indiv = (prompt.text || '').trim();
+  if(indiv) parts.push(indiv);
+  var combined = parts.join('\n\n');
+  return combined.replace(/\{theme\}/g, theme.name || '');
+}
+
+function handleGenerate(){
+  var prompt = getSelectedPrompt();
+  var theme = getSelectedTheme();
+  if(!prompt){ showToast('先にプロンプトを選択してください'); return; }
+  if(!theme){ showToast('先にテーマを選択してください'); return; }
+
+  var num = state.nextNumber;
+  var numLabel = formatNum(num);
+  var instruction = 'タイトルの頭に【' + numLabel + '】を付けてください。';
+
+  var promptText = buildPromptText(prompt, theme);
+  promptText = (promptText.trim() ? promptText + '\n\n' : '') + instruction;
+
+  var sourceText = ((theme.source || '').trim() || (theme.name || '').trim());
+  sourceText = sourceText ? (sourceText + '\n\n' + instruction) : instruction;
+
+  var now = new Date();
+  var nowMs = now.getTime();
+  var title = (theme.name || '(無題)') + ' / ' + (prompt.name || 'プロンプト');
+  var dateLabel = formatDateLabel(now);
+
+  var overwrote = false;
+  if(state.lastGenId && state.lastGenAt && (nowMs - state.lastGenAt) < REUSE_WINDOW_MS){
+    var existing = getEntry(state.lastGenId);
+    if(existing && !existing.hasAudio && existing.title === title){
+      existing.number = num;
+      existing.title = title;
+      existing.date = dateLabel;
+      existing.time = nowMs;
+      existing.read = false;
+      overwrote = true;
+    }
+  }
+  if(!overwrote){
+    var entry = {
+      id: uid(),
+      number: num,
+      title: title,
+      date: dateLabel,
+      time: nowMs,
+      read: false,
+      hasAudio: false,
+      audioDuration: 0
+    };
+    state.history.unshift(entry);
+    state.lastGenId = entry.id;
+    state.nextNumber = num + 1;
+    if(state.history.length > MAX_HISTORY) trimHistory();
+  }
+  state.lastGenAt = nowMs;
+  save();
+  renderAll();
+
+  copyQuiet(promptText);
+
+  var showInstruction = function(){
+    showToast('音声生成後、履歴の「取り込み」から追加してください', 'NotebookLM', function(){
+      openExternal(NOTEBOOK_URL);
+    }, 8000);
+  };
+
+  if(navigator.share){
+    navigator.share({ text: sourceText }).then(function(){
+      showInstruction();
+    }).catch(function(err){
+      if(err && err.name !== 'AbortError'){
+        copyQuiet(sourceText);
+        showInstruction();
+      }
+    });
+  }else{
+    copyQuiet(sourceText);
+    showInstruction();
+  }
+}
+
+/* ── Audio import ── */
+function probeAudio(file){
+  return new Promise(function(resolve){
+    var a = document.createElement('audio');
+    a.preload = 'metadata';
+    var done = false;
+    var finish = function(d){
+      if(done) return;
+      done = true;
+      try{ a.removeAttribute('src'); }catch(e){}
+      resolve(d);
+    };
+    a.onloadedmetadata = function(){
+      finish(isFinite(a.duration) && a.duration > 0 ? a.duration : 0);
+    };
+    a.onerror = function(){ finish(0); };
+    a.src = URL.createObjectURL(file);
+  });
+}
+
+function isAudioFile(file){
+  if(/^audio\//.test(file.type)) return true;
+  return /\.(m4a|m4b|mp3|aac|wav|ogg|oga|flac|opus|mp4|aiff?)$/i.test(file.name);
+}
+
+async function importAudioTo(entry, file){
+  if(!entry || !file) return;
+  if(!isAudioFile(file)){ showToast('音声ファイルではありません'); return; }
+
+  var dur = await probeAudio(file);
+
+  try{
+    if(db) await dbPutAudio(entry.id, file, file.name);
+  }catch(e){
+    console.warn(e);
+    showToast('音声の保存に失敗しました');
+    return;
+  }
+
+  if(audioUrls[entry.id]){
+    try{ URL.revokeObjectURL(audioUrls[entry.id]); }catch(e){}
+  }
+  audioUrls[entry.id] = URL.createObjectURL(file);
+
+  entry.hasAudio = true;
+  entry.audioDuration = dur;
+  entry.audioName = file.name;
+  audioPositions[entry.id] = 0;
+  if(db) dbSavePos(entry.id, 0).catch(function(){});
+
+  save();
+  renderHistory();
+  showToast('音声を取り込みました');
+
+  setTimeout(function(){
+    playEntry(entry.id);
+  }, 300);
+}
+
+function pickFileFor(entryId){
+  var entry = getEntry(entryId);
+  if(!entry) return;
+  var input = document.getElementById('fileInput');
+  input.value = '';
+  input.onchange = function(){
+    var f = input.files && input.files[0];
+    input.value = '';
+    if(!f) return;
+    importAudioTo(entry, f);
+  };
+  input.click();
+}
+
+function findLatestWithoutAudio(){
+  for(var i=0;i<state.history.length;i++){
+    if(!state.history[i].hasAudio) return state.history[i];
+  }
+  return null;
+}
+
+function handleGlobalImport(file){
+  var target = findLatestWithoutAudio();
+  if(!target){
+    showToast('先に「音声解説を生成する」から履歴を作成してください');
+    return;
+  }
+  importAudioTo(target, file);
+}
+
+/* ── Player ── */
+var audio = document.getElementById('audio');
+var playerEl = null;
+var seekEl = null;
+var pTitle, pSub, pTime, playBtn, back5Btn, fwd5Btn, repBtn, repNum, speedSlider, speedValue, resetSpeedBtn;
+
+function cachePlayerEls(){
+  playerEl = $('#player');
+  seekEl = $('#seek');
+  pTitle = $('#pTitle');
+  pSub = $('#pSub');
+  pTime = $('#pTime');
+  playBtn = $('#playBtn');
+  back5Btn = $('#back5Btn');
+  fwd5Btn = $('#fwd5Btn');
+  repBtn = $('#repeatBtn');
+  repNum = $('#repNum');
+  speedSlider = $('#speedSlider');
+  speedValue = $('#speedValue');
+  resetSpeedBtn = $('#resetSpeedBtn');
+}
+
+async function ensureAudioUrl(id){
+  if(audioUrls[id]) return audioUrls[id];
+  if(!db) return null;
+  var rec = await dbGetAudio(id);
+  if(!rec || !rec.blob) return null;
+  audioUrls[id] = URL.createObjectURL(rec.blob);
+  return audioUrls[id];
+}
+
+async function playEntry(id){
+  var entry = getEntry(id);
+  if(!entry) return;
+  if(!entry.hasAudio){
+    pickFileFor(id);
+    return;
+  }
+
+  // 同じエントリーの再生中タップ → 一時停止/再開
+  if(currentId === id && audio.src){
+    if(audio.paused || audio.ended) audio.play().catch(function(){});
+    else audio.pause();
+    return;
+  }
+
+  var url = await ensureAudioUrl(id);
+  if(!url){ showToast('音声が見つかりません'); return; }
+
+  currentId = id;
+  audio.src = url;
+  audio.playbackRate = state.rate;
+  if('preservesPitch' in audio) audio.preservesPitch = true;
+
+  updateMediaSession(entry);
+  if(playerEl) playerEl.classList.add('show');
+  renderHistory();
+  updatePlayer();
+
+  var pos = audioPositions[id] || 0;
+  var applyPos = function(){
+    if(pos > 0.5 && audio.duration && pos < audio.duration - 1){
+      audio.currentTime = pos;
+    }
+    setSeekUI();
+    updatePositionState();
+  };
+  if(audio.readyState >= 1) applyPos();
+  else audio.addEventListener('loadedmetadata', applyPos, { once: true });
+
+  audio.play().catch(function(){});
+}
+
+function togglePlay(){
+  if(!currentId){
+    // 音声付き最新エントリーを再生
+    for(var i=0;i<state.history.length;i++){
+      if(state.history[i].hasAudio){ playEntry(state.history[i].id); return; }
+    }
+    showToast('音声が取り込まれた履歴がありません');
+    return;
+  }
+  if(audio.paused || audio.ended) audio.play().catch(function(){});
+  else audio.pause();
+}
+
+function skip(sec){
+  if(!audio.src) return;
+  var dur = isFinite(audio.duration) ? audio.duration : 0;
+  var target = audio.currentTime + sec;
+  audio.currentTime = Math.max(0, dur ? Math.min(dur, target) : target);
+  setSeekUI();
+  updatePositionState();
+}
+
+function onEnded(){
+  var entry = getEntry(currentId);
+  if(!entry){ renderHistory(); return; }
+
+  if(state.repeatMode === 'one'){
+    audio.currentTime = 0;
+    audio.play().catch(function(){});
+    return;
+  }
+
+  if(!entry.read){
+    entry.read = true;
+    save();
+  }
+
+  // 次の音声付きエントリー（履歴順 = 新しい→古い）
+  var withAudio = state.history.filter(function(h){ return h.hasAudio; });
+  var idx = withAudio.findIndex(function(h){ return h.id === currentId; });
+  var next = null;
+  if(state.repeatMode === 'all' && withAudio.length > 1){
+    next = withAudio[(idx + 1) % withAudio.length];
+  }
+
+  if(next && next.id !== currentId){
+    playEntry(next.id);
+  }else{
+    document.body.classList.remove('is-playing');
+    if('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+    renderHistory();
+  }
+}
+
+function setSeekUI(){
+  if(!seekEl) return;
+  var entry = getEntry(currentId);
+  var dur = (isFinite(audio.duration) && audio.duration > 0)
+    ? audio.duration
+    : (entry && entry.audioDuration ? entry.audioDuration : 0);
+  var pos = Math.min(audio.currentTime || 0, dur || 0);
+  var p = dur > 0 ? (pos / dur) * 100 : 0;
+  seekEl.value = Math.round(p * 10);
+  seekEl.style.setProperty('--p', p.toFixed(2) + '%');
+  if(pTime) pTime.textContent = fmtTime(pos) + ' / ' + fmtTime(dur);
+}
+
+function updatePlayer(){
+  if(!playerEl) return;
+  var entry = getEntry(currentId);
+  if(!entry){ playerEl.classList.remove('show'); return; }
+  playerEl.classList.add('show');
+  if(pTitle) pTitle.textContent = numTag(entry.number) + entry.title;
+  if(pSub) pSub.textContent = (entry.date || '') + (entry.audioDuration ? ' · ' + fmtTime(entry.audioDuration) : '');
+  if(!scrubbing) setSeekUI();
+}
+
+function setRate(r, syncSlider){
+  state.rate = Math.round(r * 10) / 10;
+  audio.playbackRate = state.rate;
+  if('preservesPitch' in audio) audio.preservesPitch = true;
+  if(syncSlider !== false && speedSlider) speedSlider.value = state.rate;
+  if(speedSlider){
+    var p = ((state.rate - 0.5) / 2.5) * 100;
+    speedSlider.style.setProperty('--p', p + '%');
+  }
+  if(speedValue) speedValue.textContent = fmtRate(state.rate);
+  save();
+  updatePositionState();
+}
+
+function setRepeat(mode){
+  state.repeatMode = mode;
+  if(repBtn){
+    repBtn.classList.toggle('on', mode !== 'off');
+    repBtn.classList.toggle('one', mode === 'one');
+    repBtn.setAttribute('aria-label',
+      mode === 'off' ? 'リピート切替（オフ）' :
+      mode === 'all' ? 'リピート切替（全曲）' : 'リピート切替（1曲）');
+  }
+  save();
+}
+
+/* ── Media Session ── */
+function updateMediaSession(entry){
+  if(!('mediaSession' in navigator)) return;
+  if(!entry){
+    try{ navigator.mediaSession.metadata = null; }catch(e){}
+    return;
+  }
+  try{
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: numTag(entry.number) + entry.title,
+      artist: 'MyCast',
+      album: '音声解説',
+      artwork: [
+        { src: ICON_ABS, sizes: '512x512', type: 'image/png' }
+      ]
+    });
+  }catch(e){}
+}
+function updatePositionState(){
+  if(!('mediaSession' in navigator)) return;
+  var ms = navigator.mediaSession;
+  if(typeof ms.setPositionState !== 'function') return;
+  var d = audio.duration;
+  if(!isFinite(d) || d <= 0) return;
+  try{
+    ms.setPositionState({
+      duration: d,
+      playbackRate: audio.playbackRate || 1,
+      position: Math.min(Math.max(audio.currentTime, 0), d)
+    });
+  }catch(e){}
+}
+function setupMediaSession(){
+  if(!('mediaSession' in navigator)) return;
+  var ms = navigator.mediaSession;
+  var safe = function(a, fn){ try{ ms.setActionHandler(a, fn); }catch(e){} };
+  safe('play',  function(){ audio.play().catch(function(){}); });
+  safe('pause', function(){ audio.pause(); });
+  safe('stop',  function(){ audio.pause(); audio.currentTime = 0; });
+  safe('seekbackward', function(){ skip(-5); });
+  safe('seekforward',  function(){ skip(5); });
+  safe('seekto', function(d){
+    if(d && typeof d.seekTime === 'number'){
+      audio.currentTime = d.seekTime;
+      updatePositionState();
+    }
+  });
+}
+
+/* ── Delete history ── */
+function deleteHistory(id){
+  var entry = getEntry(id);
+  if(!entry) return;
+  if(!confirm('この履歴を削除しますか？（音声も削除されます）')) return;
+
+  if(currentId === id){
+    audio.pause();
+    audio.removeAttribute('src');
+    try{ audio.load(); }catch(e){}
+    currentId = null;
+    if(playerEl) playerEl.classList.remove('show');
+    updateMediaSession(null);
+  }
+
+  if(audioUrls[id]){
+    try{ URL.revokeObjectURL(audioUrls[id]); }catch(e){}
+    delete audioUrls[id];
+  }
+  delete audioPositions[id];
+  if(db){ dbDelAudio(id).catch(function(){}); dbDelPos(id).catch(function(){}); }
+
+  state.history = state.history.filter(function(h){ return h.id !== id; });
+  if(state.lastGenId === id) state.lastGenId = null;
+  save();
+  renderHistory();
+  showToast('履歴を削除しました');
+}
+
+/* ── Tabs ── */
+function switchTab(name){
+  var btns = $$('.tab-btn');
+  btns.forEach(function(b){ b.classList.toggle('is-active', b.dataset.tab === name); });
+  var panels = { theme: $('#tabTheme'), prompt: $('#tabPrompt'), data: $('#tabData') };
+  Object.keys(panels).forEach(function(k){
+    if(panels[k]) panels[k].hidden = (k !== name);
+  });
+  var scroller = $('.tab-scroll');
+  if(scroller) scroller.scrollTop = 0;
+}
+
+/* ── Export / Import ── */
+function exportData(){
+  var data = {
+    app: 'MyCast',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    commonPrompt: state.commonPrompt,
+    prompts: state.prompts,
+    themes: state.themes,
+    history: state.history.map(function(h){
+      // hasAudio はバックアップに含めるが、実際の音声は別途必要
+      return {
+        id: h.id, number: h.number, title: h.title, date: h.date, time: h.time,
+        read: h.read, hasAudio: false, audioDuration: h.audioDuration
+      };
+    }),
+    selectedPromptId: state.selectedPromptId,
+    selectedThemeId: state.selectedThemeId,
+    lastGenAt: state.lastGenAt,
+    lastGenId: state.lastGenId,
+    nextNumber: state.nextNumber,
+    rate: state.rate,
+    repeatMode: state.repeatMode
+  };
+  var json = JSON.stringify(data, null, 2);
+  var blob = new Blob([json], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var d = new Date();
+  var name = 'mycast-' +
+    d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0') +
+    '.json';
+
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){
+    if(a.parentNode) a.parentNode.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 5000);
+  showToast('エクスポートしました');
+}
+
+function importData(file){
+  var reader = new FileReader();
+  reader.onload = function(){
+    var data;
+    try{ data = JSON.parse(String(reader.result)); }
+    catch(e){ showToast('読み込めないファイルです'); return; }
+    if(!data || typeof data !== 'object' ||
+       !Array.isArray(data.prompts) || !Array.isArray(data.themes)){
+      showToast('読み込めないファイルです'); return;
+    }
+    if(!confirm('現在のデータを置き換えます。よろしいですか？')) return;
+
+    // 既存音声URL破棄
+    Object.keys(audioUrls).forEach(function(k){
+      try{ URL.revokeObjectURL(audioUrls[k]); }catch(e){}
+    });
+    audioUrls = {};
+    audioPositions = {};
+
+    state.commonPrompt = (typeof data.commonPrompt === 'string') ? data.commonPrompt : '';
+    state.prompts = data.prompts;
+    state.themes = data.themes;
+    state.history = Array.isArray(data.history) ? data.history.map(function(h){
+      return {
+        id: safeId(h.id) ? h.id : uid(),
+        number: (typeof h.number === 'number') ? h.number : 0,
+        title: typeof h.title === 'string' ? h.title : '',
+        date: typeof h.date === 'string' ? h.date : '',
+        time: typeof h.time === 'number' ? h.time : 0,
+        read: !!h.read,
+        hasAudio: false, // 音声実体はない
+        audioDuration: (typeof h.audioDuration === 'number') ? h.audioDuration : 0
+      };
+    }) : [];
+    state.selectedPromptId = data.selectedPromptId || null;
+    state.selectedThemeId = data.selectedThemeId || null;
+    state.lastGenAt = (typeof data.lastGenAt === 'number') ? data.lastGenAt : 0;
+    state.lastGenId = (typeof data.lastGenId === 'string') ? data.lastGenId : null;
+    state.nextNumber = (typeof data.nextNumber === 'number') ? data.nextNumber : 1;
+    state.rate = (typeof data.rate === 'number') ? data.rate : 1;
+    state.repeatMode = (typeof data.repeatMode === 'string') ? data.repeatMode : 'off';
+
+    normalize();
+    save();
+    renderAll();
+    renderThemeEditor();
+    renderPromptEditor();
+    renderCommonPrompt();
+    setRate(state.rate);
+    setRepeat(state.repeatMode);
+    showToast('インポートしました');
+  };
+  reader.onerror = function(){ showToast('読み込めませんでした'); };
+  reader.readAsText(file);
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', async function(){
+  ICON_ABS = buildAssets();
+  cachePlayerEls();
+
+  load();
+
+  // IndexedDB positions 復元
+  try{
+    db = await openDB();
+    var posRecs = await dbAllPositions();
+    posRecs.forEach(function(p){ audioPositions[p.id] = p.position || 0; });
+  }catch(e){
+    console.warn('IndexedDB not available', e);
+    showToast('保存領域が使えません（このセッションのみ）');
+  }
+
+  initTagInteractions();
+  renderAll();
+  setRate(state.rate);
+  setRepeat(state.repeatMode);
+
+  // 速度スライダー初期表示
+  if(speedSlider){
+    var p0 = ((state.rate - 0.5) / 2.5) * 100;
+    speedSlider.style.setProperty('--p', p0 + '%');
+    speedSlider.value = state.rate;
+  }
+
+  // ─── プロンプト選択 ───
+  var promptTagsEl = $('#promptTags');
+  if(promptTagsEl){
+    promptTagsEl.addEventListener('click', function(e){
+      var btn = e.target.closest('button.tag');
+      if(!btn || !btn.dataset.id) return;
+      state.selectedPromptId = btn.dataset.id;
+      save(); renderPromptTags();
+      var p = getSelectedPrompt();
+      showToast('✓ ' + ((p && p.name) || 'プロンプト') + ' を選択');
+    });
+  }
+
+  // ─── テーマ選択 ───
+  var tagsEl = $('#tags');
+  if(tagsEl){
+    tagsEl.addEventListener('click', function(e){
+      var btn = e.target.closest('button.tag');
+      if(!btn || !btn.dataset.id) return;
+      state.selectedThemeId = btn.dataset.id;
+      save(); renderThemeTags();
+      var t = getSelectedTheme();
+      showToast('✓ ' + ((t && t.name) || 'テーマ') + ' を選択');
+    });
+  }
+
+  // ─── 生成ボタン ───
+  var shareBtn = $('#shareBtn');
+  if(shareBtn) shareBtn.addEventListener('click', handleGenerate);
+
+  // ─── NotebookLM 起動 ───
+  var notebookBtn = $('#notebookBtn');
+  if(notebookBtn) notebookBtn.addEventListener('click', function(){ openExternal(NOTEBOOK_URL); });
+
+  // ─── 設定 ───
+  var settingsBtn = $('#settingsBtn');
+  if(settingsBtn) settingsBtn.addEventListener('click', function(){
+    renderThemeEditor();
+    renderPromptEditor();
+    renderCommonPrompt();
+    switchTab('theme');
+    $('#settingsModal').classList.add('show');
+  });
+  var closeBtn = $('#closeSettings');
+  if(closeBtn) closeBtn.addEventListener('click', function(){ $('#settingsModal').classList.remove('show'); });
+  var modal = $('#settingsModal');
+  if(modal) modal.addEventListener('click', function(e){
+    if(e.target === modal) modal.classList.remove('show');
+  });
+
+  // ─── タブ ───
+  $$('.tab-btn').forEach(function(b){
+    b.addEventListener('click', function(e){ switchTab(e.currentTarget.dataset.tab); });
+  });
+
+  // ─── 共通プロンプト ───
+  var commonInput = $('#commonPromptInput');
+  if(commonInput) commonInput.addEventListener('input', function(e){
+    state.commonPrompt = e.target.value;
+    save();
+  });
+
+  // ─── 追加ボタン ───
+  var addThemeBtn = $('#addThemeBtn');
+  if(addThemeBtn) addThemeBtn.addEventListener('click', function(){
+    var t = { id: uid(), name: '', source: '' };
+    state.themes.push(t);
+    if(!state.selectedThemeId) state.selectedThemeId = t.id;
+    save(); renderThemeEditor(); renderThemeTags();
+  });
+  var addPromptBtn = $('#addPromptBtn');
+  if(addPromptBtn) addPromptBtn.addEventListener('click', function(){
+    var p = { id: uid(), name: '', text: '' };
+    state.prompts.push(p);
+    if(!state.selectedPromptId) state.selectedPromptId = p.id;
+    save(); renderPromptEditor(); renderPromptTags();
+  });
+
+  // ─── エクスポート / インポート ───
+  var exportBtn = $('#exportBtn');
+  if(exportBtn) exportBtn.addEventListener('click', exportData);
+  var importBtn = $('#importBtn');
+  var importFile = $('#importFile');
+  if(importBtn && importFile){
+    importBtn.addEventListener('click', function(){ importFile.click(); });
+    importFile.addEventListener('change', function(e){
+      var f = e.target.files && e.target.files[0];
+      if(f) importData(f);
+      e.target.value = '';
+    });
+  }
+
+  // ─── 履歴操作 ───
+  var historyListEl = $('#historyList');
+  if(historyListEl){
+    historyListEl.addEventListener('click', function(e){
+      var del = e.target.closest('.history-del');
+      if(del){
+        var row = del.closest('.history-item');
+        if(row) deleteHistory(row.dataset.id);
+        return;
+      }
+      var row = e.target.closest('.history-item');
+      if(!row) return;
+      var id = row.dataset.id;
+      var entry = getEntry(id);
+      if(!entry) return;
+      if(entry.hasAudio) playEntry(id);
+      else pickFileFor(id);
+    });
+  }
+
+  // ─── プレイヤー ───
+  if(playBtn) playBtn.addEventListener('click', togglePlay);
+  if(back5Btn) back5Btn.addEventListener('click', function(){ skip(-5); });
+  if(fwd5Btn) fwd5Btn.addEventListener('click', function(){ skip(5); });
+  if(repBtn) repBtn.addEventListener('click', function(){
+    var next = state.repeatMode === 'off' ? 'all'
+             : state.repeatMode === 'all' ? 'one' : 'off';
+    setRepeat(next);
+  });
+  if(speedSlider) speedSlider.addEventListener('input', function(){
+    setRate(parseFloat(speedSlider.value), false);
+  });
+  if(resetSpeedBtn) resetSpeedBtn.addEventListener('click', function(){ setRate(1); });
+
+  if(seekEl){
+    seekEl.addEventListener('pointerdown', function(){ scrubbing = true; });
+    seekEl.addEventListener('input', function(){
+      scrubbing = true;
+      var p = Number(seekEl.value) / 1000;
+      seekEl.style.setProperty('--p', (p * 100).toFixed(2) + '%');
+      var entry = getEntry(currentId);
+      var dur = isFinite(audio.duration) && audio.duration > 0
+        ? audio.duration : (entry && entry.audioDuration) || 0;
+      if(dur && pTime) pTime.textContent = fmtTime(p * dur) + ' / ' + fmtTime(dur);
+    });
+    seekEl.addEventListener('change', function(){
+      var p = Number(seekEl.value) / 1000;
+      var dur = isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
+      if(dur) audio.currentTime = p * dur;
+      scrubbing = false;
+      setSeekUI();
+      if(currentId){
+        audioPositions[currentId] = audio.currentTime || 0;
+        if(db) dbSavePos(currentId, audioPositions[currentId]).catch(function(){});
+      }
+      updatePositionState();
+    });
+  }
+
+  // ─── Audio events ───
+  audio.addEventListener('play', function(){
+    document.body.classList.add('is-playing');
+    if('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+    renderHistory();
+    updatePlayer();
+  });
+  audio.addEventListener('pause', function(){
+    document.body.classList.remove('is-playing');
+    if('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+    renderHistory();
+    updatePlayer();
+    if(currentId){
+      audioPositions[currentId] = audio.currentTime || 0;
+      if(db) dbSavePos(currentId, audioPositions[currentId]).catch(function(){});
+    }
+  });
+  audio.addEventListener('loadedmetadata', function(){
+    if(currentId){
+      var entry = getEntry(currentId);
+      if(entry && isFinite(audio.duration) && audio.duration > 0 &&
+         Math.abs((entry.audioDuration || 0) - audio.duration) > 0.5){
+        entry.audioDuration = audio.duration;
+        save();
+        renderHistory();
+      }
+    }
+    setSeekUI();
+    updatePositionState();
+  });
+  audio.addEventListener('timeupdate', function(){
+    if(currentId) audioPositions[currentId] = audio.currentTime;
+    if(!scrubbing) setSeekUI();
+    updatePositionState();
+  });
+  audio.addEventListener('ended', onEnded);
+  audio.addEventListener('error', function(){ showToast('この音声を再生できませんでした'); });
+
+  // ページ離脱時に位置保存
+  window.addEventListener('pagehide', function(){
+    if(currentId){
+      audioPositions[currentId] = audio.currentTime || 0;
+      if(db) dbSavePos(currentId, audioPositions[currentId]).catch(function(){});
+    }
+  });
+
+  setupMediaSession();
+
+  // ─── ドラッグ&ドロップ ───
+  var dragDepth = 0;
+  var overlay = $('#dropOverlay');
+  window.addEventListener('dragenter', function(e){
+    if(!e.dataTransfer || Array.from(e.dataTransfer.types || []).indexOf('Files') === -1) return;
+    e.preventDefault();
+    dragDepth++;
+    if(overlay) overlay.classList.add('show');
+  });
+  window.addEventListener('dragover', function(e){ e.preventDefault(); });
+  window.addEventListener('dragleave', function(e){
+    e.preventDefault();
+    dragDepth = Math.max(0, dragDepth - 1);
+    if(dragDepth === 0 && overlay) overlay.classList.remove('show');
+  });
+  window.addEventListener('drop', function(e){
+    e.preventDefault();
+    dragDepth = 0;
+    if(overlay) overlay.classList.remove('show');
+    if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
+      handleGlobalImport(e.dataTransfer.files[0]);
+    }
+  });
+  document.addEventListener('dragover', function(e){ e.preventDefault(); });
+  document.addEventListener('drop', function(e){ e.preventDefault(); });
+
+  // ダブルタップズーム抑止
+  var lastTouch = 0;
+  document.addEventListener('touchend', function(e){
+    var now = Date.now();
+    if(now - lastTouch <= 300) e.preventDefault();
+    lastTouch = now;
+  }, { passive:false });
+});
+
+})();
+</script>
+</body>
+</html>
