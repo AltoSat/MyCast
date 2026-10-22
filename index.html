@@ -55,9 +55,26 @@
     position:relative;z-index:2;transition:transform .12s,background .12s}
   .icon-btn:active{transform:scale(.9);background:var(--card2)}
 
+  /* ── Main tabs ── */
+  .main-tabs{display:flex;gap:4px;background:var(--card);padding:4px;border-radius:12px;margin-bottom:16px}
+  .main-tab{flex:1;padding:10px 2px;border:none;border-radius:9px;background:transparent;color:var(--text2);
+    font-size:12.5px;font-weight:650;font-family:inherit;cursor:pointer;
+    -webkit-appearance:none;appearance:none;transition:background .15s,color .15s;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    display:flex;align-items:center;justify-content:center;gap:4px}
+  .main-tab.is-active{background:var(--accent);color:#fff}
+  .main-tab .tab-count{
+    font-size:10px;font-weight:700;background:rgba(255,255,255,.18);
+    padding:1px 6px;border-radius:99px;min-width:16px;text-align:center;
+    font-variant-numeric:tabular-nums;
+  }
+  .main-tab.is-active .tab-count{background:rgba(255,255,255,.28)}
+
+  .main-panel[hidden]{display:none}
+
   /* ── Section ── */
-  .section{margin-bottom:20px}
-  .step-label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text2);
+  .section{margin-bottom:18px}
+  .step-label{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--text2);
     margin-bottom:10px;letter-spacing:.04em;flex-wrap:wrap}
   .step-num{display:inline-flex;align-items:center;justify-content:center;
     width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);
@@ -76,7 +93,6 @@
     -webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
   .tag:active{transform:scale(.96)}
   .tag[data-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
-  .tag[data-selected="true"]::before{content:'✓ ';font-weight:700}
 
   /* ── Generate button ── */
   .genBtn{
@@ -88,20 +104,12 @@
     -webkit-appearance:none;appearance:none;
   }
   .genBtn:active{transform:scale(.98);opacity:.9}
+  .genBtn:disabled{opacity:.55;cursor:default}
   .genBtn .icon{display:block;font-size:32px;line-height:1;margin-bottom:6px;color:#fff}
   .genBtn .main{display:block;font-size:17px;font-weight:700;line-height:1.4;color:#fff}
   .genBtn .sub{display:block;font-size:11.5px;line-height:1.4;margin-top:4px;color:#fff;opacity:.9}
 
-  /* ── Audio tabs ── */
-  .audio-tabs{display:flex;gap:4px;background:var(--card);padding:4px;border-radius:12px;margin-bottom:12px}
-  .audio-tab{flex:1;padding:9px 4px;border:none;border-radius:9px;background:transparent;color:var(--text2);
-    font-size:11.5px;font-weight:650;font-family:inherit;cursor:pointer;
-    -webkit-appearance:none;appearance:none;transition:background .15s,color .15s;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .audio-tab.is-active{background:var(--accent);color:#fff}
-  .audio-tab .tab-count{font-size:10px;opacity:.8;margin-left:2px}
-  .audio-tab.is-active .tab-count{opacity:.95}
-
+  /* ── Clear played ── */
   .clear-played-wrap{margin-bottom:10px}
   .clear-played-btn{width:100%;padding:10px;border-radius:10px;border:none;
     background:rgba(255,69,58,.12);color:#ff7070;font-size:13px;font-weight:650;
@@ -146,7 +154,7 @@
   .history-del:active{background:rgba(255,69,58,.15);color:var(--red)}
   .history-bar{position:absolute;left:0;bottom:0;height:2px;background:var(--grad);
     border-radius:0 1px 1px 0;transition:width .3s linear}
-  .empty{color:var(--text3);font-size:13.5px;padding:18px 0;text-align:center}
+  .empty{color:var(--text3);font-size:13.5px;padding:24px 0;text-align:center}
   .empty small{display:block;font-size:11.5px;margin-top:6px;color:var(--text3)}
 
   .eq{display:flex;align-items:flex-end;justify-content:center;gap:2.5px;height:14px;color:#fff}
@@ -238,7 +246,7 @@
     font-size:11px;font-weight:650;flex:0 0 auto;font-family:inherit}
   .miniBtn:active{background:rgba(91,108,255,.28)}
 
-  /* ── Modal ── */
+  /* ── Modal (settings) ── */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;z-index:100;
     opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility .2s}
   .modal.show{opacity:1;visibility:visible;pointer-events:auto}
@@ -266,61 +274,112 @@
     resize:vertical;outline:none;box-sizing:border-box;-webkit-appearance:none;line-height:1.5}
   textarea:focus,input[type="text"]:focus{border-color:var(--accent)}
 
-  .folders-list{display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
-  .folder-card{background:var(--card);border-radius:14px;padding:12px;border:1px solid var(--border);
-    display:flex;flex-direction:column;gap:10px;transition:box-shadow .3s ease}
-  .folder-card.flash{box-shadow:0 0 0 2px var(--accent)}
-  .folder-card.theme-drop-over{box-shadow:0 0 0 2px var(--accent);background:rgba(91,108,255,.1)}
-  .folder-head{display:flex;gap:6px;align-items:center}
-  .folder-name{flex:1;background:transparent;border:none;color:var(--text);
-    font-size:15px;font-weight:700;padding:6px 8px;border-radius:8px;outline:none;font-family:inherit;min-width:0}
-  .folder-name:focus{background:var(--bg2)}
-  .folder-actions{display:flex;gap:4px;flex:0 0 auto}
-  .folder-actions button{width:32px;height:32px;border-radius:8px;border:none;
-    background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit;
-    -webkit-appearance:none;appearance:none}
-  .folder-actions button:active{background:var(--card2)}
-  .folder-actions .del-btn{color:var(--red)}
-  .folder-prompt{min-height:70px;font-size:13px}
-  .folder-themes{display:flex;flex-direction:column;gap:8px;
-    padding-left:10px;border-left:2px solid var(--border)}
-  .theme-card{background:var(--bg2);border-radius:10px;padding:8px;border:1px solid var(--border);
-    display:flex;flex-direction:column;gap:6px;transition:box-shadow .15s,opacity .15s}
-  .theme-card.theme-drop-before{box-shadow:0 -3px 0 0 var(--accent)}
-  .theme-card.theme-drop-after{box-shadow:0 3px 0 0 var(--accent)}
-  .theme-head{display:flex;gap:6px;align-items:center}
-  .theme-grip{width:28px;height:28px;display:flex;align-items:center;justify-content:center;
-    color:var(--text3);cursor:grab;touch-action:none;border-radius:6px;font-size:15px;flex-shrink:0;
-    -webkit-user-select:none;user-select:none}
-  .theme-grip:active{background:var(--accent-soft);color:var(--accent);cursor:grabbing}
-  .theme-name-input{flex:1;background:transparent;border:none;color:var(--text);
-    font-size:13.5px;font-weight:600;padding:6px 8px;border-radius:6px;outline:none;font-family:inherit;min-width:0}
-  .theme-name-input:focus{background:var(--card)}
-  .theme-source-input{font-size:12.5px;min-height:70px}
-  .empty-themes{color:var(--text3);font-size:12px;padding:8px 0;text-align:center}
-  .add-theme-btn{width:100%;padding:9px;border-radius:8px;background:var(--accent-soft);color:var(--accent);
-    border:1px dashed var(--accent);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;
-    -webkit-appearance:none;appearance:none}
-
-  .add-btn{width:100%;padding:14px;border-radius:12px;background:var(--accent-soft);color:var(--accent);
-    border:1px dashed var(--accent);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;
-    -webkit-appearance:none;appearance:none}
-
   .note{color:var(--text3);font-size:12px;line-height:1.6;margin:0 0 12px}
   .data-btn{display:block;width:100%;padding:14px;border-radius:12px;background:var(--accent-soft);
     color:var(--accent);border:1px solid var(--border);font-size:15px;font-weight:600;
     font-family:inherit;cursor:pointer;margin-bottom:10px;-webkit-appearance:none;appearance:none}
   .data-btn:active{background:rgba(10,132,255,.28)}
 
+  /* ── Settings folder view (compact) ── */
+  .settings-folder{
+    background:var(--card);
+    border-radius:14px;
+    border:1px solid var(--border);
+    margin-bottom:12px;
+    overflow:hidden;
+    transition:box-shadow .15s,background .15s;
+  }
+  .settings-folder.drop-before{box-shadow:0 -3px 0 0 var(--accent)}
+  .settings-folder.drop-after{box-shadow:0 3px 0 0 var(--accent)}
+  .settings-folder.drop-over{box-shadow:0 0 0 2px var(--accent);background:rgba(91,108,255,.08)}
+
+  .folder-head-row{
+    display:flex;align-items:center;gap:8px;padding:12px;
+    cursor:pointer;transition:background .12s;
+    -webkit-user-select:none;user-select:none;
+  }
+  .folder-head-row:active{background:rgba(255,255,255,.04)}
+
+  .drag-grip{
+    width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+    color:var(--text3);cursor:grab;touch-action:none;font-size:16px;border-radius:6px;
+    flex-shrink:0;-webkit-user-select:none;user-select:none;
+    transition:background .12s,color .12s;
+  }
+  .drag-grip:active{background:var(--accent-soft);color:var(--accent);cursor:grabbing}
+
+  .folder-name-label{
+    flex:1;font-size:15px;font-weight:700;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;
+  }
+  .folder-count-label{
+    font-size:11.5px;color:var(--text2);background:var(--bg2);
+    padding:2px 8px;border-radius:8px;flex-shrink:0;
+    font-variant-numeric:tabular-nums;
+  }
+
+  .themes-list{padding:0 12px 12px}
+  .theme-item{
+    display:flex;align-items:center;gap:6px;padding:8px 8px 8px 6px;
+    margin-left:24px;background:var(--bg2);border-radius:8px;margin-bottom:6px;
+    cursor:pointer;transition:box-shadow .15s,background .12s;
+    -webkit-user-select:none;user-select:none;
+  }
+  .theme-item:active{background:rgba(255,255,255,.06)}
+  .theme-item.drop-before{box-shadow:0 -2px 0 0 var(--accent)}
+  .theme-item.drop-after{box-shadow:0 2px 0 0 var(--accent)}
+  .theme-item .drag-grip{width:28px;height:28px;font-size:14px}
+  .theme-name-label{
+    flex:1;font-size:13px;font-weight:500;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;
+  }
+  .theme-source-preview{
+    font-size:11px;color:var(--text3);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    max-width:100%;
+  }
+  .theme-text-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+
+  .empty-themes{
+    margin-left:24px;padding:8px;color:var(--text3);font-size:12px;text-align:center;
+    border:1px dashed var(--border);border-radius:8px;margin-bottom:8px;
+  }
+  .add-theme-inline{
+    margin-left:24px;padding:8px;border-radius:8px;background:transparent;
+    border:1px dashed var(--border);color:var(--text2);font-size:12px;font-weight:600;
+    font-family:inherit;cursor:pointer;width:calc(100% - 24px);
+    -webkit-appearance:none;appearance:none;
+  }
+  .add-theme-inline:active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+
+  .add-btn{width:100%;padding:14px;border-radius:12px;background:var(--accent-soft);color:var(--accent);
+    border:1px dashed var(--accent);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;
+    -webkit-appearance:none;appearance:none}
+
+  /* ── Edit modal (large sheet) ── */
+  .edit-modal{z-index:110}
+  .edit-modal-card{width:100%;height:90vh;max-height:90vh;background:var(--bg2);
+    border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden}
+  .edit-modal-scroll{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:0 16px;overscroll-behavior:contain}
+  .edit-modal-foot{padding:16px;padding-bottom:calc(var(--safe-bottom) + 16px);
+    border-top:1px solid var(--border);flex-shrink:0}
+  .delete-btn{width:100%;padding:14px;border-radius:12px;
+    background:rgba(255,69,58,.12);color:#ff7070;border:none;
+    font-size:15px;font-weight:650;font-family:inherit;cursor:pointer;
+    -webkit-appearance:none;appearance:none}
+  .delete-btn:active{background:rgba(255,69,58,.25)}
+  .edit-modal-scroll textarea{min-height:220px}
+
   /* ── Drag ghost ── */
-  .drag-ghost{position:fixed;pointer-events:none;z-index:1000;opacity:.88;
+  .drag-ghost{position:fixed;pointer-events:none;z-index:1000;opacity:.92;
     transform:rotate(1.5deg);box-shadow:0 12px 40px rgba(0,0,0,.65);
     border-radius:10px;background:var(--bg2);border:2px solid var(--accent);
     padding:10px 14px;font-size:13px;font-weight:600;color:var(--text);
     max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
   /* ── Toast ── */
-  .toast{position:fixed;left:50%;bottom:calc(var(--safe-bottom) + 280px);
+  .toast{position:fixed;left:50%;bottom:calc(var(--safe-bottom) + 240px);
     transform:translateX(-50%) translateY(20px);background:var(--card2);color:var(--text);
     padding:11px 18px;border-radius:999px;font-size:13px;font-weight:500;opacity:0;
     transition:opacity .2s,transform .2s;pointer-events:none;z-index:200;white-space:nowrap;
@@ -358,42 +417,52 @@
   </header>
 
   <main>
-    <!-- ① プロンプトフォルダ -->
-    <section class="section">
-      <div class="step-label is-active"><span class="step-num">1</span>プロンプトフォルダ<span class="hint">長押しで編集</span></div>
-      <div id="promptTags" class="tags"></div>
-    </section>
+    <div class="main-tabs" id="mainTabs">
+      <button class="main-tab is-active" data-tab="new">新規</button>
+      <button class="main-tab" data-tab="generating">生成中<span class="tab-count" style="display:none">0</span></button>
+      <button class="main-tab" data-tab="unplayed">未再生<span class="tab-count" style="display:none">0</span></button>
+      <button class="main-tab" data-tab="played">再生済<span class="tab-count" style="display:none">0</span></button>
+    </div>
 
-    <!-- ② テーマ選択 -->
-    <section class="section">
-      <div class="step-label is-active"><span class="step-num">2</span>テーマを選択<span class="hint">長押しで編集</span></div>
-      <div id="tags" class="tags"></div>
-    </section>
+    <!-- 新規（ワークフロー） -->
+    <div id="panelNew" class="main-panel">
+      <section class="section">
+        <div class="step-label is-active"><span class="step-num">1</span>プロンプトフォルダ<span class="hint">長押しで編集</span></div>
+        <div id="promptTags" class="tags"></div>
+      </section>
 
-    <!-- ③ 音声解説を生成 -->
-    <section class="section">
-      <div class="step-label is-active"><span class="step-num">3</span>音声解説を生成する</div>
-      <button id="shareBtn" type="button" class="genBtn" aria-label="音声解説を生成する">
-        <span class="icon">🎙</span>
-        <span class="main" id="shareBtnTitle">【001】音声解説を生成する</span>
-        <span class="sub">プロンプトをコピー &amp; ソースを共有</span>
-      </button>
-    </section>
+      <section class="section">
+        <div class="step-label is-active"><span class="step-num">2</span>テーマを選択<span class="hint">長押しで編集</span></div>
+        <div id="tags" class="tags"></div>
+      </section>
 
-    <!-- ④ 音声解説一覧 -->
-    <section class="section">
-      <div class="step-label"><span class="step-num">4</span>音声解説一覧<span class="hint">ドロップで取込</span></div>
-      <div class="audio-tabs" id="audioTabs">
-        <button class="audio-tab is-active" data-tab="new" data-label="新規">新規</button>
-        <button class="audio-tab" data-tab="generating" data-label="生成中">生成中</button>
-        <button class="audio-tab" data-tab="unplayed" data-label="未再生">未再生</button>
-        <button class="audio-tab" data-tab="played" data-label="再生済">再生済</button>
-      </div>
+      <section class="section">
+        <div class="step-label is-active"><span class="step-num">3</span>音声解説を生成する</div>
+        <button id="shareBtn" type="button" class="genBtn" aria-label="音声解説を生成する">
+          <span class="icon">🎙</span>
+          <span class="main" id="shareBtnTitle">【001】音声解説を生成する</span>
+          <span class="sub">プロンプトをコピー &amp; ソースを共有</span>
+        </button>
+      </section>
+    </div>
+
+    <!-- 生成中 -->
+    <div id="panelGenerating" class="main-panel" hidden>
+      <div id="listGenerating" class="history"></div>
+    </div>
+
+    <!-- 未再生 -->
+    <div id="panelUnplayed" class="main-panel" hidden>
+      <div id="listUnplayed" class="history"></div>
+    </div>
+
+    <!-- 再生済 -->
+    <div id="panelPlayed" class="main-panel" hidden>
       <div id="clearPlayedWrap" class="clear-played-wrap" style="display:none">
         <button id="clearPlayedBtn" type="button" class="clear-played-btn">再生済みをすべて削除</button>
       </div>
-      <div id="historyList" class="history"></div>
-    </section>
+      <div id="listPlayed" class="history"></div>
+    </div>
   </main>
 </div>
 
@@ -449,9 +518,9 @@
 
     <div class="tab-scroll">
       <div id="tabFolders" class="tab-panel">
-        <p class="note">⠿ をドラッグしてテーマを別フォルダへ移動、または同じフォルダ内で並び替えできます。</p>
-        <div id="foldersList" class="folders-list"></div>
-        <button id="addFolderBtn" type="button" class="add-btn">+ フォルダを追加</button>
+        <p class="note">⠿ をドラッグで並び替え・別フォルダへ移動。行をタップで編集。</p>
+        <div id="foldersList"></div>
+        <button id="addFolderBtn" type="button" class="add-btn" style="margin-top:12px">+ フォルダを追加</button>
       </div>
 
       <div id="tabCommon" class="tab-panel" hidden>
@@ -474,6 +543,29 @@
   </div>
 </div>
 
+<!-- 編集モーダル（フォルダ／テーマ） -->
+<div id="editModal" class="modal edit-modal">
+  <div class="edit-modal-card">
+    <div class="modal-head">
+      <h2 id="editModalTitle">編集</h2>
+      <button id="editModalClose" type="button" class="icon-btn" aria-label="閉じる">✕</button>
+    </div>
+    <div class="edit-modal-scroll">
+      <div class="field">
+        <label>名前</label>
+        <input type="text" id="editModalName" placeholder="名前">
+      </div>
+      <div class="field">
+        <label id="editModalTextLabel">本文</label>
+        <textarea id="editModalText" rows="12"></textarea>
+      </div>
+    </div>
+    <div class="edit-modal-foot">
+      <button id="editModalDelete" type="button" class="delete-btn">削除</button>
+    </div>
+  </div>
+</div>
+
 <div class="drop-overlay" id="dropOverlay">
   <div>音声ファイルをドロップ<small>ファイル名の【番号】で自動マッチします</small></div>
 </div>
@@ -486,19 +578,19 @@
 (function(){
 'use strict';
 
-/* ═══════════════════════════════════════
-   MyCast — 統合版
-   ═══════════════════════════════════════ */
+/* ═════════════════════════════════════════════
+   MyCast — 統合版 v3
+   ═════════════════════════════════════════════ */
 
-var STORAGE_KEY = 'mycast.v2';
-var LEGACY_KEYS = ['mycast.v1', 'nblink.v9', 'nblink.v8', 'nblink.v7'];
+var STORAGE_KEY = 'mycast.v3';
+var LEGACY_KEYS = ['mycast.v2','mycast.v1','nblink.v9','nblink.v8','nblink.v7'];
 var MAX_HISTORY = 200;
 var REUSE_WINDOW_MS = 30000;
-var GENERATING_THRESHOLD_MS = 10 * 60 * 1000; // 10分
 var NOTEBOOK_URL = 'https://notebooklm.google.com/';
 var LONG_PRESS_MS = 550;
 var DEFAULT_PROMPT = '以下のソースを参考に、テーマ「{theme}」について音声でわかりやすく解説してください。';
 var ICON_FILE = 'icon.png';
+var TABS = ['new', 'generating', 'unplayed', 'played'];
 
 function $(s, r){ return (r||document).querySelector(s); }
 function $$(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); }
@@ -506,8 +598,8 @@ function $$(s, r){ return Array.prototype.slice.call((r||document).querySelector
 /* ── State ── */
 var state = {
   commonPrompt: '',
-  prompts: [],           // [{ id, name, text, themes: [{ id, name, source }] }]
-  history: [],           // [{ id, number, title, date, time, read, hasAudio, audioDuration, ... }]
+  prompts: [],
+  history: [],
   selectedPromptId: null,
   selectedThemeId: null,
   lastGenAt: 0,
@@ -515,7 +607,7 @@ var state = {
   nextNumber: 1,
   rate: 1,
   repeatMode: 'off',
-  audioTab: 'new'
+  mainTab: 'new'
 };
 
 var currentId = null;
@@ -526,7 +618,9 @@ var toastTimer = null;
 var suppressClickUntil = 0;
 var db = null;
 var ICON_ABS = '';
-var themeDrag = null;
+var settingsDrag = null;
+var editing = { type: null, folderId: null, themeId: null };
+var generatingLock = false;
 
 /* ── Utils ── */
 function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
@@ -575,16 +669,13 @@ function hideToast(){
   clearTimeout(toastTimer);
 }
 
-/* ── Extract number from filename ── */
+/* ── Filename helpers ── */
 function extractNumberFromFilename(name){
   var base = String(name || '').replace(/\.[^.]+$/, '');
-  // 【001】 or 【1】
   var m = base.match(/【(\d{1,4})】/);
   if(m) return parseInt(m[1], 10);
-  // 001_xxx, 001-xxx, 001.xxx, 001 xxx
   m = base.match(/^(\d{1,4})[\s_\-\.]/);
   if(m) return parseInt(m[1], 10);
-  // xxx_001, xxx-001
   m = base.match(/[\s_\-](\d{1,4})$/);
   if(m) return parseInt(m[1], 10);
   return null;
@@ -593,18 +684,7 @@ function cleanTitleFromFile(name){
   return String(name || '').replace(/\.[^.]+$/, '').trim() || '(無題)';
 }
 
-/* ── Icons / Manifest ── */
-function roundRect(g, x, y, w, h, r){
-  g.beginPath();
-  if(typeof g.roundRect === 'function'){ g.roundRect(x, y, w, h, r); return; }
-  r = Math.min(r, w/2, h/2);
-  g.moveTo(x+r, y);
-  g.arcTo(x+w, y, x+w, y+h, r);
-  g.arcTo(x+w, y+h, x, y+h, r);
-  g.arcTo(x, y+h, x, y, r);
-  g.arcTo(x, y, x+w, y, r);
-  g.closePath();
-}
+/* ── Icons ── */
 function buildAssets(){
   var iconAbs;
   try{ iconAbs = new URL(ICON_FILE, location.href).href; }catch(e){ iconAbs = ICON_FILE; }
@@ -698,15 +778,12 @@ function save(){
 }
 
 function migrateSchema(){
-  // prompts が旧形式（themes を持たない）の場合、themes を prompts[0].themes に統合
   if(!Array.isArray(state.prompts)) state.prompts = [];
-
   var needsMigration = false;
   if(state.prompts.length > 0){
     var hasThemesField = state.prompts.some(function(p){ return Array.isArray(p.themes); });
     if(!hasThemesField) needsMigration = true;
   }
-
   if(needsMigration){
     var oldThemes = Array.isArray(state.themes) ? state.themes : [];
     state.prompts.forEach(function(p, i){
@@ -722,8 +799,6 @@ function migrateSchema(){
     }
   }
   delete state.themes;
-
-  // 全フォルダに themes 配列を保証
   state.prompts.forEach(function(p){
     if(!Array.isArray(p.themes)) p.themes = [];
   });
@@ -734,7 +809,6 @@ function normalize(){
   if(!Array.isArray(state.prompts)) state.prompts = [];
   if(!Array.isArray(state.history)) state.history = [];
 
-  // フォルダ検証
   state.prompts.forEach(function(p){
     if(!safeId(p.id)) p.id = uid();
     if(typeof p.name !== 'string') p.name = '';
@@ -756,7 +830,6 @@ function normalize(){
     if(!state.commonPrompt.trim()) state.commonPrompt = DEFAULT_PROMPT;
   }
 
-  // 履歴検証
   state.history.forEach(function(h){
     if(!safeId(h.id)) h.id = uid();
     if(typeof h.number !== 'number' || !isFinite(h.number)) h.number = 0;
@@ -775,9 +848,8 @@ function normalize(){
   }
   if(typeof state.rate !== 'number' || state.rate < 0.5 || state.rate > 3) state.rate = 1;
   if(['off','all','one'].indexOf(state.repeatMode) === -1) state.repeatMode = 'off';
-  if(['new','generating','unplayed','played'].indexOf(state.audioTab) === -1) state.audioTab = 'new';
+  if(TABS.indexOf(state.mainTab) === -1) state.mainTab = 'new';
 
-  // 選択の整合性
   var selectedFolder = state.prompts.find(function(p){ return p.id === state.selectedPromptId; });
   if(!selectedFolder){
     state.selectedPromptId = state.prompts[0].id;
@@ -809,8 +881,7 @@ function load(){
     if(raw) parsed = JSON.parse(raw);
     if(!parsed){
       for(var i=0;i<LEGACY_KEYS.length;i++){
-        var lk = LEGACY_KEYS[i];
-        var lv = localStorage.getItem(lk);
+        var lv = localStorage.getItem(LEGACY_KEYS[i]);
         if(lv){ try{ parsed = JSON.parse(lv); break; }catch(e){} }
       }
     }
@@ -819,7 +890,7 @@ function load(){
   if(parsed && typeof parsed === 'object'){
     if(typeof parsed.commonPrompt === 'string') state.commonPrompt = parsed.commonPrompt;
     if(Array.isArray(parsed.prompts)) state.prompts = parsed.prompts;
-    if(Array.isArray(parsed.themes)) state.themes = parsed.themes;  // 旧形式
+    if(Array.isArray(parsed.themes)) state.themes = parsed.themes;
     if(Array.isArray(parsed.history)) state.history = parsed.history;
     if(parsed.selectedPromptId) state.selectedPromptId = parsed.selectedPromptId;
     if(parsed.selectedThemeId) state.selectedThemeId = parsed.selectedThemeId;
@@ -828,7 +899,8 @@ function load(){
     if(typeof parsed.nextNumber === 'number') state.nextNumber = parsed.nextNumber;
     if(typeof parsed.rate === 'number') state.rate = parsed.rate;
     if(typeof parsed.repeatMode === 'string') state.repeatMode = parsed.repeatMode;
-    if(typeof parsed.audioTab === 'string') state.audioTab = parsed.audioTab;
+    var tab = parsed.mainTab || parsed.audioTab;
+    if(typeof tab === 'string') state.mainTab = tab;
   }
   migrateSchema();
   normalize();
@@ -840,9 +912,9 @@ function getSelectedFolder(){
   return state.prompts.find(function(p){ return p.id === state.selectedPromptId; }) || null;
 }
 function getSelectedTheme(){
-  var folder = getSelectedFolder();
-  if(!folder) return null;
-  return folder.themes.find(function(t){ return t.id === state.selectedThemeId; }) || null;
+  var f = getSelectedFolder();
+  if(!f) return null;
+  return f.themes.find(function(t){ return t.id === state.selectedThemeId; }) || null;
 }
 function getEntry(id){
   return state.history.find(function(h){ return h.id === id; }) || null;
@@ -853,14 +925,47 @@ function findFolderByThemeId(themeId){
   }) || null;
 }
 
-/* ── Tab logic ── */
+/* ── Tab classification ── */
 function getEntryTab(entry){
   if(entry.hasAudio) return entry.read ? 'played' : 'unplayed';
-  var age = Date.now() - entry.time;
-  return age < GENERATING_THRESHOLD_MS ? 'new' : 'generating';
+  return 'generating';
 }
 
-/* ── Render main ── */
+/* ── Render main tabs ── */
+function updateMainTabCounts(){
+  var counts = { generating: 0, unplayed: 0, played: 0 };
+  state.history.forEach(function(h){
+    var tab = getEntryTab(h);
+    if(counts[tab] !== undefined) counts[tab]++;
+  });
+  $$('.main-tab').forEach(function(btn){
+    var tab = btn.dataset.tab;
+    var countEl = btn.querySelector('.tab-count');
+    if(!countEl) return;
+    if(tab === 'new'){
+      countEl.style.display = 'none';
+    } else {
+      var c = counts[tab] || 0;
+      countEl.textContent = c;
+      countEl.style.display = c > 0 ? '' : 'none';
+    }
+  });
+}
+
+function switchMainTab(tab){
+  if(TABS.indexOf(tab) === -1) return;
+  state.mainTab = tab;
+  save();
+  $$('.main-tab').forEach(function(b){ b.classList.toggle('is-active', b.dataset.tab === tab); });
+  $('#panelNew').hidden = tab !== 'new';
+  $('#panelGenerating').hidden = tab !== 'generating';
+  $('#panelUnplayed').hidden = tab !== 'unplayed';
+  $('#panelPlayed').hidden = tab !== 'played';
+  renderHistory();
+  try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){ window.scrollTo(0, 0); }
+}
+
+/* ── Render tags ── */
 function renderPromptTags(){
   var el = $('#promptTags'); if(!el) return;
   el.innerHTML = '';
@@ -904,86 +1009,83 @@ function renderShareBtn(){
   if(btn) btn.setAttribute('aria-label', label);
 }
 
+/* ── History rendering ── */
 var SVG_IMPORT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>';
 var SVG_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72c0 .8.87 1.29 1.56.9l10.9-6.86a1.05 1.05 0 0 0 0-1.8L9.56 4.24A1.05 1.05 0 0 0 8 5.14Z"/></svg>';
 
-function updateAudioTabs(counts){
-  $$('.audio-tab').forEach(function(btn){
-    var tab = btn.dataset.tab;
-    var label = btn.dataset.label;
-    var c = counts[tab] || 0;
-    btn.innerHTML = esc(label) + (c > 0 ? ' <span class="tab-count">' + c + '</span>' : '');
-    btn.classList.toggle('is-active', tab === state.audioTab);
-  });
+function makeHistoryRow(h){
+  var isPlaying = (h.id === currentId) && !audio.paused && !audio.ended;
+  var row = document.createElement('div');
+  row.className = 'history-item' +
+    (isPlaying ? ' playing' : '') +
+    (h.read && !isPlaying ? ' read' : '');
+  row.dataset.id = h.id;
+
+  var thumb;
+  if(h.hasAudio){
+    thumb = isPlaying
+      ? '<div class="eq"><i></i><i></i><i></i><i></i></div>'
+      : SVG_PLAY;
+  }else{
+    thumb = SVG_IMPORT;
+  }
+
+  var durTxt = '';
+  if(h.hasAudio && h.audioDuration > 0) durTxt = ' · ' + fmtTime(h.audioDuration);
+  else if(h.hasAudio) durTxt = ' · 音声あり';
+  else durTxt = ' · 音声未登録';
+  var sub = (h.date || '') + durTxt;
+
+  var pct = 0;
+  if(h.id === currentId && h.audioDuration > 0){
+    pct = Math.min(100, ((audio.currentTime || 0) / h.audioDuration) * 100);
+  } else if(h.hasAudio && audioPositions[h.id] > 0 && h.audioDuration > 0){
+    pct = Math.min(100, (audioPositions[h.id] / h.audioDuration) * 100);
+  }
+
+  row.innerHTML =
+    '<button type="button" class="thumb" aria-label="' + (h.hasAudio ? '再生' : '音声を取り込む') + '">' + thumb + '</button>' +
+    '<div class="history-text">' +
+      '<div class="history-title"><span class="history-num">' + esc(numTag(h.number)) + '</span>' + esc(h.title) + '</div>' +
+      '<div class="history-sub">' + esc(sub) + '</div>' +
+    '</div>' +
+    '<button type="button" class="history-del" aria-label="削除">✕</button>' +
+    (pct > 0.5 ? '<div class="history-bar" style="width:' + pct.toFixed(1) + '%"></div>' : '');
+  return row;
 }
 
 function renderHistory(){
-  var el = $('#historyList'); if(!el) return;
+  updateMainTabCounts();
 
-  var counts = { new: 0, generating: 0, unplayed: 0, played: 0 };
-  state.history.forEach(function(h){ counts[getEntryTab(h)]++; });
-  updateAudioTabs(counts);
+  var tab = state.mainTab;
+  if(tab === 'new') return;
 
-  var clearWrap = $('#clearPlayedWrap');
-  if(clearWrap){
-    clearWrap.style.display = (state.audioTab === 'played' && counts.played > 0) ? 'block' : 'none';
-  }
+  var listEl = {
+    generating: $('#listGenerating'),
+    unplayed: $('#listUnplayed'),
+    played: $('#listPlayed')
+  }[tab];
+  if(!listEl) return;
 
-  var visible = state.history.filter(function(h){ return getEntryTab(h) === state.audioTab; });
+  var visible = state.history.filter(function(h){ return getEntryTab(h) === tab; });
 
   if(!visible.length){
     var msgs = {
-      new: '新規の項目はありません<small>「音声解説を生成する」から作成できます</small>',
-      generating: '生成中の項目はありません<small>10分以上経過した未登録の項目が表示されます</small>',
+      generating: '生成中の項目はありません<small>「新規」タブから生成できます</small>',
       unplayed: '未再生の項目はありません<small>音声ファイルをドロップで取り込めます</small>',
       played: '再生済みの項目はありません'
     };
-    el.innerHTML = '<div class="empty">' + (msgs[state.audioTab] || '項目はありません') + '</div>';
-    return;
+    listEl.innerHTML = '<div class="empty">' + (msgs[tab] || '項目はありません') + '</div>';
+  } else {
+    listEl.innerHTML = '';
+    visible.forEach(function(h){ listEl.appendChild(makeHistoryRow(h)); });
   }
 
-  el.innerHTML = '';
-  visible.forEach(function(h){
-    var isPlaying = (h.id === currentId) && !audio.paused && !audio.ended;
-    var row = document.createElement('div');
-    row.className = 'history-item' +
-      (isPlaying ? ' playing' : '') +
-      (h.read && !isPlaying ? ' read' : '');
-    row.dataset.id = h.id;
-
-    var thumb;
-    if(h.hasAudio){
-      thumb = isPlaying
-        ? '<div class="eq"><i></i><i></i><i></i><i></i></div>'
-        : SVG_PLAY;
-    }else{
-      thumb = SVG_IMPORT;
-    }
-
-    var durTxt = '';
-    if(h.hasAudio && h.audioDuration > 0) durTxt = ' · ' + fmtTime(h.audioDuration);
-    else if(h.hasAudio) durTxt = ' · 音声あり';
-    else durTxt = ' · 音声未登録';
-    var sub = (h.date || '') + durTxt;
-
-    var pct = 0;
-    if(h.id === currentId && h.audioDuration > 0){
-      pct = Math.min(100, ((audio.currentTime || 0) / h.audioDuration) * 100);
-    } else if(h.hasAudio && audioPositions[h.id] > 0 && h.audioDuration > 0){
-      pct = Math.min(100, (audioPositions[h.id] / h.audioDuration) * 100);
-    }
-
-    row.innerHTML =
-      '<button type="button" class="thumb" aria-label="' + (h.hasAudio ? '再生' : '音声を取り込む') + '">' + thumb + '</button>' +
-      '<div class="history-text">' +
-        '<div class="history-title"><span class="history-num">' + esc(numTag(h.number)) + '</span>' + esc(h.title) + '</div>' +
-        '<div class="history-sub">' + esc(sub) + '</div>' +
-      '</div>' +
-      '<button type="button" class="history-del" aria-label="削除">✕</button>' +
-      (pct > 0.5 ? '<div class="history-bar" style="width:' + pct.toFixed(1) + '%"></div>' : '');
-
-    el.appendChild(row);
-  });
+  var clearWrap = $('#clearPlayedWrap');
+  if(clearWrap){
+    var playedCount = state.history.filter(function(h){ return h.hasAudio && h.read; }).length;
+    clearWrap.style.display = (tab === 'played' && playedCount > 0) ? 'block' : 'none';
+  }
 
   document.body.classList.toggle('is-playing', !audio.paused && !audio.ended && !!audio.src);
 }
@@ -1005,171 +1107,186 @@ function renderCommonPrompt(){
 function renderFoldersEditor(){
   var el = $('#foldersList'); if(!el) return;
   el.innerHTML = '';
-  state.prompts.forEach(function(folder, idx){
+
+  state.prompts.forEach(function(folder){
     var card = document.createElement('div');
-    card.className = 'folder-card';
-    card.dataset.promptCard = folder.id;
+    card.className = 'settings-folder';
+    card.dataset.folderId = folder.id;
 
-    var themesHtml = folder.themes.map(function(t){
-      return (
-        '<div class="theme-card" data-theme-card="' + esc(t.id) + '">' +
-          '<div class="theme-head">' +
-            '<div class="theme-grip" data-theme-grip aria-label="ドラッグして移動">⠿</div>' +
-            '<input class="theme-name-input" type="text" placeholder="テーマ名" value="' + esc(t.name) + '">' +
-            '<button type="button" class="del-btn" data-theme-del="' + esc(t.id) + '" aria-label="削除" style="background:transparent;border:none;color:#ff453a;font-size:14px;width:28px;height:28px;border-radius:6px;cursor:pointer">✕</button>' +
-          '</div>' +
-          '<textarea class="theme-source-input" placeholder="ソーステキスト">' + esc(t.source) + '</textarea>' +
-        '</div>'
-      );
-    }).join('');
-
-    if(!themesHtml) themesHtml = '<div class="empty-themes">テーマがありません</div>';
+    var themesHtml = '';
+    if(folder.themes.length){
+      themesHtml = folder.themes.map(function(t){
+        var preview = (t.source || '').trim().split('\n')[0].slice(0, 40);
+        return (
+          '<div class="theme-item" data-theme-id="' + esc(t.id) + '" data-parent-folder="' + esc(folder.id) + '">' +
+            '<div class="drag-grip" data-drag-theme aria-label="ドラッグ">⠿</div>' +
+            '<div class="theme-text-col">' +
+              '<div class="theme-name-label">' + esc(t.name || '(無題)') + '</div>' +
+              (preview ? '<div class="theme-source-preview">' + esc(preview) + '</div>' : '') +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+    } else {
+      themesHtml = '<div class="empty-themes">テーマなし</div>';
+    }
 
     card.innerHTML =
-      '<div class="folder-head">' +
-        '<input class="folder-name" type="text" placeholder="フォルダ名" value="' + esc(folder.name) + '">' +
-        '<div class="folder-actions">' +
-          '<button type="button" data-folder-up="' + idx + '" aria-label="上へ">↑</button>' +
-          '<button type="button" data-folder-down="' + idx + '" aria-label="下へ">↓</button>' +
-          '<button type="button" class="del-btn" data-folder-del="' + esc(folder.id) + '" aria-label="削除">✕</button>' +
-        '</div>' +
+      '<div class="folder-head-row" data-folder-head>' +
+        '<div class="drag-grip" data-drag-folder aria-label="ドラッグ">⠿</div>' +
+        '<div class="folder-name-label">' + esc(folder.name || '(無題)') + '</div>' +
+        '<div class="folder-count-label">' + folder.themes.length + '</div>' +
       '</div>' +
-      '<textarea class="folder-prompt" placeholder="このフォルダのプロンプト本文（{theme} でテーマ名を差し込み）">' + esc(folder.text) + '</textarea>' +
-      '<div class="folder-themes">' + themesHtml + '</div>' +
-      '<button type="button" class="add-theme-btn" data-add-theme="' + esc(folder.id) + '">+ テーマを追加</button>';
+      '<div class="themes-list">' +
+        themesHtml +
+        '<button type="button" class="add-theme-inline" data-add-theme="' + esc(folder.id) + '">+ テーマを追加</button>' +
+      '</div>';
 
-    // ── Folder name input ──
-    var nameInput = card.querySelector('.folder-name');
-    nameInput.addEventListener('input', function(e){
-      folder.name = e.target.value;
-      save();
-      renderPromptTags();
-      renderShareBtn();
+    var headRow = card.querySelector('[data-folder-head]');
+    headRow.addEventListener('click', function(e){
+      if(e.target.closest('[data-drag-folder]')) return;
+      openFolderEdit(folder.id);
     });
 
-    // ── Folder prompt textarea ──
-    var promptInput = card.querySelector('.folder-prompt');
-    promptInput.addEventListener('input', function(e){
-      folder.text = e.target.value;
-      save();
+    card.querySelectorAll('.theme-item').forEach(function(row){
+      row.addEventListener('click', function(e){
+        if(e.target.closest('[data-drag-theme]')) return;
+        openThemeEdit(folder.id, row.dataset.themeId);
+      });
     });
 
-    // ── Folder up/down/delete ──
-    var upBtn = card.querySelector('[data-folder-up]');
-    if(upBtn) upBtn.addEventListener('click', function(){
-      var i = parseInt(upBtn.dataset.folderUp, 10);
-      if(i <= 0) return;
-      var arr = state.prompts;
-      var item = arr.splice(i, 1)[0];
-      arr.splice(i - 1, 0, item);
-      save(); renderFoldersEditor(); renderPromptTags();
-    });
-    var downBtn = card.querySelector('[data-folder-down]');
-    if(downBtn) downBtn.addEventListener('click', function(){
-      var i = parseInt(downBtn.dataset.folderDown, 10);
-      if(i >= state.prompts.length - 1) return;
-      var arr = state.prompts;
-      var item = arr.splice(i, 1)[0];
-      arr.splice(i + 1, 0, item);
-      save(); renderFoldersEditor(); renderPromptTags();
-    });
-    var delBtn = card.querySelector('[data-folder-del]');
-    if(delBtn) delBtn.addEventListener('click', function(){
-      if(state.prompts.length <= 1){
-        showToast('最後のフォルダは削除できません');
-        return;
-      }
-      if(!confirm('このフォルダと中のテーマを削除しますか？')) return;
-      state.prompts = state.prompts.filter(function(p){ return p.id !== folder.id; });
-      if(state.selectedPromptId === folder.id){
-        state.selectedPromptId = state.prompts[0].id;
-        state.selectedThemeId = state.prompts[0].themes[0] ? state.prompts[0].themes[0].id : null;
-      }
-      save(); renderFoldersEditor(); renderPromptTags(); renderThemeTags(); renderShareBtn();
-    });
-
-    // ── Add theme ──
     var addThemeBtn = card.querySelector('[data-add-theme]');
-    if(addThemeBtn) addThemeBtn.addEventListener('click', function(){
-      var t = { id: uid(), name: '', source: '' };
-      folder.themes.push(t);
+    if(addThemeBtn) addThemeBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var newTheme = { id: uid(), name: '新規テーマ', source: '' };
+      folder.themes.push(newTheme);
       save();
-      if(folder.id === state.selectedPromptId && !state.selectedThemeId){
-        state.selectedThemeId = t.id;
-      }
       renderFoldersEditor();
       if(folder.id === state.selectedPromptId) renderThemeTags();
-    });
-
-    // ── Per-theme inputs ──
-    card.querySelectorAll('.theme-card').forEach(function(tc){
-      var tId = tc.dataset.themeCard;
-      var theme = folder.themes.find(function(x){ return x.id === tId; });
-      if(!theme) return;
-
-      var tName = tc.querySelector('.theme-name-input');
-      if(tName) tName.addEventListener('input', function(e){
-        theme.name = e.target.value;
-        save();
-        if(folder.id === state.selectedPromptId) renderThemeTags();
-        renderShareBtn();
-      });
-      var tSrc = tc.querySelector('.theme-source-input');
-      if(tSrc) tSrc.addEventListener('input', function(e){
-        theme.source = e.target.value;
-        save();
-      });
-      var tDel = tc.querySelector('[data-theme-del]');
-      if(tDel) tDel.addEventListener('click', function(){
-        if(!confirm('このテーマを削除しますか？')) return;
-        folder.themes = folder.themes.filter(function(x){ return x.id !== theme.id; });
-        if(state.selectedThemeId === theme.id){
-          state.selectedThemeId = folder.themes[0] ? folder.themes[0].id : null;
-        }
-        save();
-        renderFoldersEditor();
-        if(folder.id === state.selectedPromptId) renderThemeTags();
-        renderShareBtn();
-      });
+      // 追加後すぐに編集モーダルを開く
+      setTimeout(function(){ openThemeEdit(folder.id, newTheme.id); }, 60);
     });
 
     el.appendChild(card);
   });
 }
 
-/* ── Long-press to edit ── */
-function openEditorForTag(kind, id){
-  if(!id) return;
-  if(kind === 'folder'){
-    var folder = state.prompts.find(function(p){ return p.id === id; });
-    if(!folder) return;
-    renderCommonPrompt();
+/* ── Edit modal (folder/theme) ── */
+function openFolderEdit(folderId){
+  var folder = state.prompts.find(function(p){ return p.id === folderId; });
+  if(!folder) return;
+
+  editing = { type: 'folder', folderId: folderId, themeId: null };
+
+  $('#editModalTitle').textContent = 'フォルダを編集';
+  $('#editModalName').value = folder.name || '';
+  $('#editModalTextLabel').textContent = 'プロンプト本文';
+  $('#editModalText').value = folder.text || '';
+  $('#editModalText').placeholder = 'このフォルダのプロンプト本文（{theme} でテーマ名を差し込み）';
+
+  var delBtn = $('#editModalDelete');
+  delBtn.textContent = 'このフォルダを削除';
+  delBtn.style.display = '';
+  delBtn.onclick = function(){
+    if(state.prompts.length <= 1){ showToast('最後のフォルダは削除できません'); return; }
+    if(!confirm('このフォルダと中のテーマをすべて削除しますか？')) return;
+    state.prompts = state.prompts.filter(function(p){ return p.id !== folderId; });
+    if(state.selectedPromptId === folderId){
+      state.selectedPromptId = state.prompts[0].id;
+      state.selectedThemeId = state.prompts[0].themes[0] ? state.prompts[0].themes[0].id : null;
+    }
+    save();
+    closeEditModal();
     renderFoldersEditor();
-    switchTab('folders');
-    $('#settingsModal').classList.add('show');
-    setTimeout(function(){
-      var el = document.querySelector('[data-prompt-card="' + id + '"]');
-      if(el){
-        try{ el.scrollIntoView({ behavior:'smooth', block:'center' }); }catch(e){ el.scrollIntoView(); }
-        el.classList.add('flash');
-        setTimeout(function(){ el.classList.remove('flash'); }, 1300);
-      }
-    }, 280);
+    renderPromptTags();
+    renderThemeTags();
+    renderShareBtn();
+    showToast('フォルダを削除しました');
+  };
+
+  $('#editModal').classList.add('show');
+}
+
+function openThemeEdit(folderId, themeId){
+  var folder = state.prompts.find(function(p){ return p.id === folderId; });
+  if(!folder) return;
+  var theme = folder.themes.find(function(t){ return t.id === themeId; });
+  if(!theme) return;
+
+  editing = { type: 'theme', folderId: folderId, themeId: themeId };
+
+  $('#editModalTitle').textContent = 'テーマを編集';
+  $('#editModalName').value = theme.name || '';
+  $('#editModalTextLabel').textContent = 'ソーステキスト';
+  $('#editModalText').value = theme.source || '';
+  $('#editModalText').placeholder = 'ソーステキスト（Notebook に渡す内容）';
+
+  var delBtn = $('#editModalDelete');
+  delBtn.textContent = 'このテーマを削除';
+  delBtn.style.display = '';
+  delBtn.onclick = function(){
+    if(!confirm('このテーマを削除しますか？')) return;
+    folder.themes = folder.themes.filter(function(t){ return t.id !== themeId; });
+    if(state.selectedThemeId === themeId){
+      state.selectedThemeId = folder.themes[0] ? folder.themes[0].id : null;
+    }
+    save();
+    closeEditModal();
+    renderFoldersEditor();
+    if(folder.id === state.selectedPromptId) renderThemeTags();
+    renderShareBtn();
+    showToast('テーマを削除しました');
+  };
+
+  $('#editModal').classList.add('show');
+}
+
+function closeEditModal(){
+  $('#editModal').classList.remove('show');
+  editing = { type: null, folderId: null, themeId: null };
+}
+
+function bindEditModalInputs(){
+  var nameEl = $('#editModalName');
+  var textEl = $('#editModalText');
+
+  nameEl.addEventListener('input', function(){
+    if(editing.type === 'folder'){
+      var f = state.prompts.find(function(p){ return p.id === editing.folderId; });
+      if(f){ f.name = nameEl.value; save(); renderPromptTags(); renderFoldersEditor(); }
+    } else if(editing.type === 'theme'){
+      var f2 = state.prompts.find(function(p){ return p.id === editing.folderId; });
+      if(!f2) return;
+      var t = f2.themes.find(function(x){ return x.id === editing.themeId; });
+      if(t){ t.name = nameEl.value; save(); renderFoldersEditor(); if(f2.id === state.selectedPromptId) renderThemeTags(); }
+    }
+  });
+
+  textEl.addEventListener('input', function(){
+    if(editing.type === 'folder'){
+      var f = state.prompts.find(function(p){ return p.id === editing.folderId; });
+      if(f){ f.text = textEl.value; save(); }
+    } else if(editing.type === 'theme'){
+      var f2 = state.prompts.find(function(p){ return p.id === editing.folderId; });
+      if(!f2) return;
+      var t = f2.themes.find(function(x){ return x.id === editing.themeId; });
+      if(t){ t.source = textEl.value; save(); }
+    }
+  });
+
+  $('#editModalClose').addEventListener('click', closeEditModal);
+  $('#editModal').addEventListener('click', function(e){
+    if(e.target === $('#editModal')) closeEditModal();
+  });
+}
+
+/* ── Long-press to edit (main screen) ── */
+function openEditFromMain(kind, id){
+  if(kind === 'folder'){
+    openFolderEdit(id);
   } else if(kind === 'theme'){
     var f = findFolderByThemeId(id);
-    if(!f) return;
-    renderCommonPrompt();
-    renderFoldersEditor();
-    switchTab('folders');
-    $('#settingsModal').classList.add('show');
-    setTimeout(function(){
-      var el = document.querySelector('[data-theme-card="' + id + '"]');
-      if(el){
-        try{ el.scrollIntoView({ behavior:'smooth', block:'center' }); }catch(e){ el.scrollIntoView(); }
-        el.classList.add('flash');
-        setTimeout(function(){ el.classList.remove('flash'); }, 1300);
-      }
-    }, 280);
+    if(f) openThemeEdit(f.id, id);
   }
 }
 
@@ -1186,7 +1303,6 @@ function initTagInteractions(){
   document.addEventListener('pointerdown', function(e){
     var btn = e.target.closest ? e.target.closest('button.tag') : null;
     if(!btn) return;
-    // どのコンテナ内か判定
     var kind = null;
     if(btn.closest('#promptTags')) kind = 'folder';
     else if(btn.closest('#tags')) kind = 'theme';
@@ -1215,7 +1331,7 @@ function initTagInteractions(){
       var kind = pendingKind;
       pendingBtn = null; pendingKind = null;
       suppressClickUntil = Date.now() + 800;
-      openEditorForTag(kind, id);
+      openEditFromMain(kind, id);
     } else {
       pendingBtn = null; pendingKind = null;
     }
@@ -1297,80 +1413,88 @@ function buildPromptText(folder, theme){
   return combined.replace(/\{theme\}/g, theme.name || '');
 }
 
-function handleGenerate(){
+async function handleGenerate(){
+  if(generatingLock) return;
   var folder = getSelectedFolder();
   var theme = getSelectedTheme();
   if(!folder){ showToast('先にプロンプトフォルダを選択してください'); return; }
   if(!theme){ showToast('先にテーマを選択してください'); return; }
 
-  var num = state.nextNumber;
-  var numLabel = formatNum(num);
-  var instruction = 'タイトルの頭に【' + numLabel + '】を付けてください。';
+  generatingLock = true;
+  var shareBtn = $('#shareBtn');
+  if(shareBtn) shareBtn.disabled = true;
 
-  var promptText = buildPromptText(folder, theme);
-  promptText = (promptText.trim() ? promptText + '\n\n' : '') + instruction;
+  try{
+    var num = state.nextNumber;
+    var instruction = 'タイトルの頭に【' + formatNum(num) + '】を付けてください。';
 
-  var sourceText = ((theme.source || '').trim() || (theme.name || '').trim());
-  sourceText = sourceText ? (sourceText + '\n\n' + instruction) : instruction;
+    var promptText = buildPromptText(folder, theme);
+    promptText = (promptText.trim() ? promptText + '\n\n' : '') + instruction;
 
-  var now = new Date();
-  var nowMs = now.getTime();
-  var title = (theme.name || '(無題)') + ' / ' + (folder.name || 'フォルダ');
-  var dateLabel = formatDateLabel(now);
+    var sourceText = ((theme.source || '').trim() || (theme.name || '').trim());
+    sourceText = sourceText ? (sourceText + '\n\n' + instruction) : instruction;
 
-  var overwrote = false;
-  if(state.lastGenId && state.lastGenAt && (nowMs - state.lastGenAt) < REUSE_WINDOW_MS){
-    var existing = getEntry(state.lastGenId);
-    if(existing && !existing.hasAudio){
-      existing.number = num;
-      existing.title = title;
-      existing.date = dateLabel;
-      existing.time = nowMs;
-      existing.read = false;
-      overwrote = true;
-    }
-  }
-  if(!overwrote){
-    var entry = {
-      id: uid(),
-      number: num,
-      title: title,
-      date: dateLabel,
-      time: nowMs,
-      read: false,
-      hasAudio: false,
-      audioDuration: 0,
-      folderName: folder.name,
-      themeName: theme.name
-    };
-    state.history.unshift(entry);
-    state.lastGenId = entry.id;
-    state.nextNumber = num + 1;
-    if(state.history.length > MAX_HISTORY) trimHistory();
-  }
-  state.lastGenAt = nowMs;
-  save();
-  state.audioTab = 'new';
-  renderAll();
+    var now = new Date();
+    var nowMs = now.getTime();
+    var title = (theme.name || '(無題)') + ' / ' + (folder.name || 'フォルダ');
+    var dateLabel = formatDateLabel(now);
 
-  copyQuiet(promptText);
-
-  var showInstruction = function(){
-    showToast('音声生成後、ファイルをドロップまたは📥で取り込み', 'NotebookLM', function(){
-      openExternal(NOTEBOOK_URL);
-    }, 8000);
-  };
-
-  if(navigator.share){
-    navigator.share({ text: sourceText }).then(showInstruction).catch(function(err){
-      if(err && err.name !== 'AbortError'){
-        copyQuiet(sourceText);
-        showInstruction();
+    var overwrote = false;
+    if(state.lastGenId && state.lastGenAt && (nowMs - state.lastGenAt) < REUSE_WINDOW_MS){
+      var existing = getEntry(state.lastGenId);
+      if(existing && !existing.hasAudio && existing.title === title){
+        existing.number = num;
+        existing.date = dateLabel;
+        existing.time = nowMs;
+        existing.read = false;
+        overwrote = true;
       }
-    });
-  }else{
-    copyQuiet(sourceText);
-    showInstruction();
+    }
+    if(!overwrote){
+      var entry = {
+        id: uid(),
+        number: num,
+        title: title,
+        date: dateLabel,
+        time: nowMs,
+        read: false,
+        hasAudio: false,
+        audioDuration: 0,
+        folderName: folder.name,
+        themeName: theme.name
+      };
+      state.history.unshift(entry);
+      state.lastGenId = entry.id;
+      state.nextNumber = num + 1;
+      if(state.history.length > MAX_HISTORY) trimHistory();
+    }
+    state.lastGenAt = nowMs;
+    save();
+    renderAll();
+
+    copyQuiet(promptText);
+
+    if(navigator.share){
+      try{
+        await navigator.share({ text: sourceText });
+      }catch(err){
+        if(!err || err.name !== 'AbortError'){
+          copyQuiet(sourceText);
+        }
+      }
+    } else {
+      copyQuiet(sourceText);
+    }
+
+    showToast(
+      numTag(num) + ' を生成中に追加しました',
+      '生成中を見る',
+      function(){ switchMainTab('generating'); },
+      6000
+    );
+  } finally {
+    generatingLock = false;
+    if(shareBtn) shareBtn.disabled = false;
   }
 }
 
@@ -1433,8 +1557,9 @@ async function importAudioTo(entry, file){
   if(db) dbSavePos(entry.id, 0).catch(function(){});
 
   save();
-  state.audioTab = 'unplayed';
+  state.mainTab = 'unplayed';
   renderAll();
+  switchMainTab('unplayed');
   showToast(numTag(entry.number) + ' に音声を取り込みました');
 
   setTimeout(function(){ playEntry(entry.id); }, 300);
@@ -1454,7 +1579,6 @@ function pickFileFor(entryId){
   input.click();
 }
 
-/* ── Global audio drop (main UX) ── */
 async function handleAudioDrop(file){
   if(!file || !isAudioFile(file)){ showToast('音声ファイルではありません'); return; }
 
@@ -1468,7 +1592,6 @@ async function handleAudioDrop(file){
   }
 
   if(!target){
-    // 新規エントリー作成
     var assignNum = (num !== null) ? num : state.nextNumber;
     target = {
       id: uid(),
@@ -1763,8 +1886,8 @@ function clearPlayed(){
   showToast(played.length + ' 件を削除しました');
 }
 
-/* ── Tabs ── */
-function switchTab(name){
+/* ── Settings tabs ── */
+function switchSettingsTab(name){
   $$('.tab-btn').forEach(function(b){ b.classList.toggle('is-active', b.dataset.tab === name); });
   var panels = { folders: $('#tabFolders'), common: $('#tabCommon'), data: $('#tabData') };
   Object.keys(panels).forEach(function(k){
@@ -1774,11 +1897,208 @@ function switchTab(name){
   if(scroller) scroller.scrollTop = 0;
 }
 
+/* ── Settings folder drag (folders + themes) ── */
+function initSettingsDrag(){
+  document.addEventListener('pointerdown', function(e){
+    var grip = e.target.closest ? e.target.closest('[data-drag-folder], [data-drag-theme]') : null;
+    if(!grip) return;
+    var isFolder = grip.hasAttribute('data-drag-folder');
+    var container = isFolder ? grip.closest('[data-folder-id]') : grip.closest('[data-theme-id]');
+    if(!container) return;
+
+    var folderEl = isFolder ? container : container.closest('[data-folder-id]');
+    if(!folderEl) return;
+
+    e.preventDefault();
+    settingsDrag = {
+      kind: isFolder ? 'folder' : 'theme',
+      folderId: folderEl.dataset.folderId,
+      themeId: isFolder ? null : container.dataset.themeId,
+      startX: e.clientX,
+      startY: e.clientY,
+      active: false,
+      ghost: null,
+      originalEl: container,
+      dropTarget: null,
+      name: isFolder
+        ? (folderEl.querySelector('.folder-name-label') || {}).textContent
+        : (container.querySelector('.theme-name-label') || {}).textContent
+    };
+  });
+
+  document.addEventListener('pointermove', function(e){
+    if(!settingsDrag) return;
+    if(!settingsDrag.active){
+      var dist = Math.hypot(e.clientX - settingsDrag.startX, e.clientY - settingsDrag.startY);
+      if(dist < 6) return;
+      settingsDrag.active = true;
+      var ghost = document.createElement('div');
+      ghost.className = 'drag-ghost';
+      ghost.textContent = '⠿ ' + (settingsDrag.name || '(無題)');
+      document.body.appendChild(ghost);
+      settingsDrag.ghost = ghost;
+      settingsDrag.originalEl.style.opacity = '0.35';
+      if(navigator.vibrate){ try{ navigator.vibrate(10); }catch(e){} }
+    }
+    settingsDrag.ghost.style.left = (e.clientX + 12) + 'px';
+    settingsDrag.ghost.style.top = (e.clientY + 12) + 'px';
+    updateSettingsDropTarget(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('pointerup', function(e){
+    if(!settingsDrag) return;
+    if(settingsDrag.active){
+      performSettingsDrop();
+    }
+    cleanupSettingsDrag();
+  });
+
+  document.addEventListener('pointercancel', cleanupSettingsDrag);
+}
+
+function updateSettingsDropTarget(x, y){
+  $$('.drop-before, .drop-after, .drop-over').forEach(function(el){
+    el.classList.remove('drop-before', 'drop-after', 'drop-over');
+  });
+  settingsDrag.dropTarget = null;
+
+  var el = document.elementFromPoint(x, y);
+  if(!el) return;
+  if(settingsDrag.ghost && settingsDrag.ghost.contains(el)) return;
+
+  if(settingsDrag.kind === 'folder'){
+    var targetFolder = el.closest('.settings-folder');
+    if(!targetFolder) return;
+    if(targetFolder.dataset.folderId === settingsDrag.folderId) return;
+    var rect = targetFolder.getBoundingClientRect();
+    if(y < rect.top + rect.height / 2){
+      targetFolder.classList.add('drop-before');
+    } else {
+      targetFolder.classList.add('drop-after');
+    }
+    settingsDrag.dropTarget = { type: 'folder', el: targetFolder };
+    return;
+  }
+
+  // theme drag
+  var targetTheme = el.closest('[data-theme-id]');
+  if(targetTheme && targetTheme.dataset.themeId !== settingsDrag.themeId){
+    var r2 = targetTheme.getBoundingClientRect();
+    if(y < r2.top + r2.height / 2){
+      targetTheme.classList.add('drop-before');
+    } else {
+      targetTheme.classList.add('drop-after');
+    }
+    settingsDrag.dropTarget = { type: 'theme', el: targetTheme };
+    return;
+  }
+
+  var targetFolder2 = el.closest('.settings-folder');
+  if(targetFolder2){
+    targetFolder2.classList.add('drop-over');
+    settingsDrag.dropTarget = { type: 'folder-as-theme', el: targetFolder2 };
+  }
+}
+
+function performSettingsDrop(){
+  var dt = settingsDrag && settingsDrag.dropTarget;
+  if(!dt) return;
+
+  if(settingsDrag.kind === 'folder'){
+    var srcIdx = state.prompts.findIndex(function(p){ return p.id === settingsDrag.folderId; });
+    if(srcIdx === -1) return;
+    var targetFolderId = dt.el.dataset.folderId;
+    var targetIdx = state.prompts.findIndex(function(p){ return p.id === targetFolderId; });
+    if(targetIdx === -1) return;
+
+    var insertBefore = dt.el.classList.contains('drop-before');
+    var folder = state.prompts.splice(srcIdx, 1)[0];
+
+    var finalIdx;
+    if(insertBefore){
+      finalIdx = (srcIdx < targetIdx) ? targetIdx - 1 : targetIdx;
+    } else {
+      finalIdx = (srcIdx < targetIdx) ? targetIdx : targetIdx + 1;
+    }
+    finalIdx = Math.max(0, Math.min(state.prompts.length, finalIdx));
+    state.prompts.splice(finalIdx, 0, folder);
+    save();
+    renderFoldersEditor();
+    renderPromptTags();
+    return;
+  }
+
+  // theme drag
+  var srcFolder = state.prompts.find(function(p){ return p.id === settingsDrag.folderId; });
+  if(!srcFolder) return;
+  var srcThemeIdx = srcFolder.themes.findIndex(function(t){ return t.id === settingsDrag.themeId; });
+  if(srcThemeIdx === -1) return;
+  var theme = srcFolder.themes[srcThemeIdx];
+
+  if(dt.type === 'theme'){
+    var targetThemeId = dt.el.dataset.themeId;
+    var targetFolderId2 = dt.el.closest('[data-folder-id]').dataset.folderId;
+    var targetFolder = state.prompts.find(function(p){ return p.id === targetFolderId2; });
+    if(!targetFolder) return;
+    var targetThemeIdx = targetFolder.themes.findIndex(function(t){ return t.id === targetThemeId; });
+    if(targetThemeIdx === -1) return;
+
+    var insertBefore2 = dt.el.classList.contains('drop-before');
+
+    srcFolder.themes.splice(srcThemeIdx, 1);
+
+    var finalIdx2;
+    if(srcFolder === targetFolder){
+      if(insertBefore2){
+        finalIdx2 = (srcThemeIdx < targetThemeIdx) ? targetThemeIdx - 1 : targetThemeIdx;
+      } else {
+        finalIdx2 = (srcThemeIdx < targetThemeIdx) ? targetThemeIdx : targetThemeIdx + 1;
+      }
+      finalIdx2 = Math.max(0, Math.min(targetFolder.themes.length, finalIdx2));
+      targetFolder.themes.splice(finalIdx2, 0, theme);
+    } else {
+      finalIdx2 = insertBefore2 ? targetThemeIdx : targetThemeIdx + 1;
+      finalIdx2 = Math.max(0, Math.min(targetFolder.themes.length, finalIdx2));
+      targetFolder.themes.splice(finalIdx2, 0, theme);
+      if(state.selectedThemeId === theme.id){
+        state.selectedPromptId = targetFolder.id;
+      }
+    }
+  } else if(dt.type === 'folder-as-theme'){
+    var targetFolderId3 = dt.el.dataset.folderId;
+    var targetFolder3 = state.prompts.find(function(p){ return p.id === targetFolderId3; });
+    if(!targetFolder3) return;
+    if(targetFolder3 === srcFolder) return;
+    srcFolder.themes.splice(srcThemeIdx, 1);
+    targetFolder3.themes.push(theme);
+    if(state.selectedThemeId === theme.id){
+      state.selectedPromptId = targetFolder3.id;
+    }
+  }
+
+  save();
+  renderFoldersEditor();
+  renderPromptTags();
+  renderThemeTags();
+  renderShareBtn();
+}
+
+function cleanupSettingsDrag(){
+  if(settingsDrag){
+    if(settingsDrag.ghost && settingsDrag.ghost.parentNode) settingsDrag.ghost.parentNode.removeChild(settingsDrag.ghost);
+    if(settingsDrag.originalEl) settingsDrag.originalEl.style.opacity = '';
+  }
+  $$('.drop-before, .drop-after, .drop-over').forEach(function(el){
+    el.classList.remove('drop-before', 'drop-after', 'drop-over');
+  });
+  settingsDrag = null;
+}
+
 /* ── Export / Import ── */
 function exportData(){
   var data = {
     app: 'MyCast',
-    version: 2,
+    version: 3,
     exportedAt: new Date().toISOString(),
     commonPrompt: state.commonPrompt,
     prompts: state.prompts,
@@ -1796,7 +2116,7 @@ function exportData(){
     nextNumber: state.nextNumber,
     rate: state.rate,
     repeatMode: state.repeatMode,
-    audioTab: state.audioTab
+    mainTab: state.mainTab
   };
   var json = JSON.stringify(data, null, 2);
   var blob = new Blob([json], { type: 'application/json' });
@@ -1859,7 +2179,7 @@ function importData(file){
     state.nextNumber = (typeof data.nextNumber === 'number') ? data.nextNumber : 1;
     state.rate = (typeof data.rate === 'number') ? data.rate : 1;
     state.repeatMode = (typeof data.repeatMode === 'string') ? data.repeatMode : 'off';
-    state.audioTab = (typeof data.audioTab === 'string') ? data.audioTab : 'new';
+    state.mainTab = (typeof data.mainTab === 'string') ? data.mainTab : 'new';
 
     migrateSchema();
     normalize();
@@ -1869,164 +2189,11 @@ function importData(file){
     renderCommonPrompt();
     setRate(state.rate);
     setRepeat(state.repeatMode);
+    switchMainTab(state.mainTab);
     showToast('インポートしました');
   };
   reader.onerror = function(){ showToast('読み込めませんでした'); };
   reader.readAsText(file);
-}
-
-/* ── Theme drag & drop (pointer events based) ── */
-function initThemeDrag(){
-  var settings = $('#settingsModal');
-  if(!settings) return;
-
-  document.addEventListener('pointerdown', function(e){
-    var grip = e.target.closest ? e.target.closest('[data-theme-grip]') : null;
-    if(!grip) return;
-    var themeCard = grip.closest('[data-theme-card]');
-    if(!themeCard) return;
-    var folderCard = themeCard.closest('[data-prompt-card]');
-    if(!folderCard) return;
-
-    e.preventDefault();
-    themeDrag = {
-      themeId: themeCard.dataset.themeCard,
-      promptId: folderCard.dataset.promptCard,
-      startX: e.clientX,
-      startY: e.clientY,
-      active: false,
-      ghost: null,
-      themeCard: themeCard,
-      dropTarget: null
-    };
-  });
-
-  document.addEventListener('pointermove', function(e){
-    if(!themeDrag) return;
-    if(!themeDrag.active){
-      var dist = Math.hypot(e.clientX - themeDrag.startX, e.clientY - themeDrag.startY);
-      if(dist < 6) return;
-      themeDrag.active = true;
-
-      var ghost = document.createElement('div');
-      ghost.className = 'drag-ghost';
-      var nameInput = themeDrag.themeCard.querySelector('.theme-name-input');
-      ghost.textContent = '⠿ ' + (nameInput ? (nameInput.value || '(無題)') : '(無題)');
-      ghost.style.left = '0px';
-      ghost.style.top = '0px';
-      document.body.appendChild(ghost);
-      themeDrag.ghost = ghost;
-      themeDrag.themeCard.style.opacity = '0.3';
-      if(navigator.vibrate){ try{ navigator.vibrate(10); }catch(e){} }
-    }
-
-    themeDrag.ghost.style.left = (e.clientX + 12) + 'px';
-    themeDrag.ghost.style.top = (e.clientY + 12) + 'px';
-
-    updateThemeDropTarget(e.clientX, e.clientY);
-  });
-
-  document.addEventListener('pointerup', function(e){
-    if(!themeDrag) return;
-    if(themeDrag.active){
-      handleThemeDrop(e.clientX, e.clientY);
-    }
-    cleanupThemeDrag();
-  });
-
-  document.addEventListener('pointercancel', cleanupThemeDrag);
-}
-
-function updateThemeDropTarget(x, y){
-  $$('.theme-drop-over, .theme-drop-before, .theme-drop-after').forEach(function(el){
-    el.classList.remove('theme-drop-over', 'theme-drop-before', 'theme-drop-after');
-  });
-  themeDrag.dropTarget = null;
-
-  var el = document.elementFromPoint(x, y);
-  if(!el) return;
-  if(themeDrag.ghost && themeDrag.ghost.contains(el)) return;
-
-  var themeEl = el.closest('[data-theme-card]');
-  if(themeEl && themeEl !== themeDrag.themeCard){
-    var rect = themeEl.getBoundingClientRect();
-    if(y < rect.top + rect.height / 2){
-      themeEl.classList.add('theme-drop-before');
-    } else {
-      themeEl.classList.add('theme-drop-after');
-    }
-    themeDrag.dropTarget = { type: 'theme', el: themeEl };
-    return;
-  }
-
-  var folderEl = el.closest('[data-prompt-card]');
-  if(folderEl){
-    folderEl.classList.add('theme-drop-over');
-    themeDrag.dropTarget = { type: 'folder', el: folderEl };
-  }
-}
-
-function handleThemeDrop(x, y){
-  var dt = themeDrag && themeDrag.dropTarget;
-  if(!dt) return;
-
-  var srcFolder = state.prompts.find(function(p){ return p.id === themeDrag.promptId; });
-  if(!srcFolder) return;
-  var srcIdx = srcFolder.themes.findIndex(function(t){ return t.id === themeDrag.themeId; });
-  if(srcIdx === -1) return;
-  var theme = srcFolder.themes[srcIdx];
-
-  if(dt.type === 'theme'){
-    var targetThemeId = dt.el.dataset.themeCard;
-    var targetFolderId = dt.el.closest('[data-prompt-card]').dataset.promptCard;
-    var targetFolder = state.prompts.find(function(p){ return p.id === targetFolderId; });
-    if(!targetFolder) return;
-    var targetIdx = targetFolder.themes.findIndex(function(t){ return t.id === targetThemeId; });
-    if(targetIdx === -1) return;
-
-    var insertBefore = dt.el.classList.contains('theme-drop-before');
-
-    srcFolder.themes.splice(srcIdx, 1);
-
-    var finalIdx;
-    if(srcFolder === targetFolder){
-      if(insertBefore){
-        finalIdx = (srcIdx < targetIdx) ? targetIdx - 1 : targetIdx;
-      } else {
-        finalIdx = (srcIdx < targetIdx) ? targetIdx : targetIdx + 1;
-      }
-      finalIdx = Math.max(0, Math.min(targetFolder.themes.length, finalIdx));
-      targetFolder.themes.splice(finalIdx, 0, theme);
-    } else {
-      finalIdx = insertBefore ? targetIdx : targetIdx + 1;
-      finalIdx = Math.max(0, Math.min(targetFolder.themes.length, finalIdx));
-      targetFolder.themes.splice(finalIdx, 0, theme);
-    }
-  } else if(dt.type === 'folder'){
-    var targetFolderId2 = dt.el.dataset.promptCard;
-    var targetFolder2 = state.prompts.find(function(p){ return p.id === targetFolderId2; });
-    if(!targetFolder2) return;
-    if(targetFolder2 === srcFolder) return;
-    srcFolder.themes.splice(srcIdx, 1);
-    targetFolder2.themes.push(theme);
-  }
-
-  save();
-  renderFoldersEditor();
-  renderPromptTags();
-  renderThemeTags();
-  showToast('移動しました');
-}
-
-function cleanupThemeDrag(){
-  if(themeDrag){
-    if(themeDrag.ghost && themeDrag.ghost.parentNode) themeDrag.ghost.parentNode.removeChild(themeDrag.ghost);
-    if(themeDrag.themeCard) themeDrag.themeCard.style.opacity = '';
-  }
-  $$('.theme-drop-over, .theme-drop-before, .theme-drop-after').forEach(function(el){
-    el.classList.remove('theme-drop-over', 'theme-drop-before', 'theme-drop-after');
-  });
-  themeDrag = null;
 }
 
 /* ── Init ── */
@@ -2046,7 +2213,11 @@ document.addEventListener('DOMContentLoaded', async function(){
   }
 
   initTagInteractions();
-  initThemeDrag();
+  initSettingsDrag();
+  bindEditModalInputs();
+
+  // 初期タブ
+  switchMainTab(state.mainTab);
   renderAll();
   setRate(state.rate);
   setRepeat(state.repeatMode);
@@ -2106,7 +2277,7 @@ document.addEventListener('DOMContentLoaded', async function(){
   if(settingsBtn) settingsBtn.addEventListener('click', function(){
     renderFoldersEditor();
     renderCommonPrompt();
-    switchTab('folders');
+    switchSettingsTab('folders');
     $('#settingsModal').classList.add('show');
   });
   var closeBtn = $('#closeSettings');
@@ -2117,7 +2288,7 @@ document.addEventListener('DOMContentLoaded', async function(){
   });
 
   $$('.tab-btn').forEach(function(b){
-    b.addEventListener('click', function(e){ switchTab(e.currentTarget.dataset.tab); });
+    b.addEventListener('click', function(e){ switchSettingsTab(e.currentTarget.dataset.tab); });
   });
 
   // ─── 共通プロンプト ───
@@ -2130,28 +2301,22 @@ document.addEventListener('DOMContentLoaded', async function(){
   // ─── フォルダ追加 ───
   var addFolderBtn = $('#addFolderBtn');
   if(addFolderBtn) addFolderBtn.addEventListener('click', function(){
-    var f = { id: uid(), name: '', text: state.commonPrompt || DEFAULT_PROMPT,
-      themes: [{ id: uid(), name: '', source: '' }] };
+    var f = { id: uid(), name: '新規フォルダ', text: state.commonPrompt || DEFAULT_PROMPT,
+      themes: [{ id: uid(), name: '新規テーマ', source: '' }] };
     state.prompts.push(f);
     save();
     renderFoldersEditor();
     renderPromptTags();
-    // スクロールして見せる
-    setTimeout(function(){
-      var el = document.querySelector('[data-prompt-card="' + f.id + '"]');
-      if(el) try{ el.scrollIntoView({ behavior:'smooth', block:'center' }); }catch(e){}
-    }, 100);
+    setTimeout(function(){ openFolderEdit(f.id); }, 80);
   });
 
-  // ─── オーディオタブ ───
-  var audioTabsEl = $('#audioTabs');
-  if(audioTabsEl){
-    audioTabsEl.addEventListener('click', function(e){
-      var btn = e.target.closest('.audio-tab');
+  // ─── メインタブ ───
+  var mainTabsEl = $('#mainTabs');
+  if(mainTabsEl){
+    mainTabsEl.addEventListener('click', function(e){
+      var btn = e.target.closest('.main-tab');
       if(!btn) return;
-      state.audioTab = btn.dataset.tab;
-      save();
-      renderHistory();
+      switchMainTab(btn.dataset.tab);
     });
   }
 
@@ -2160,9 +2325,10 @@ document.addEventListener('DOMContentLoaded', async function(){
   if(clearPlayedBtn) clearPlayedBtn.addEventListener('click', clearPlayed);
 
   // ─── 履歴操作 ───
-  var historyListEl = $('#historyList');
-  if(historyListEl){
-    historyListEl.addEventListener('click', function(e){
+  ['#listGenerating', '#listUnplayed', '#listPlayed'].forEach(function(sel){
+    var el = $(sel);
+    if(!el) return;
+    el.addEventListener('click', function(e){
       var del = e.target.closest('.history-del');
       if(del){
         var r = del.closest('.history-item');
@@ -2177,7 +2343,7 @@ document.addEventListener('DOMContentLoaded', async function(){
       if(entry.hasAudio) playEntry(id);
       else pickFileFor(id);
     });
-  }
+  });
 
   // ─── プレイヤー ───
   if(playBtn) playBtn.addEventListener('click', togglePlay);
@@ -2265,7 +2431,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
   setupMediaSession();
 
-  // ─── ドラッグ&ドロップ (音声) ───
+  // ─── ドラッグ&ドロップ（音声） ───
   var dragDepth = 0;
   var overlay = $('#dropOverlay');
   window.addEventListener('dragenter', function(e){
@@ -2298,11 +2464,6 @@ document.addEventListener('DOMContentLoaded', async function(){
     if(now - lastTouch <= 300) e.preventDefault();
     lastTouch = now;
   }, { passive:false });
-
-  // 生成中タブへの自動遷移用に定期リフレッシュ（1分毎）
-  setInterval(function(){
-    if(document.visibilityState === 'visible') renderHistory();
-  }, 60000);
 });
 
 })();
