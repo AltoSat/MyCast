@@ -17,7 +17,7 @@
   :root{
     --bg:#0a0a0c; --bg2:#131316; --card:#1c1c1e; --card2:#2c2c2e;
     --text:#fff; --text2:#8e8e93; --text3:#48484a;
-    --accent:#0a84ff; --accent2:#5e5ce6; --accent-soft:rgba(10,132,255,.15);
+    --accent:#6c7bff; --accent2:#b06cff; --accent-soft:rgba(108,123,255,.15);
     --grad:linear-gradient(135deg,#5b6cff,#9a6cff);
     --grad-soft:linear-gradient(140deg,rgba(91,108,255,.14),rgba(176,108,255,.06));
     --green:#30d158; --red:#ff453a;
@@ -39,7 +39,7 @@
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     background:
-      radial-gradient(120% 55% at 50% -12%, rgba(91,108,255,.16), transparent 62%),
+      radial-gradient(120% 55% at 50% -12%, rgba(108,123,255,.16), transparent 62%),
       radial-gradient(90% 45% at 105% 108%, rgba(176,108,255,.10), transparent 62%);
   }
   .app-wrap{position:relative;z-index:1}
@@ -107,7 +107,6 @@
   .genBtn:disabled{opacity:.55;cursor:default}
   .genBtn .icon{display:block;font-size:32px;line-height:1;margin-bottom:6px;color:#fff}
   .genBtn .main{display:block;font-size:17px;font-weight:700;line-height:1.4;color:#fff}
-  .genBtn .sub{display:block;font-size:11.5px;line-height:1.4;margin-top:4px;color:#fff;opacity:.9}
 
   /* ── Clear played ── */
   .clear-played-wrap{margin-bottom:10px}
@@ -125,12 +124,12 @@
     cursor:pointer;position:relative;overflow:hidden;
   }
   .history-item:active{transform:scale(.985)}
-  .history-item.playing{background:rgba(91,108,255,.15);border-color:rgba(91,108,255,.38)}
+  .history-item.playing{background:rgba(108,123,255,.15);border-color:rgba(108,123,255,.38)}
   .history-item.read:not(.playing){opacity:.55}
   .history-item .thumb{
     flex:0 0 42px;width:42px;height:42px;border-radius:12px;
     display:flex;align-items:center;justify-content:center;
-    background:var(--grad-soft);border:1px solid rgba(91,108,255,.20);
+    background:var(--grad-soft);border:1px solid rgba(108,123,255,.20);
     color:#c8cfff;font-size:15px;font-weight:700;cursor:pointer;
     -webkit-appearance:none;appearance:none;padding:0;font-family:inherit;
     transition:transform .12s,background .12s;
@@ -219,14 +218,14 @@
     color:var(--text);font-size:13px;font-weight:700;letter-spacing:-.02em;
     display:grid;place-items:center;padding:0;
     transition:transform .12s,background .12s;font-family:inherit}
-  .skipBtn:active{transform:scale(.9);background:rgba(91,108,255,.22)}
+  .skipBtn:active{transform:scale(.9);background:rgba(108,123,255,.22)}
 
   .pfoot{display:flex;align-items:center;gap:8px;padding:0 2px}
   .repBtn{position:relative;width:34px;height:34px;border-radius:50%;flex:0 0 auto;
     background:transparent;border:none;color:var(--text2);
     display:grid;place-items:center;padding:0;transition:color .15s,background .15s}
   .repBtn svg{width:17px;height:17px}
-  .repBtn.on{color:#c8cfff;background:rgba(91,108,255,.18)}
+  .repBtn.on{color:#c8cfff;background:rgba(108,123,255,.18)}
   .repNum{position:absolute;bottom:2px;right:2px;font-size:8px;font-weight:800;color:#fff;
     background:var(--accent2);width:11px;height:11px;border-radius:50%;
     display:none;place-items:center;line-height:1}
@@ -244,7 +243,7 @@
   .miniBtn{height:26px;padding:0 9px;border-radius:8px;border:none;
     background:rgba(255,255,255,.08);color:var(--text);
     font-size:11px;font-weight:650;flex:0 0 auto;font-family:inherit}
-  .miniBtn:active{background:rgba(91,108,255,.28)}
+  .miniBtn:active{background:rgba(108,123,255,.28)}
 
   /* ── Modal (settings) ── */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;z-index:100;
@@ -273,12 +272,13 @@
     border-radius:12px;color:var(--text);padding:12px;font-size:15px;font-family:inherit;
     resize:vertical;outline:none;box-sizing:border-box;-webkit-appearance:none;line-height:1.5}
   textarea:focus,input[type="text"]:focus{border-color:var(--accent)}
+  #commonPromptInput{min-height:280px}
 
   .note{color:var(--text3);font-size:12px;line-height:1.6;margin:0 0 12px}
   .data-btn{display:block;width:100%;padding:14px;border-radius:12px;background:var(--accent-soft);
     color:var(--accent);border:1px solid var(--border);font-size:15px;font-weight:600;
     font-family:inherit;cursor:pointer;margin-bottom:10px;-webkit-appearance:none;appearance:none}
-  .data-btn:active{background:rgba(10,132,255,.28)}
+  .data-btn:active{background:rgba(108,123,255,.28)}
 
   /* ── Settings folder view (compact) ── */
   .settings-folder{
@@ -291,7 +291,7 @@
   }
   .settings-folder.drop-before{box-shadow:0 -3px 0 0 var(--accent)}
   .settings-folder.drop-after{box-shadow:0 3px 0 0 var(--accent)}
-  .settings-folder.drop-over{box-shadow:0 0 0 2px var(--accent);background:rgba(91,108,255,.08)}
+  .settings-folder.drop-over{box-shadow:0 0 0 2px var(--accent);background:rgba(108,123,255,.08)}
 
   .folder-head-row{
     display:flex;align-items:center;gap:8px;padding:12px;
@@ -299,14 +299,6 @@
     -webkit-user-select:none;user-select:none;
   }
   .folder-head-row:active{background:rgba(255,255,255,.04)}
-
-  .drag-grip{
-    width:32px;height:32px;display:flex;align-items:center;justify-content:center;
-    color:var(--text3);cursor:grab;touch-action:none;font-size:16px;border-radius:6px;
-    flex-shrink:0;-webkit-user-select:none;user-select:none;
-    transition:background .12s,color .12s;
-  }
-  .drag-grip:active{background:var(--accent-soft);color:var(--accent);cursor:grabbing}
 
   .folder-name-label{
     flex:1;font-size:15px;font-weight:700;
@@ -317,6 +309,14 @@
     padding:2px 8px;border-radius:8px;flex-shrink:0;
     font-variant-numeric:tabular-nums;
   }
+  .drag-grip{
+    width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+    color:var(--text3);cursor:grab;touch-action:none;font-size:16px;border-radius:6px;
+    flex-shrink:0;-webkit-user-select:none;user-select:none;
+    transition:background .12s,color .12s;
+    order:10;
+  }
+  .drag-grip:active{background:var(--accent-soft);color:var(--accent);cursor:grabbing}
 
   .themes-list{padding:0 12px 12px}
   .theme-item{
@@ -328,7 +328,8 @@
   .theme-item:active{background:rgba(255,255,255,.06)}
   .theme-item.drop-before{box-shadow:0 -2px 0 0 var(--accent)}
   .theme-item.drop-after{box-shadow:0 2px 0 0 var(--accent)}
-  .theme-item .drag-grip{width:28px;height:28px;font-size:14px}
+  .theme-item .drag-grip{width:28px;height:28px;font-size:14px;order:10}
+  .theme-text-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
   .theme-name-label{
     flex:1;font-size:13px;font-weight:500;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;
@@ -338,7 +339,6 @@
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     max-width:100%;
   }
-  .theme-text-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 
   .empty-themes{
     margin-left:24px;padding:8px;color:var(--text3);font-size:12px;text-align:center;
@@ -355,6 +355,32 @@
   .add-btn{width:100%;padding:14px;border-radius:12px;background:var(--accent-soft);color:var(--accent);
     border:1px dashed var(--accent);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;
     -webkit-appearance:none;appearance:none}
+
+  /* ── Common themes toggle ── */
+  .common-themes-toggle{
+    display:flex;align-items:center;justify-content:space-between;
+    width:100%;padding:12px;border-radius:10px;background:var(--card);
+    border:1px solid var(--border);color:var(--text);font-family:inherit;
+    font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px;
+    -webkit-appearance:none;appearance:none;
+  }
+  .common-themes-toggle:active{background:var(--card2)}
+  .common-themes-toggle .arrow{transition:transform .2s;font-size:12px;color:var(--text2)}
+  .common-themes-toggle[aria-expanded="true"] .arrow{transform:rotate(180deg)}
+  .common-themes-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+  .common-theme-row{
+    display:flex;align-items:center;gap:8px;padding:10px 12px;
+    background:var(--bg2);border-radius:10px;border:1px solid var(--border);
+  }
+  .common-theme-folder{
+    font-size:11px;color:var(--text2);background:var(--card);
+    padding:2px 8px;border-radius:6px;flex-shrink:0;
+    max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .common-theme-name{
+    flex:1;font-size:13px;font-weight:500;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;
+  }
 
   /* ── Edit modal (large sheet) ── */
   .edit-modal{z-index:110}
@@ -387,9 +413,9 @@
     display:flex;align-items:center;gap:10px}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
   .toast span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .toastAction{border:none;background:rgba(91,108,255,.32);color:#c8cfff;
+  .toastAction{border:none;background:rgba(108,123,255,.32);color:#c8cfff;
     font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:8px;flex:0 0 auto;white-space:nowrap}
-  .toastAction:active{background:rgba(91,108,255,.5)}
+  .toastAction:active{background:rgba(108,123,255,.5)}
 
   /* ── Drop overlay ── */
   .drop-overlay{position:fixed;inset:0;z-index:80;display:grid;place-items:center;
@@ -397,7 +423,7 @@
     opacity:0;pointer-events:none;transition:opacity .18s}
   .drop-overlay.show{opacity:1}
   .drop-overlay div{padding:44px 56px;border:2px dashed rgba(140,150,255,.75);border-radius:28px;
-    font-size:17px;font-weight:700;color:#cfd4ff;background:rgba(91,108,255,.10);
+    font-size:17px;font-weight:700;color:#cfd4ff;background:rgba(108,123,255,.10);
     text-align:center;line-height:1.6}
   .drop-overlay small{display:block;font-size:12px;font-weight:500;color:#a8b0d8;margin-top:8px}
 </style>
@@ -427,7 +453,7 @@
     <!-- 新規（ワークフロー） -->
     <div id="panelNew" class="main-panel">
       <section class="section">
-        <div class="step-label is-active"><span class="step-num">1</span>プロンプトフォルダ<span class="hint">長押しで編集</span></div>
+        <div class="step-label is-active"><span class="step-num">1</span>プロンプト<span class="hint">長押しで編集</span></div>
         <div id="promptTags" class="tags"></div>
       </section>
 
@@ -441,7 +467,6 @@
         <button id="shareBtn" type="button" class="genBtn" aria-label="音声解説を生成する">
           <span class="icon">🎙</span>
           <span class="main" id="shareBtnTitle">【001】音声解説を生成する</span>
-          <span class="sub">プロンプトをコピー &amp; ソースを共有</span>
         </button>
       </section>
     </div>
@@ -511,29 +536,34 @@
     </div>
 
     <div class="tabs">
-      <button type="button" class="tab-btn is-active" data-tab="folders">フォルダ</button>
+      <button type="button" class="tab-btn is-active" data-tab="folders">個別プロンプト</button>
       <button type="button" class="tab-btn" data-tab="common">共通プロンプト</button>
       <button type="button" class="tab-btn" data-tab="data">データ</button>
     </div>
 
     <div class="tab-scroll">
       <div id="tabFolders" class="tab-panel">
-        <p class="note">⠿ をドラッグで並び替え・別フォルダへ移動。行をタップで編集。</p>
+        <p class="note">⠿ をドラッグで並び替え・別プロンプトへ移動。行をタップで編集。</p>
         <div id="foldersList"></div>
-        <button id="addFolderBtn" type="button" class="add-btn" style="margin-top:12px">+ フォルダを追加</button>
+        <button id="addFolderBtn" type="button" class="add-btn" style="margin-top:12px">+ 個別プロンプトを追加</button>
       </div>
 
       <div id="tabCommon" class="tab-panel" hidden>
         <div class="field">
-          <label>共通プロンプト<span class="hint2">各フォルダのプロンプトと結合してコピーされます</span></label>
-          <textarea id="commonPromptInput" rows="6" placeholder="共通プロンプト本文（{theme} でテーマ名を差し込み）"></textarea>
+          <label>共通プロンプト<span class="hint2">各個別プロンプトと結合してコピーされます</span></label>
+          <textarea id="commonPromptInput" rows="12" placeholder="共通プロンプト本文（{theme} でテーマ名を差し込み）"></textarea>
         </div>
+        <button type="button" class="common-themes-toggle" id="commonThemesToggle" aria-expanded="false">
+          <span>テーマ一覧を表示</span>
+          <span class="arrow">▼</span>
+        </button>
+        <div id="commonThemesList" class="common-themes-list" hidden></div>
       </div>
 
       <div id="tabData" class="tab-panel" hidden>
         <div class="field">
           <label>バックアップ</label>
-          <p class="note">フォルダ・プロンプト・履歴を JSON ファイルに保存できます。音声ファイル本体は含まれません。</p>
+          <p class="note">個別プロンプト・テーマ・履歴を JSON ファイルに保存できます。音声ファイル本体は含まれません。</p>
           <button id="exportBtn" type="button" class="data-btn">エクスポート（ファイルに保存）</button>
           <button id="importBtn" type="button" class="data-btn">インポート（ファイルから復元）</button>
           <input id="importFile" type="file" accept=".json,application/json" hidden>
@@ -543,7 +573,7 @@
   </div>
 </div>
 
-<!-- 編集モーダル（フォルダ／テーマ） -->
+<!-- 編集モーダル（個別プロンプト／テーマ） -->
 <div id="editModal" class="modal edit-modal">
   <div class="edit-modal-card">
     <div class="modal-head">
@@ -567,7 +597,7 @@
 </div>
 
 <div class="drop-overlay" id="dropOverlay">
-  <div>音声ファイルをドロップ<small>ファイル名の【番号】で自動マッチします</small></div>
+  <div>音声ファイルをドロップ<small>複数ファイル対応・【番号】で自動マッチ</small></div>
 </div>
 <div id="toast" class="toast"></div>
 
@@ -579,11 +609,11 @@
 'use strict';
 
 /* ═════════════════════════════════════════════
-   MyCast — 統合版 v3
+   MyCast — 統合版 v4
    ═════════════════════════════════════════════ */
 
-var STORAGE_KEY = 'mycast.v3';
-var LEGACY_KEYS = ['mycast.v2','mycast.v1','nblink.v9','nblink.v8','nblink.v7'];
+var STORAGE_KEY = 'mycast.v4';
+var LEGACY_KEYS = ['mycast.v3','mycast.v2','mycast.v1','nblink.v9','nblink.v8','nblink.v7'];
 var MAX_HISTORY = 200;
 var REUSE_WINDOW_MS = 30000;
 var NOTEBOOK_URL = 'https://notebooklm.google.com/';
@@ -607,7 +637,8 @@ var state = {
   nextNumber: 1,
   rate: 1,
   repeatMode: 'off',
-  mainTab: 'new'
+  mainTab: 'new',
+  commonThemesOpen: false
 };
 
 var currentId = null;
@@ -619,6 +650,7 @@ var suppressClickUntil = 0;
 var db = null;
 var ICON_ABS = '';
 var settingsDrag = null;
+var settingsAutoScrollRAF = null;
 var editing = { type: null, folderId: null, themeId: null };
 var generatingLock = false;
 
@@ -849,6 +881,7 @@ function normalize(){
   if(typeof state.rate !== 'number' || state.rate < 0.5 || state.rate > 3) state.rate = 1;
   if(['off','all','one'].indexOf(state.repeatMode) === -1) state.repeatMode = 'off';
   if(TABS.indexOf(state.mainTab) === -1) state.mainTab = 'new';
+  if(typeof state.commonThemesOpen !== 'boolean') state.commonThemesOpen = false;
 
   var selectedFolder = state.prompts.find(function(p){ return p.id === state.selectedPromptId; });
   if(!selectedFolder){
@@ -899,6 +932,7 @@ function load(){
     if(typeof parsed.nextNumber === 'number') state.nextNumber = parsed.nextNumber;
     if(typeof parsed.rate === 'number') state.rate = parsed.rate;
     if(typeof parsed.repeatMode === 'string') state.repeatMode = parsed.repeatMode;
+    if(typeof parsed.commonThemesOpen === 'boolean') state.commonThemesOpen = parsed.commonThemesOpen;
     var tab = parsed.mainTab || parsed.audioTab;
     if(typeof tab === 'string') state.mainTab = tab;
   }
@@ -931,7 +965,7 @@ function getEntryTab(entry){
   return 'generating';
 }
 
-/* ── Render main tabs ── */
+/* ── Main tabs ── */
 function updateMainTabCounts(){
   var counts = { generating: 0, unplayed: 0, played: 0 };
   state.history.forEach(function(h){
@@ -984,7 +1018,7 @@ function renderThemeTags(){
   var folder = getSelectedFolder();
   el.innerHTML = '';
   if(!folder){
-    el.innerHTML = '<div class="empty">フォルダがありません</div>';
+    el.innerHTML = '<div class="empty">個別プロンプトがありません</div>';
     return;
   }
   if(!folder.themes.length){
@@ -1009,7 +1043,7 @@ function renderShareBtn(){
   if(btn) btn.setAttribute('aria-label', label);
 }
 
-/* ── History rendering ── */
+/* ── History ── */
 var SVG_IMPORT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>';
 var SVG_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72c0 .8.87 1.29 1.56.9l10.9-6.86a1.05 1.05 0 0 0 0-1.8L9.56 4.24A1.05 1.05 0 0 0 8 5.14Z"/></svg>';
 
@@ -1104,6 +1138,35 @@ function renderCommonPrompt(){
   if(document.activeElement !== el) el.value = state.commonPrompt;
 }
 
+function renderCommonThemes(){
+  var listEl = $('#commonThemesList'); if(!listEl) return;
+  listEl.innerHTML = '';
+  var hasAny = false;
+  state.prompts.forEach(function(folder){
+    folder.themes.forEach(function(theme){
+      hasAny = true;
+      var row = document.createElement('div');
+      row.className = 'common-theme-row';
+      row.innerHTML =
+        '<span class="common-theme-folder">' + esc(folder.name || '(無題)') + '</span>' +
+        '<span class="common-theme-name">' + esc(theme.name || '(無題)') + '</span>';
+      listEl.appendChild(row);
+    });
+  });
+  if(!hasAny){
+    listEl.innerHTML = '<div class="empty">テーマがありません</div>';
+  }
+}
+
+function updateCommonThemesToggle(){
+  var toggle = $('#commonThemesToggle');
+  var list = $('#commonThemesList');
+  if(!toggle || !list) return;
+  toggle.setAttribute('aria-expanded', state.commonThemesOpen ? 'true' : 'false');
+  toggle.querySelector('span').textContent = state.commonThemesOpen ? 'テーマ一覧を隠す' : 'テーマ一覧を表示';
+  list.hidden = !state.commonThemesOpen;
+}
+
 function renderFoldersEditor(){
   var el = $('#foldersList'); if(!el) return;
   el.innerHTML = '';
@@ -1119,11 +1182,11 @@ function renderFoldersEditor(){
         var preview = (t.source || '').trim().split('\n')[0].slice(0, 40);
         return (
           '<div class="theme-item" data-theme-id="' + esc(t.id) + '" data-parent-folder="' + esc(folder.id) + '">' +
-            '<div class="drag-grip" data-drag-theme aria-label="ドラッグ">⠿</div>' +
             '<div class="theme-text-col">' +
               '<div class="theme-name-label">' + esc(t.name || '(無題)') + '</div>' +
               (preview ? '<div class="theme-source-preview">' + esc(preview) + '</div>' : '') +
             '</div>' +
+            '<div class="drag-grip" data-drag-theme aria-label="ドラッグ">⠿</div>' +
           '</div>'
         );
       }).join('');
@@ -1133,9 +1196,9 @@ function renderFoldersEditor(){
 
     card.innerHTML =
       '<div class="folder-head-row" data-folder-head>' +
-        '<div class="drag-grip" data-drag-folder aria-label="ドラッグ">⠿</div>' +
         '<div class="folder-name-label">' + esc(folder.name || '(無題)') + '</div>' +
         '<div class="folder-count-label">' + folder.themes.length + '</div>' +
+        '<div class="drag-grip" data-drag-folder aria-label="ドラッグ">⠿</div>' +
       '</div>' +
       '<div class="themes-list">' +
         themesHtml +
@@ -1163,7 +1226,6 @@ function renderFoldersEditor(){
       save();
       renderFoldersEditor();
       if(folder.id === state.selectedPromptId) renderThemeTags();
-      // 追加後すぐに編集モーダルを開く
       setTimeout(function(){ openThemeEdit(folder.id, newTheme.id); }, 60);
     });
 
@@ -1171,25 +1233,25 @@ function renderFoldersEditor(){
   });
 }
 
-/* ── Edit modal (folder/theme) ── */
+/* ── Edit modal ── */
 function openFolderEdit(folderId){
   var folder = state.prompts.find(function(p){ return p.id === folderId; });
   if(!folder) return;
 
   editing = { type: 'folder', folderId: folderId, themeId: null };
 
-  $('#editModalTitle').textContent = 'フォルダを編集';
+  $('#editModalTitle').textContent = '個別プロンプトを編集';
   $('#editModalName').value = folder.name || '';
   $('#editModalTextLabel').textContent = 'プロンプト本文';
   $('#editModalText').value = folder.text || '';
-  $('#editModalText').placeholder = 'このフォルダのプロンプト本文（{theme} でテーマ名を差し込み）';
+  $('#editModalText').placeholder = 'この個別プロンプトの本文（{theme} でテーマ名を差し込み）';
 
   var delBtn = $('#editModalDelete');
-  delBtn.textContent = 'このフォルダを削除';
+  delBtn.textContent = 'この個別プロンプトを削除';
   delBtn.style.display = '';
   delBtn.onclick = function(){
-    if(state.prompts.length <= 1){ showToast('最後のフォルダは削除できません'); return; }
-    if(!confirm('このフォルダと中のテーマをすべて削除しますか？')) return;
+    if(state.prompts.length <= 1){ showToast('最後の個別プロンプトは削除できません'); return; }
+    if(!confirm('この個別プロンプトと中のテーマをすべて削除しますか？')) return;
     state.prompts = state.prompts.filter(function(p){ return p.id !== folderId; });
     if(state.selectedPromptId === folderId){
       state.selectedPromptId = state.prompts[0].id;
@@ -1201,7 +1263,8 @@ function openFolderEdit(folderId){
     renderPromptTags();
     renderThemeTags();
     renderShareBtn();
-    showToast('フォルダを削除しました');
+    renderCommonThemes();
+    showToast('個別プロンプトを削除しました');
   };
 
   $('#editModal').classList.add('show');
@@ -1235,6 +1298,7 @@ function openThemeEdit(folderId, themeId){
     renderFoldersEditor();
     if(folder.id === state.selectedPromptId) renderThemeTags();
     renderShareBtn();
+    renderCommonThemes();
     showToast('テーマを削除しました');
   };
 
@@ -1280,7 +1344,7 @@ function bindEditModalInputs(){
   });
 }
 
-/* ── Long-press to edit (main screen) ── */
+/* ── Long-press to edit ── */
 function openEditFromMain(kind, id){
   if(kind === 'folder'){
     openFolderEdit(id);
@@ -1417,7 +1481,7 @@ async function handleGenerate(){
   if(generatingLock) return;
   var folder = getSelectedFolder();
   var theme = getSelectedTheme();
-  if(!folder){ showToast('先にプロンプトフォルダを選択してください'); return; }
+  if(!folder){ showToast('先にプロンプトを選択してください'); return; }
   if(!theme){ showToast('先にテーマを選択してください'); return; }
 
   generatingLock = true;
@@ -1425,32 +1489,41 @@ async function handleGenerate(){
   if(shareBtn) shareBtn.disabled = true;
 
   try{
-    var num = state.nextNumber;
-    var instruction = 'タイトルの頭に【' + formatNum(num) + '】を付けてください。';
+    var now = new Date();
+    var nowMs = now.getTime();
 
+    // 30秒以内の上書き判定
+    var reuseEntry = null;
+    if(state.lastGenId && state.lastGenAt && (nowMs - state.lastGenAt) < REUSE_WINDOW_MS){
+      var candidate = getEntry(state.lastGenId);
+      if(candidate && !candidate.hasAudio && candidate.folderName === folder.name && candidate.themeName === theme.name){
+        reuseEntry = candidate;
+      }
+    }
+
+    var num;
+    if(reuseEntry){
+      num = reuseEntry.number; // 番号は既存のものを維持（増やさない）
+    } else {
+      num = state.nextNumber;
+    }
+
+    var instruction = 'タイトルの頭に【' + formatNum(num) + '】を付けてください。';
     var promptText = buildPromptText(folder, theme);
     promptText = (promptText.trim() ? promptText + '\n\n' : '') + instruction;
 
     var sourceText = ((theme.source || '').trim() || (theme.name || '').trim());
     sourceText = sourceText ? (sourceText + '\n\n' + instruction) : instruction;
 
-    var now = new Date();
-    var nowMs = now.getTime();
-    var title = (theme.name || '(無題)') + ' / ' + (folder.name || 'フォルダ');
+    var title = (theme.name || '(無題)') + ' / ' + (folder.name || 'プロンプト');
     var dateLabel = formatDateLabel(now);
 
-    var overwrote = false;
-    if(state.lastGenId && state.lastGenAt && (nowMs - state.lastGenAt) < REUSE_WINDOW_MS){
-      var existing = getEntry(state.lastGenId);
-      if(existing && !existing.hasAudio && existing.title === title){
-        existing.number = num;
-        existing.date = dateLabel;
-        existing.time = nowMs;
-        existing.read = false;
-        overwrote = true;
-      }
-    }
-    if(!overwrote){
+    if(reuseEntry){
+      reuseEntry.date = dateLabel;
+      reuseEntry.time = nowMs;
+      reuseEntry.read = false;
+      reuseEntry.title = title;
+    } else {
       var entry = {
         id: uid(),
         number: num,
@@ -1468,6 +1541,7 @@ async function handleGenerate(){
       state.nextNumber = num + 1;
       if(state.history.length > MAX_HISTORY) trimHistory();
     }
+
     state.lastGenAt = nowMs;
     save();
     renderAll();
@@ -1487,7 +1561,7 @@ async function handleGenerate(){
     }
 
     showToast(
-      numTag(num) + ' を生成中に追加しました',
+      numTag(num) + (reuseEntry ? ' を更新しました' : ' を生成中に追加しました'),
       '生成中を見る',
       function(){ switchMainTab('generating'); },
       6000
@@ -1525,7 +1599,7 @@ function probeAudio(file){
 
 async function importAudioTo(entry, file){
   if(!entry || !file) return;
-  if(!isAudioFile(file)){ showToast('音声ファイルではありません'); return; }
+  if(!isAudioFile(file)){ return; }
 
   var dur = await probeAudio(file);
 
@@ -1560,9 +1634,6 @@ async function importAudioTo(entry, file){
   state.mainTab = 'unplayed';
   renderAll();
   switchMainTab('unplayed');
-  showToast(numTag(entry.number) + ' に音声を取り込みました');
-
-  setTimeout(function(){ playEntry(entry.id); }, 300);
 }
 
 function pickFileFor(entryId){
@@ -1574,45 +1645,71 @@ function pickFileFor(entryId){
     var f = input.files && input.files[0];
     input.value = '';
     if(!f) return;
-    importAudioTo(entry, f);
+    importAudioTo(entry, f).then(function(){
+      showToast(numTag(entry.number) + ' に音声を取り込みました');
+      setTimeout(function(){ playEntry(entry.id); }, 300);
+    });
   };
   input.click();
 }
 
-async function handleAudioDrop(file){
-  if(!file || !isAudioFile(file)){ showToast('音声ファイルではありません'); return; }
+/* ── Multiple audio drop ── */
+async function handleAudioDrops(files){
+  var list = Array.from(files || []).filter(isAudioFile);
+  if(!list.length){ showToast('音声ファイルが見つかりません'); return; }
 
-  var num = extractNumberFromFilename(file.name);
-  var target = null;
+  var added = 0;
+  var matched = 0;
 
-  if(num !== null){
-    target = state.history.find(function(h){
-      return h.number === num && !h.hasAudio;
-    });
+  for(var i=0; i<list.length; i++){
+    var file = list[i];
+    var num = extractNumberFromFilename(file.name);
+    var target = null;
+
+    if(num !== null){
+      target = state.history.find(function(h){
+        return h.number === num && !h.hasAudio;
+      });
+    }
+
+    if(!target){
+      var assignNum = (num !== null) ? num : state.nextNumber;
+      target = {
+        id: uid(),
+        number: assignNum,
+        title: cleanTitleFromFile(file.name),
+        date: formatDateLabel(new Date()),
+        time: Date.now(),
+        read: false,
+        hasAudio: false,
+        audioDuration: 0,
+        fromAudio: true
+      };
+      state.history.unshift(target);
+      if(assignNum >= state.nextNumber) state.nextNumber = assignNum + 1;
+      added++;
+    } else {
+      matched++;
+    }
+
+    await importAudioTo(target, file);
   }
 
-  if(!target){
-    var assignNum = (num !== null) ? num : state.nextNumber;
-    target = {
-      id: uid(),
-      number: assignNum,
-      title: cleanTitleFromFile(file.name),
-      date: formatDateLabel(new Date()),
-      time: Date.now(),
-      read: false,
-      hasAudio: false,
-      audioDuration: 0,
-      fromAudio: true
-    };
-    state.history.unshift(target);
-    if(assignNum >= state.nextNumber) state.nextNumber = assignNum + 1;
-    save();
-    showToast('新規Castとして追加');
+  save();
+  if(list.length === 1){
+    showToast(matched ? numTag(list[0] && '') : '音声を取り込みました');
   } else {
-    showToast(numTag(num) + ' にマッチしました');
+    showToast(list.length + ' 件の音声を取り込みました');
   }
 
-  await importAudioTo(target, file);
+  // 最初のファイルを再生
+  var firstNum = extractNumberFromFilename(list[0].name);
+  var firstEntry = null;
+  if(firstNum !== null){
+    firstEntry = state.history.find(function(h){ return h.number === firstNum; });
+  }
+  if(!firstEntry && state.history.length) firstEntry = state.history[0];
+  if(firstEntry) setTimeout(function(){ playEntry(firstEntry.id); }, 400);
 }
 
 /* ── Playback ── */
@@ -1893,11 +1990,31 @@ function switchSettingsTab(name){
   Object.keys(panels).forEach(function(k){
     if(panels[k]) panels[k].hidden = (k !== name);
   });
+  if(name === 'common'){
+    renderCommonThemes();
+    updateCommonThemesToggle();
+  }
   var scroller = $('.tab-scroll');
   if(scroller) scroller.scrollTop = 0;
 }
 
-/* ── Settings folder drag (folders + themes) ── */
+/* ── Settings drag + auto-scroll ── */
+function startAutoScrollLoop(){
+  if(settingsAutoScrollRAF) return;
+  var step = function(){
+    if(!settingsDrag || !settingsDrag.active || !settingsDrag.autoScrollDir){
+      settingsAutoScrollRAF = null;
+      return;
+    }
+    var scroller = $('.tab-scroll');
+    if(scroller){
+      scroller.scrollTop += settingsDrag.autoScrollDir * 10;
+    }
+    settingsAutoScrollRAF = requestAnimationFrame(step);
+  };
+  settingsAutoScrollRAF = requestAnimationFrame(step);
+}
+
 function initSettingsDrag(){
   document.addEventListener('pointerdown', function(e){
     var grip = e.target.closest ? e.target.closest('[data-drag-folder], [data-drag-theme]') : null;
@@ -1920,6 +2037,7 @@ function initSettingsDrag(){
       ghost: null,
       originalEl: container,
       dropTarget: null,
+      autoScrollDir: 0,
       name: isFolder
         ? (folderEl.querySelector('.folder-name-label') || {}).textContent
         : (container.querySelector('.theme-name-label') || {}).textContent
@@ -1939,10 +2057,21 @@ function initSettingsDrag(){
       settingsDrag.ghost = ghost;
       settingsDrag.originalEl.style.opacity = '0.35';
       if(navigator.vibrate){ try{ navigator.vibrate(10); }catch(e){} }
+      startAutoScrollLoop();
     }
     settingsDrag.ghost.style.left = (e.clientX + 12) + 'px';
     settingsDrag.ghost.style.top = (e.clientY + 12) + 'px';
     updateSettingsDropTarget(e.clientX, e.clientY);
+
+    // 自動スクロール判定
+    var scroller = $('.tab-scroll');
+    if(scroller){
+      var rect = scroller.getBoundingClientRect();
+      var edge = 70;
+      if(e.clientY < rect.top + edge) settingsDrag.autoScrollDir = -1;
+      else if(e.clientY > rect.bottom - edge) settingsDrag.autoScrollDir = 1;
+      else settingsDrag.autoScrollDir = 0;
+    }
   });
 
   document.addEventListener('pointerup', function(e){
@@ -1980,7 +2109,6 @@ function updateSettingsDropTarget(x, y){
     return;
   }
 
-  // theme drag
   var targetTheme = el.closest('[data-theme-id]');
   if(targetTheme && targetTheme.dataset.themeId !== settingsDrag.themeId){
     var r2 = targetTheme.getBoundingClientRect();
@@ -2028,7 +2156,6 @@ function performSettingsDrop(){
     return;
   }
 
-  // theme drag
   var srcFolder = state.prompts.find(function(p){ return p.id === settingsDrag.folderId; });
   if(!srcFolder) return;
   var srcThemeIdx = srcFolder.themes.findIndex(function(t){ return t.id === settingsDrag.themeId; });
@@ -2081,12 +2208,17 @@ function performSettingsDrop(){
   renderPromptTags();
   renderThemeTags();
   renderShareBtn();
+  renderCommonThemes();
 }
 
 function cleanupSettingsDrag(){
   if(settingsDrag){
     if(settingsDrag.ghost && settingsDrag.ghost.parentNode) settingsDrag.ghost.parentNode.removeChild(settingsDrag.ghost);
     if(settingsDrag.originalEl) settingsDrag.originalEl.style.opacity = '';
+  }
+  if(settingsAutoScrollRAF){
+    cancelAnimationFrame(settingsAutoScrollRAF);
+    settingsAutoScrollRAF = null;
   }
   $$('.drop-before, .drop-after, .drop-over').forEach(function(el){
     el.classList.remove('drop-before', 'drop-after', 'drop-over');
@@ -2098,7 +2230,7 @@ function cleanupSettingsDrag(){
 function exportData(){
   var data = {
     app: 'MyCast',
-    version: 3,
+    version: 4,
     exportedAt: new Date().toISOString(),
     commonPrompt: state.commonPrompt,
     prompts: state.prompts,
@@ -2116,7 +2248,8 @@ function exportData(){
     nextNumber: state.nextNumber,
     rate: state.rate,
     repeatMode: state.repeatMode,
-    mainTab: state.mainTab
+    mainTab: state.mainTab,
+    commonThemesOpen: state.commonThemesOpen
   };
   var json = JSON.stringify(data, null, 2);
   var blob = new Blob([json], { type: 'application/json' });
@@ -2180,6 +2313,7 @@ function importData(file){
     state.rate = (typeof data.rate === 'number') ? data.rate : 1;
     state.repeatMode = (typeof data.repeatMode === 'string') ? data.repeatMode : 'off';
     state.mainTab = (typeof data.mainTab === 'string') ? data.mainTab : 'new';
+    state.commonThemesOpen = (typeof data.commonThemesOpen === 'boolean') ? data.commonThemesOpen : false;
 
     migrateSchema();
     normalize();
@@ -2187,6 +2321,8 @@ function importData(file){
     renderAll();
     renderFoldersEditor();
     renderCommonPrompt();
+    renderCommonThemes();
+    updateCommonThemesToggle();
     setRate(state.rate);
     setRepeat(state.repeatMode);
     switchMainTab(state.mainTab);
@@ -2216,7 +2352,6 @@ document.addEventListener('DOMContentLoaded', async function(){
   initSettingsDrag();
   bindEditModalInputs();
 
-  // 初期タブ
   switchMainTab(state.mainTab);
   renderAll();
   setRate(state.rate);
@@ -2228,7 +2363,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     speedSlider.value = state.rate;
   }
 
-  // ─── プロンプトタグ ───
+  // ─── プロンプトタグ（トーストなし） ───
   var promptTagsEl = $('#promptTags');
   if(promptTagsEl){
     promptTagsEl.addEventListener('click', function(e){
@@ -2245,12 +2380,10 @@ document.addEventListener('DOMContentLoaded', async function(){
       save();
       renderPromptTags();
       renderThemeTags();
-      var f = getSelectedFolder();
-      showToast('✓ ' + ((f && f.name) || 'フォルダ') + ' を選択');
     });
   }
 
-  // ─── テーマタグ ───
+  // ─── テーマタグ（トーストなし） ───
   var tagsEl = $('#tags');
   if(tagsEl){
     tagsEl.addEventListener('click', function(e){
@@ -2259,8 +2392,6 @@ document.addEventListener('DOMContentLoaded', async function(){
       state.selectedThemeId = btn.dataset.id;
       save();
       renderThemeTags();
-      var t = getSelectedTheme();
-      showToast('✓ ' + ((t && t.name) || 'テーマ') + ' を選択');
     });
   }
 
@@ -2277,6 +2408,8 @@ document.addEventListener('DOMContentLoaded', async function(){
   if(settingsBtn) settingsBtn.addEventListener('click', function(){
     renderFoldersEditor();
     renderCommonPrompt();
+    renderCommonThemes();
+    updateCommonThemesToggle();
     switchSettingsTab('folders');
     $('#settingsModal').classList.add('show');
   });
@@ -2298,15 +2431,24 @@ document.addEventListener('DOMContentLoaded', async function(){
     save();
   });
 
-  // ─── フォルダ追加 ───
+  // ─── テーマ一覧トグル ───
+  var commonThemesToggle = $('#commonThemesToggle');
+  if(commonThemesToggle) commonThemesToggle.addEventListener('click', function(){
+    state.commonThemesOpen = !state.commonThemesOpen;
+    save();
+    updateCommonThemesToggle();
+  });
+
+  // ─── 個別プロンプト追加 ───
   var addFolderBtn = $('#addFolderBtn');
   if(addFolderBtn) addFolderBtn.addEventListener('click', function(){
-    var f = { id: uid(), name: '新規フォルダ', text: state.commonPrompt || DEFAULT_PROMPT,
+    var f = { id: uid(), name: '新規プロンプト', text: state.commonPrompt || DEFAULT_PROMPT,
       themes: [{ id: uid(), name: '新規テーマ', source: '' }] };
     state.prompts.push(f);
     save();
     renderFoldersEditor();
     renderPromptTags();
+    renderCommonThemes();
     setTimeout(function(){ openFolderEdit(f.id); }, 80);
   });
 
@@ -2422,6 +2564,21 @@ document.addEventListener('DOMContentLoaded', async function(){
   audio.addEventListener('ended', onEnded);
   audio.addEventListener('error', function(){ showToast('この音声を再生できませんでした'); });
 
+  // アプリ復帰時にMediaSession状態を同期（iOSワークアラウンド）
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible'){
+      if(currentId){
+        var entry = getEntry(currentId);
+        if(entry) updateMediaSession(entry);
+      }
+      if('mediaSession' in navigator){
+        try{
+          navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
+        }catch(e){}
+      }
+    }
+  });
+
   window.addEventListener('pagehide', function(){
     if(currentId){
       audioPositions[currentId] = audio.currentTime || 0;
@@ -2431,7 +2588,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
   setupMediaSession();
 
-  // ─── ドラッグ&ドロップ（音声） ───
+  // ─── ドラッグ&ドロップ（複数音声） ───
   var dragDepth = 0;
   var overlay = $('#dropOverlay');
   window.addEventListener('dragenter', function(e){
@@ -2451,7 +2608,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     dragDepth = 0;
     if(overlay) overlay.classList.remove('show');
     if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
-      handleAudioDrop(e.dataTransfer.files[0]);
+      handleAudioDrops(e.dataTransfer.files);
     }
   });
   document.addEventListener('dragover', function(e){ e.preventDefault(); });
