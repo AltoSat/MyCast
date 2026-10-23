@@ -45,6 +45,9 @@
   }
   .app-wrap{position:relative;z-index:1}
 
+  /* hidden属性を確実に効かせる */
+  [hidden]{display:none !important}
+
   /* ── Number pill ── */
   .num-pill{
     display:inline-block;
@@ -319,7 +322,11 @@
     box-shadow:0 2px 10px rgba(108,123,255,.55),inset 0 0 0 1px rgba(255,255,255,.12);
   }
   .repBtn.on:active{background:var(--accent2)}
-  .playAllBtn:active{background:rgba(108,123,255,.22)}
+  .repBtn.on.unplayed{
+    background:var(--orange);
+    box-shadow:0 2px 10px rgba(255,159,10,.55),inset 0 0 0 1px rgba(255,255,255,.15);
+  }
+  .repBtn.on.unplayed:active{background:#ffb340}
   .repNum{position:absolute;bottom:1px;right:1px;font-size:8px;font-weight:800;color:#fff;
     background:var(--accent2);width:11px;height:11px;border-radius:50%;
     display:none;place-items:center;line-height:1;
@@ -436,7 +443,6 @@
   }
   .drag-grip:active{background:var(--accent-soft);color:var(--accent);cursor:grabbing}
 
-  /* テーマ一覧: テーマ名のみ・2列表示 */
   .themes-list{
     padding:0 12px 12px 24px;
     display:grid;
@@ -487,13 +493,49 @@
     touch-action:auto;overscroll-behavior:contain}
   .edit-modal-scroll{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;
     padding:0 16px;overscroll-behavior:contain;touch-action:pan-y}
-  .edit-modal-foot{padding:16px;padding-bottom:calc(var(--safe-bottom) + 16px);
-    border-top:1px solid var(--border);flex-shrink:0}
-  .delete-btn{width:100%;padding:14px;border-radius:12px;
-    background:rgba(255,69,58,.12);color:#ff7070;border:none;
-    font-size:15px;font-weight:650;font-family:inherit;cursor:pointer;
-    -webkit-appearance:none;appearance:none}
+
+  .edit-modal-foot{
+    padding:16px;
+    padding-bottom:calc(var(--safe-bottom) + 16px);
+    border-top:1px solid var(--border);
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .delete-btn{
+    width:auto;
+    padding:11px 18px;
+    border-radius:12px;
+    background:rgba(255,69,58,.12);
+    color:#ff7070;
+    border:none;
+    font-size:13.5px;
+    font-weight:650;
+    font-family:inherit;
+    cursor:pointer;
+    -webkit-appearance:none;appearance:none;
+    flex:0 0 auto;
+    transition:background .12s;
+  }
   .delete-btn:active{background:rgba(255,69,58,.25)}
+  .close-btn{
+    width:auto;
+    padding:12px 26px;
+    border-radius:12px;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    font-size:15px;
+    font-weight:650;
+    font-family:inherit;
+    cursor:pointer;
+    -webkit-appearance:none;appearance:none;
+    flex:0 0 auto;
+    transition:background .12s,transform .1s;
+  }
+  .close-btn:active{background:var(--accent2);transform:scale(.97)}
   .edit-modal-scroll textarea{min-height:220px}
 
   /* ── Match modal ── */
@@ -644,11 +686,6 @@
     <button class="timerBtn" id="timerBtn" aria-label="30分タイマー開始"></button>
   </div>
   <div class="pfoot">
-    <button class="repBtn playAllBtn" id="playAllBtn" aria-label="未再生をすべて再生">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>
-      </svg>
-    </button>
     <button class="repBtn" id="repeatBtn" aria-label="リピート切替">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
         <path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
@@ -717,6 +754,7 @@
     </div>
     <div class="edit-modal-foot">
       <button id="editModalDelete" type="button" class="delete-btn">削除</button>
+      <button id="editModalCloseBottom" type="button" class="close-btn">閉じる</button>
     </div>
   </div>
 </div>
@@ -763,6 +801,7 @@ var TABS = ['new', 'generating', 'unplayed', 'played'];
 var SETTINGS_TABS = ['folders', 'common', 'data'];
 var TIMER_DURATION_MS = 30 * 60 * 1000;
 var MIN_THEME_LEN = 2;
+var REPEAT_MODES = ['off', 'all', 'one', 'unplayed'];
 
 function $(s, r){ return (r||document).querySelector(s); }
 function $$(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); }
@@ -796,7 +835,6 @@ var editing = { type: null, folderId: null, themeId: null };
 var generatingLock = false;
 var pendingMatchResolve = null;
 var editModalOpenedAt = 0;
-var playQueue = [];
 var timerInterval = null;
 var timerEndAt = 0;
 
@@ -848,7 +886,6 @@ function hideToast(){
   clearTimeout(toastTimer);
 }
 
-/* ── Filename helpers ── */
 function cleanTitleFromFile(name){
   return String(name || '')
     .replace(/\.[^.]+$/, '')
@@ -856,7 +893,6 @@ function cleanTitleFromFile(name){
     .trim() || '(無題)';
 }
 
-/* ── テキスト正規化（表記揺れ対応） ── */
 function normalizeForMatch(s){
   var str = String(s || '');
   try{ str = str.normalize('NFKC'); }catch(e){}
@@ -1032,7 +1068,7 @@ function normalize(){
     state.nextNumber = maxNum + 1;
   }
   if(typeof state.rate !== 'number' || state.rate < 0.5 || state.rate > 3) state.rate = 1;
-  if(['off','all','one'].indexOf(state.repeatMode) === -1) state.repeatMode = 'off';
+  if(REPEAT_MODES.indexOf(state.repeatMode) === -1) state.repeatMode = 'off';
   if(TABS.indexOf(state.mainTab) === -1) state.mainTab = 'new';
   if(!state.lastExportSnapshot || typeof state.lastExportSnapshot !== 'object'){
     state.lastExportSnapshot = null;
@@ -1537,7 +1573,7 @@ function openFolderEdit(folderId){
   $('#editModalText').value = folder.text || '';
   $('#editModalText').placeholder = 'この個別プロンプトの本文（{theme} でテーマ名を差し込み）';
   var delBtn = $('#editModalDelete');
-  delBtn.textContent = 'この個別プロンプトを削除';
+  delBtn.textContent = '削除';
   delBtn.style.display = '';
   delBtn.onclick = function(){
     if(state.prompts.length <= 1){ showToast('最後の個別プロンプトは削除できません'); return; }
@@ -1571,7 +1607,7 @@ function openThemeEdit(folderId, themeId){
   $('#editModalText').value = theme.source || '';
   $('#editModalText').placeholder = 'ソーステキスト（Notebook に渡す内容）';
   var delBtn = $('#editModalDelete');
-  delBtn.textContent = 'このテーマを削除';
+  delBtn.textContent = '削除';
   delBtn.style.display = '';
   delBtn.onclick = function(){
     if(!confirm('このテーマを削除しますか？')) return;
@@ -1634,6 +1670,8 @@ function bindEditModalInputs(){
     updateDataTabBadge();
   });
   $('#editModalClose').addEventListener('click', closeEditModal);
+  var closeBottom = $('#editModalCloseBottom');
+  if(closeBottom) closeBottom.addEventListener('click', closeEditModal);
   $('#editModal').addEventListener('click', function(e){
     if(e.target === $('#editModal')){
       if(Date.now() - editModalOpenedAt < 400) return;
@@ -1642,7 +1680,7 @@ function bindEditModalInputs(){
   });
 }
 
-/* ── Long-press to edit（長押しした瞬間に開く） ── */
+/* ── Long-press to edit ── */
 function openEditFromMain(kind, id){
   if(kind === 'folder'){ openFolderEdit(id); }
   else if(kind === 'theme'){
@@ -1884,7 +1922,8 @@ async function importAudioTo(entry, file, isNew){
   entry.hasAudio = true;
   entry.audioDuration = dur;
   entry.audioName = file.name;
-  if(isNew){ entry.title = cleanTitleFromFile(file.name); }
+  // 統合データ: 数字は履歴データのまま、タイトルは音声ファイル名を適用
+  entry.title = cleanTitleFromFile(file.name);
   audioPositions[entry.id] = 0;
   if(db) dbSavePos(entry.id, 0).catch(function(){});
   save();
@@ -1910,7 +1949,7 @@ function pickFileFor(entryId){
   input.click();
 }
 
-/* ── Audio matching (containment-based) ── */
+/* ── Audio matching ── */
 function createEntryFromAudio(file){
   var num = state.nextNumber;
   var entry = {
@@ -2047,7 +2086,7 @@ async function handleAudioDrops(files){
 /* ── Playback ── */
 var audio = document.getElementById('audio');
 var playerEl, seekEl, pTitle, pSub, pCurrent, pTotal, playBtn, headBtn, back15Btn, fwd15Btn,
-    timerBtn, repBtn, repNum, playAllBtn, speedSlider, speedValue, resetSpeedBtn;
+    timerBtn, repBtn, repNum, speedSlider, speedValue, resetSpeedBtn;
 
 function cachePlayerEls(){
   playerEl = $('#player');
@@ -2063,7 +2102,6 @@ function cachePlayerEls(){
   timerBtn = $('#timerBtn');
   repBtn = $('#repeatBtn');
   repNum = $('#repNum');
-  playAllBtn = $('#playAllBtn');
   speedSlider = $('#speedSlider');
   speedValue = $('#speedValue');
   resetSpeedBtn = $('#resetSpeedBtn');
@@ -2144,16 +2182,6 @@ function seekToStart(){
   updatePositionState();
 }
 
-/* ── Play all unplayed ── */
-function playAllUnplayed(){
-  var unplayed = state.history.filter(function(h){ return h.hasAudio && !h.read; });
-  if(!unplayed.length){ showToast('未再生のファイルがありません'); return; }
-  var sorted = unplayed.slice().sort(function(a,b){ return (a.time||0) - (b.time||0); });
-  playQueue = sorted.map(function(h){ return h.id; });
-  var firstId = playQueue.shift();
-  if(firstId) playEntry(firstId);
-}
-
 function onEnded(){
   var entry = getEntry(currentId);
   if(!entry){ renderHistory(); return; }
@@ -2169,30 +2197,34 @@ function onEnded(){
     save();
   }
 
-  // Play-all-unplayed queue
-  while(playQueue.length){
-    var nextId = playQueue.shift();
-    var nextEntry = getEntry(nextId);
-    if(nextEntry && nextEntry.hasAudio && !nextEntry.read){
-      playEntry(nextId);
+  if(state.repeatMode === 'unplayed'){
+    var unplayed = state.history.filter(function(h){ return h.hasAudio && !h.read; });
+    if(unplayed.length){
+      unplayed.sort(function(a,b){ return (a.time||0) - (b.time||0); });
+      playEntry(unplayed[0].id);
       return;
     }
-  }
-
-  var withAudio = state.history.filter(function(h){ return h.hasAudio; });
-  var idx = withAudio.findIndex(function(h){ return h.id === currentId; });
-  var next = null;
-  if(state.repeatMode === 'all' && withAudio.length > 1){
-    next = withAudio[(idx + 1) % withAudio.length];
-  }
-
-  if(next && next.id !== currentId){
-    playEntry(next.id);
-  }else{
     document.body.classList.remove('is-playing');
     if('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
     renderHistory();
+    return;
   }
+
+  if(state.repeatMode === 'all'){
+    var withAudio = state.history.filter(function(h){ return h.hasAudio; });
+    var idx = withAudio.findIndex(function(h){ return h.id === currentId; });
+    if(withAudio.length > 1 && idx !== -1){
+      var next = withAudio[(idx + 1) % withAudio.length];
+      if(next && next.id !== currentId){
+        playEntry(next.id);
+        return;
+      }
+    }
+  }
+
+  document.body.classList.remove('is-playing');
+  if('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+  renderHistory();
 }
 
 function setSeekUI(){
@@ -2234,15 +2266,28 @@ function setRate(r, syncSlider){
 }
 
 function setRepeat(mode){
+  if(REPEAT_MODES.indexOf(mode) === -1) mode = 'off';
   state.repeatMode = mode;
   if(repBtn){
     repBtn.classList.toggle('on', mode !== 'off');
     repBtn.classList.toggle('one', mode === 'one');
-    repBtn.setAttribute('aria-label',
-      mode === 'off' ? 'リピート切替（オフ）' :
-      mode === 'all' ? 'リピート切替（全曲）' : 'リピート切替（1曲）');
+    repBtn.classList.toggle('unplayed', mode === 'unplayed');
+    var labels = {
+      off: 'リピート切替（オフ）',
+      all: 'リピート切替（全曲）',
+      one: 'リピート切替（1曲）',
+      unplayed: 'リピート切替（未再生のみ）'
+    };
+    repBtn.setAttribute('aria-label', labels[mode] || 'リピート切替');
   }
   save();
+}
+
+function cycleRepeat(){
+  var idx = REPEAT_MODES.indexOf(state.repeatMode);
+  if(idx < 0) idx = 0;
+  var next = REPEAT_MODES[(idx + 1) % REPEAT_MODES.length];
+  setRepeat(next);
 }
 
 /* ── Timer (30 min) ── */
@@ -2498,7 +2543,6 @@ function updateSettingsDropTarget(x, y){
   var targetTheme = el.closest('[data-theme-id]');
   if(targetTheme && targetTheme.dataset.themeId !== settingsDrag.themeId){
     var r2 = targetTheme.getBoundingClientRect();
-    // 2列表示なので左右位置で判定
     var midX = r2.left + r2.width / 2;
     if(x < midX){
       targetTheme.classList.add('drop-before');
@@ -2831,7 +2875,6 @@ document.addEventListener('DOMContentLoaded', async function(){
       var id = row.dataset.id;
       var entry = getEntry(id);
       if(!entry) return;
-      playQueue = [];
       if(entry.hasAudio) playEntry(id);
       else pickFileFor(id);
     });
@@ -2842,12 +2885,7 @@ document.addEventListener('DOMContentLoaded', async function(){
   if(back15Btn) back15Btn.addEventListener('click', function(){ skip(-15); });
   if(fwd15Btn) fwd15Btn.addEventListener('click', function(){ skip(15); });
   if(timerBtn) timerBtn.addEventListener('click', toggleTimer);
-  if(repBtn) repBtn.addEventListener('click', function(){
-    var n = state.repeatMode === 'off' ? 'all'
-          : state.repeatMode === 'all' ? 'one' : 'off';
-    setRepeat(n);
-  });
-  if(playAllBtn) playAllBtn.addEventListener('click', playAllUnplayed);
+  if(repBtn) repBtn.addEventListener('click', cycleRepeat);
   if(speedSlider) speedSlider.addEventListener('input', function(){
     setRate(parseFloat(speedSlider.value), false);
   });
