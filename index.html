@@ -20,7 +20,7 @@
     --accent:#6c7bff; --accent2:#b06cff; --accent-soft:rgba(108,123,255,.15);
     --grad:linear-gradient(135deg,#5b6cff,#9a6cff);
     --grad-soft:linear-gradient(140deg,rgba(91,108,255,.14),rgba(176,108,255,.06));
-    --green:#30d158; --red:#ff453a;
+    --green:#30d158; --red:#ff453a; --orange:#ff9f0a;
     --border:rgba(255,255,255,.08);
     --safe-top:env(safe-area-inset-top,0px);
     --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -45,17 +45,18 @@
   }
   .app-wrap{position:relative;z-index:1}
 
-  /* ── Number pill (視認性UP: ソリッドグラデ + 白文字) ── */
+  /* ── Number pill ── */
   .num-pill{
-    display:inline-flex;align-items:center;justify-content:center;
-    min-width:32px;height:19px;padding:0 9px;margin-right:6px;
+    display:inline-block;
+    min-width:32px;height:19px;line-height:19px;
+    padding:0 9px;margin-right:6px;
     border-radius:99px;
     background:var(--grad);
     color:#fff;
     font-size:11.5px;font-weight:800;
+    text-align:center;
     font-variant-numeric:tabular-nums;letter-spacing:.03em;
     vertical-align:middle;position:relative;top:-1px;
-    line-height:1;
     box-shadow:0 1px 4px rgba(91,108,255,.35);
   }
   .history-item.playing .num-pill,
@@ -193,7 +194,8 @@
   .history-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
   .history-title{
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-    font-size:14px;font-weight:600;line-height:1.35;word-break:break-word;
+    font-size:14px;font-weight:600;line-height:1.35;
+    overflow-wrap:break-word;word-break:normal;
   }
   .history-sub{
     display:flex;justify-content:space-between;align-items:baseline;gap:10px;
@@ -226,7 +228,7 @@
   .eq i:nth-child(3){height:64%;animation-delay:-.08s}
   .eq i:nth-child(4){height:100%;animation-delay:-.70s}
   .history-item.playing .eq i{animation-play-state:running}
-  .player.show .pthumb .eq i{animation-play-state:running}
+  body.is-playing .player.show .pthumb .eq i{animation-play-state:running}
   @keyframes eqb{from{transform:scaleY(.22)}to{transform:scaleY(1)}}
 
   /* ── Player ── */
@@ -247,8 +249,11 @@
   .pthumb{width:40px;height:40px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;color:#fff;
     background:var(--grad);box-shadow:0 6px 16px rgba(91,108,255,.30)}
   .pmeta{flex:1;min-width:0}
-  .ptitle{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-    font-size:14px;font-weight:650;line-height:1.3;word-break:break-word}
+  .ptitle{
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    font-size:14px;font-weight:650;line-height:1.35;
+    overflow-wrap:break-word;word-break:normal;
+  }
   .psub{font-size:11px;color:var(--text2);margin-top:2px;font-variant-numeric:tabular-nums}
 
   .seekRow{display:flex;align-items:center;gap:8px;margin-bottom:2px}
@@ -287,6 +292,20 @@
     flex:0 0 auto}
   .skipBtn:active{transform:scale(.9);background:rgba(108,123,255,.22)}
   .skipBtn svg{width:16px;height:16px}
+  .timerBtn{width:48px;height:48px;border-radius:50%;
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);
+    color:var(--text);font-size:11px;font-weight:700;
+    display:grid;place-items:center;padding:0;
+    transition:transform .12s,background .12s;font-family:inherit;
+    flex:0 0 auto}
+  .timerBtn:active{transform:scale(.9);background:rgba(108,123,255,.22)}
+  .timerBtn svg{width:18px;height:18px}
+  .timerBtn .timer-text{font-size:11px;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+  .timerBtn.active{
+    background:rgba(255,159,10,.20);
+    border-color:rgba(255,159,10,.45);
+    color:#ffb340;
+  }
 
   .pfoot{display:flex;align-items:center;gap:8px;padding:0 2px}
   .repBtn{position:relative;width:34px;height:34px;border-radius:50%;flex:0 0 auto;
@@ -300,6 +319,7 @@
     box-shadow:0 2px 10px rgba(108,123,255,.55),inset 0 0 0 1px rgba(255,255,255,.12);
   }
   .repBtn.on:active{background:var(--accent2)}
+  .playAllBtn:active{background:rgba(108,123,255,.22)}
   .repNum{position:absolute;bottom:1px;right:1px;font-size:8px;font-weight:800;color:#fff;
     background:var(--accent2);width:11px;height:11px;border-radius:50%;
     display:none;place-items:center;line-height:1;
@@ -369,7 +389,7 @@
   .data-btn:active{background:rgba(108,123,255,.28)}
   .data-btn.skip-style{background:transparent;color:var(--text2);border:1px solid var(--border)}
 
-  /* ── Settings folder view (compact) ── */
+  /* ── Settings folder view ── */
   .settings-folder{
     background:var(--card);
     border-radius:14px;
@@ -416,36 +436,42 @@
   }
   .drag-grip:active{background:var(--accent-soft);color:var(--accent);cursor:grabbing}
 
-  .themes-list{padding:0 12px 12px}
+  /* テーマ一覧: テーマ名のみ・2列表示 */
+  .themes-list{
+    padding:0 12px 12px 24px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
   .theme-item{
-    display:flex;align-items:center;gap:6px;padding:8px 8px 8px 6px;
-    margin-left:24px;background:var(--bg2);border-radius:8px;margin-bottom:6px;
+    display:flex;align-items:center;gap:2px;padding:8px 4px 8px 10px;
+    background:var(--bg2);border-radius:8px;
     cursor:pointer;transition:box-shadow .15s,background .12s;
     -webkit-user-select:none;user-select:none;
+    min-width:0;
   }
   .theme-item:active{background:rgba(255,255,255,.06)}
-  .theme-item.drop-before{box-shadow:0 -2px 0 0 var(--accent)}
-  .theme-item.drop-after{box-shadow:0 2px 0 0 var(--accent)}
-  .theme-item .drag-grip{width:28px;height:28px;font-size:14px;order:10}
-  .theme-text-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-  .theme-name-label{
-    flex:1;font-size:13px;font-weight:500;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;
+  .theme-item.drop-before{box-shadow:inset 2px 0 0 0 var(--accent)}
+  .theme-item.drop-after{box-shadow:inset -2px 0 0 0 var(--accent)}
+  .theme-item .drag-grip{
+    width:20px;height:20px;font-size:12px;order:10;flex:0 0 auto;
   }
-  .theme-source-preview{
-    font-size:11px;color:var(--text3);
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    max-width:100%;
+  .theme-name-label{
+    flex:1;font-size:12px;font-weight:500;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;
+    line-height:1.3;
   }
 
   .empty-themes{
-    margin-left:24px;padding:8px;color:var(--text3);font-size:12px;text-align:center;
-    border:1px dashed var(--border);border-radius:8px;margin-bottom:8px;
+    grid-column:1 / -1;
+    padding:8px;color:var(--text3);font-size:12px;text-align:center;
+    border:1px dashed var(--border);border-radius:8px;
   }
   .add-theme-inline{
-    margin-left:24px;padding:8px;border-radius:8px;background:transparent;
+    grid-column:1 / -1;
+    padding:8px;border-radius:8px;background:transparent;
     border:1px dashed var(--border);color:var(--text2);font-size:12px;font-weight:600;
-    font-family:inherit;cursor:pointer;width:calc(100% - 24px);
+    font-family:inherit;cursor:pointer;
     -webkit-appearance:none;appearance:none;
   }
   .add-theme-inline:active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
@@ -454,7 +480,7 @@
     border:1px dashed var(--accent);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;
     -webkit-appearance:none;appearance:none}
 
-  /* ── Edit modal (large sheet) ── */
+  /* ── Edit modal ── */
   .edit-modal{z-index:110}
   .edit-modal-card{width:100%;height:90vh;max-height:90vh;background:var(--bg2);
     border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden;
@@ -470,7 +496,7 @@
   .delete-btn:active{background:rgba(255,69,58,.25)}
   .edit-modal-scroll textarea{min-height:220px}
 
-  /* ── Match modal (audio file picker) ── */
+  /* ── Match modal ── */
   .match-modal{z-index:120}
   .match-scroll{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;
     padding:0 16px calc(var(--safe-bottom) + 20px);
@@ -487,14 +513,21 @@
     transition:background .12s,border-color .12s,transform .1s}
   .match-cand:active{background:var(--card2);transform:scale(.99)}
   .match-cand-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-  .match-cand-title{font-size:13.5px;font-weight:600;
+  .match-cand-title{
+    font-size:13.5px;font-weight:600;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    display:flex;align-items:center;gap:6px}
+  }
+  .match-cand-title .num-pill{vertical-align:middle;margin-right:4px}
   .match-cand-sub{font-size:11px;color:var(--text2);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .match-cand-score{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--accent);
-    font-variant-numeric:tabular-nums;background:var(--accent-soft);
-    padding:2px 8px;border-radius:99px}
+  .match-cand-badge{
+    flex:0 0 auto;
+    font-size:10.5px;font-weight:700;
+    color:#4ade80;
+    background:rgba(74,222,128,.15);
+    padding:2px 8px;border-radius:99px;
+    white-space:nowrap;
+  }
   .match-empty{color:var(--text3);font-size:12.5px;padding:16px 0;text-align:center}
 
   /* ── Drag ghost ── */
@@ -550,18 +583,15 @@
       <button class="main-tab" data-tab="played">再生済<span class="tab-count" style="display:none">0</span></button>
     </div>
 
-    <!-- 新規（ワークフロー） -->
     <div id="panelNew" class="main-panel">
       <section class="section">
         <div class="step-label is-active"><span class="step-num">1</span>プロンプト<span class="hint">長押しで編集</span></div>
         <div id="promptTags" class="tags"></div>
       </section>
-
       <section class="section">
         <div class="step-label is-active"><span class="step-num">2</span>テーマを選択<span class="hint">長押しで編集</span></div>
         <div id="tags" class="tags"></div>
       </section>
-
       <section class="section">
         <div class="step-label is-active"><span class="step-num">3</span>音声解説を生成する</div>
         <button id="shareBtn" type="button" class="genBtn" aria-label="音声解説を生成する">
@@ -571,17 +601,14 @@
       </section>
     </div>
 
-    <!-- 生成中 -->
     <div id="panelGenerating" class="main-panel" hidden>
       <div id="listGenerating" class="history"></div>
     </div>
 
-    <!-- 未再生 -->
     <div id="panelUnplayed" class="main-panel" hidden>
       <div id="listUnplayed" class="history"></div>
     </div>
 
-    <!-- 再生済 -->
     <div id="panelPlayed" class="main-panel" hidden>
       <div id="clearPlayedWrap" class="clear-played-wrap" style="display:none">
         <button id="clearPlayedBtn" type="button" class="clear-played-btn">再生済みをすべて削除</button>
@@ -591,7 +618,6 @@
   </main>
 </div>
 
-<!-- プレイヤー -->
 <div class="player" id="player">
   <div class="phead">
     <div class="pthumb"><div class="eq"><i></i><i></i><i></i><i></i></div></div>
@@ -614,10 +640,15 @@
       <svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72c0 .8.87 1.29 1.56.9l10.9-6.86a1.05 1.05 0 0 0 0-1.8L9.56 4.24A1.05 1.05 0 0 0 8 5.14Z"/></svg>
       <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4.6" height="15" rx="1.7"/><rect x="13.4" y="4.5" width="4.6" height="15" rx="1.7"/></svg>
     </button>
-    <button class="skipBtn" id="fwd5Btn" aria-label="5秒進む">+5</button>
     <button class="skipBtn" id="fwd15Btn" aria-label="15秒進む">+15</button>
+    <button class="timerBtn" id="timerBtn" aria-label="30分タイマー開始"></button>
   </div>
   <div class="pfoot">
+    <button class="repBtn playAllBtn" id="playAllBtn" aria-label="未再生をすべて再生">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>
+      </svg>
+    </button>
     <button class="repBtn" id="repeatBtn" aria-label="リピート切替">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
         <path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
@@ -632,34 +663,29 @@
   </div>
 </div>
 
-<!-- 設定モーダル -->
 <div id="settingsModal" class="modal">
   <div class="modal-card">
     <div class="modal-head">
       <h2>設定</h2>
       <button id="closeSettings" type="button" class="icon-btn" aria-label="閉じる">✕</button>
     </div>
-
     <div class="tabs">
       <button type="button" class="tab-btn is-active" data-tab="folders">個別プロンプト</button>
       <button type="button" class="tab-btn" data-tab="common">共通プロンプト</button>
       <button type="button" class="tab-btn" data-tab="data">データ<span class="tab-badge" id="dataTabBadge"></span></button>
     </div>
-
     <div class="tab-scroll">
       <div id="tabFolders" class="tab-panel">
         <p class="note">▶ でテーマ一覧を開閉。⠿ をドラッグで並び替え・別プロンプトへ移動。行をタップで編集。</p>
         <div id="foldersList"></div>
         <button id="addFolderBtn" type="button" class="add-btn" style="margin-top:12px">+ 個別プロンプトを追加</button>
       </div>
-
       <div id="tabCommon" class="tab-panel" hidden>
         <div class="field">
           <label>共通プロンプト<span class="hint2">各個別プロンプトと結合してコピーされます</span></label>
           <textarea id="commonPromptInput" rows="16" placeholder="共通プロンプト本文（{theme} でテーマ名を差し込み）"></textarea>
         </div>
       </div>
-
       <div id="tabData" class="tab-panel" hidden>
         <div class="field">
           <label>バックアップ</label>
@@ -673,7 +699,6 @@
   </div>
 </div>
 
-<!-- 編集モーダル（個別プロンプト／テーマ） -->
 <div id="editModal" class="modal edit-modal">
   <div class="edit-modal-card">
     <div class="modal-head">
@@ -696,7 +721,6 @@
   </div>
 </div>
 
-<!-- 音声ファイル紐づけ選択モーダル -->
 <div id="matchModal" class="modal match-modal">
   <div class="modal-card">
     <div class="modal-head">
@@ -706,7 +730,7 @@
     <div class="match-scroll">
       <div class="match-file-info">
         <div class="match-file-name" id="matchFileName"></div>
-        <div class="match-file-hint">紐づける生成中データを選択してください</div>
+        <div class="match-file-hint" id="matchFileHint">紐づける生成中データを選択してください</div>
       </div>
       <div id="matchCandidates" class="match-candidates"></div>
       <button id="matchNewBtn" type="button" class="data-btn">新規として追加</button>
@@ -716,7 +740,7 @@
 </div>
 
 <div class="drop-overlay" id="dropOverlay">
-  <div>音声ファイルをドロップ<small>複数ファイル対応・名前の一致率で自動紐づけ</small></div>
+  <div>音声ファイルをドロップ<small>複数ファイル対応・テーマ名の一致で自動紐づけ</small></div>
 </div>
 <div id="toast" class="toast"></div>
 
@@ -726,10 +750,6 @@
 <script>
 (function(){
 'use strict';
-
-/* ═════════════════════════════════════════════
-   MyCast — 統合版 v4
-   ═════════════════════════════════════════════ */
 
 var STORAGE_KEY = 'mycast.v4';
 var LEGACY_KEYS = ['mycast.v3','mycast.v2','mycast.v1','nblink.v9','nblink.v8','nblink.v7'];
@@ -741,15 +761,12 @@ var DEFAULT_PROMPT = '以下のソースを参考に、テーマ「{theme}」に
 var ICON_FILE = 'icon.png';
 var TABS = ['new', 'generating', 'unplayed', 'played'];
 var SETTINGS_TABS = ['folders', 'common', 'data'];
-
-var AUTO_MATCH_THRESHOLD = 0.62;
-var AUTO_MATCH_MARGIN = 0.12;
-var MIN_CANDIDATE_SCORE = 0.15;
+var TIMER_DURATION_MS = 30 * 60 * 1000;
+var MIN_THEME_LEN = 2;
 
 function $(s, r){ return (r||document).querySelector(s); }
 function $$(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); }
 
-/* ── State ── */
 var state = {
   commonPrompt: '',
   prompts: [],
@@ -779,6 +796,9 @@ var editing = { type: null, folderId: null, themeId: null };
 var generatingLock = false;
 var pendingMatchResolve = null;
 var editModalOpenedAt = 0;
+var playQueue = [];
+var timerInterval = null;
+var timerEndAt = 0;
 
 /* ── Utils ── */
 function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
@@ -830,53 +850,21 @@ function hideToast(){
 
 /* ── Filename helpers ── */
 function cleanTitleFromFile(name){
-  return String(name || '').replace(/\.[^.]+$/, '').trim() || '(無題)';
+  return String(name || '')
+    .replace(/\.[^.]+$/, '')
+    .replace(/^[\u200B-\u200D\uFEFF\s]+|[\u200B-\u200D\uFEFF\s]+$/g, '')
+    .trim() || '(無題)';
 }
 
-/* ── テキスト類似度 ── */
+/* ── テキスト正規化（表記揺れ対応） ── */
 function normalizeForMatch(s){
-  return String(s || '')
+  var str = String(s || '');
+  try{ str = str.normalize('NFKC'); }catch(e){}
+  return str
     .replace(/【\d+】/g, ' ')
     .replace(/[\s\u3000_\-\.\u30fb\u30fc\uff0d\/／・、。！？!?,]/g, '')
     .replace(/[「」『』（）()\[\]【】]/g, '')
     .toLowerCase();
-}
-function bigrams(s){
-  var arr = [];
-  var len = s.length;
-  if(len === 0) return arr;
-  if(len === 1){ arr.push(s); return arr; }
-  for(var i=0; i<len-1; i++) arr.push(s.slice(i, i+2));
-  return arr;
-}
-function diceCoefficient(a, b){
-  var A = bigrams(a), B = bigrams(b);
-  if(!A.length || !B.length) return 0;
-  var countB = {};
-  B.forEach(function(g){ countB[g] = (countB[g]||0) + 1; });
-  var inter = 0;
-  A.forEach(function(g){
-    if(countB[g] > 0){ inter++; countB[g]--; }
-  });
-  return (2 * inter) / (A.length + B.length);
-}
-function scoreEntryMatch(baseName, entry){
-  var base = normalizeForMatch(baseName);
-  if(!base) return 0;
-  var fields = [entry.themeName, entry.title, entry.folderName].filter(Boolean);
-  var best = 0;
-  fields.forEach(function(f){
-    var n = normalizeForMatch(f);
-    if(!n) return;
-    var s = diceCoefficient(base, n);
-    if(n.length >= 3 && base.length >= 3){
-      if(n.indexOf(base) !== -1 || base.indexOf(n) !== -1){
-        s = Math.max(s, 0.75);
-      }
-    }
-    if(s > best) best = s;
-  });
-  return best;
 }
 
 /* ── Icons ── */
@@ -1147,14 +1135,11 @@ function countDataChanges(){
   if(!state.lastExportSnapshot) return 0;
   var last = state.lastExportSnapshot;
   var count = 0;
-
   if((last.commonPrompt || '') !== (state.commonPrompt || '')) count++;
-
   var lastFolders = {};
   (last.prompts || []).forEach(function(f){ lastFolders[f.id] = f; });
   var currentFolders = {};
   state.prompts.forEach(function(f){ currentFolders[f.id] = f; });
-
   state.prompts.forEach(function(f){
     var prev = lastFolders[f.id];
     if(!prev){ count++; return; }
@@ -1200,7 +1185,6 @@ function getEntryTab(entry){
   return 'generating';
 }
 
-/* ── Main tabs ── */
 function updateMainTabCounts(){
   var counts = { generating: 0, unplayed: 0, played: 0 };
   state.history.forEach(function(h){
@@ -1254,7 +1238,7 @@ function switchMainTab(tab, direction){
   try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){ window.scrollTo(0, 0); }
 }
 
-/* ── Swipe navigation (anywhere) ── */
+/* ── Swipe navigation ── */
 function initSwipeNavigation(){
   var startX = 0, startY = 0, tracking = false, startT = 0;
 
@@ -1266,7 +1250,7 @@ function initSwipeNavigation(){
       if(tgt.closest('input,textarea,select,.seek,.spdRange,[data-drag-folder],[data-drag-theme]')){
         tracking = false; return;
       }
-      if(tgt.closest('.player .btn, .player .skipBtn, .player .repBtn, .player .miniBtn')){
+      if(tgt.closest('.player .btn, .player .skipBtn, .player .repBtn, .player .miniBtn, .player .timerBtn')){
         tracking = false; return;
       }
     }
@@ -1279,6 +1263,7 @@ function initSwipeNavigation(){
   document.addEventListener('touchend', function(e){
     if(!tracking) return;
     tracking = false;
+    if(settingsDrag && settingsDrag.active) return;
     if(Date.now() - startT > 900) return;
     var t = e.changedTouches[0];
     var dx = t.clientX - startX;
@@ -1479,13 +1464,9 @@ function renderFoldersEditor(){
     var themesHtml = '';
     if(folder.themes.length){
       themesHtml = folder.themes.map(function(t){
-        var preview = (t.source || '').trim().split('\n')[0].slice(0, 40);
         return (
           '<div class="theme-item" data-theme-id="' + esc(t.id) + '" data-parent-folder="' + esc(folder.id) + '">' +
-            '<div class="theme-text-col">' +
-              '<div class="theme-name-label">' + esc(t.name || '(無題)') + '</div>' +
-              (preview ? '<div class="theme-source-preview">' + esc(preview) + '</div>' : '') +
-            '</div>' +
+            '<div class="theme-name-label">' + esc(t.name || '(無題)') + '</div>' +
             '<div class="drag-grip" data-drag-theme aria-label="ドラッグ">⠿</div>' +
           '</div>'
         );
@@ -1549,15 +1530,12 @@ function renderFoldersEditor(){
 function openFolderEdit(folderId){
   var folder = state.prompts.find(function(p){ return p.id === folderId; });
   if(!folder) return;
-
   editing = { type: 'folder', folderId: folderId, themeId: null };
-
   $('#editModalTitle').textContent = '個別プロンプトを編集';
   $('#editModalName').value = folder.name || '';
   $('#editModalTextLabel').textContent = 'プロンプト本文';
   $('#editModalText').value = folder.text || '';
   $('#editModalText').placeholder = 'この個別プロンプトの本文（{theme} でテーマ名を差し込み）';
-
   var delBtn = $('#editModalDelete');
   delBtn.textContent = 'この個別プロンプトを削除';
   delBtn.style.display = '';
@@ -1578,7 +1556,6 @@ function openFolderEdit(folderId){
     updateDataTabBadge();
     showToast('個別プロンプトを削除しました');
   };
-
   openEditModalUI();
 }
 
@@ -1587,15 +1564,12 @@ function openThemeEdit(folderId, themeId){
   if(!folder) return;
   var theme = folder.themes.find(function(t){ return t.id === themeId; });
   if(!theme) return;
-
   editing = { type: 'theme', folderId: folderId, themeId: themeId };
-
   $('#editModalTitle').textContent = 'テーマを編集';
   $('#editModalName').value = theme.name || '';
   $('#editModalTextLabel').textContent = 'ソーステキスト';
   $('#editModalText').value = theme.source || '';
   $('#editModalText').placeholder = 'ソーステキスト（Notebook に渡す内容）';
-
   var delBtn = $('#editModalDelete');
   delBtn.textContent = 'このテーマを削除';
   delBtn.style.display = '';
@@ -1613,7 +1587,6 @@ function openThemeEdit(folderId, themeId){
     updateDataTabBadge();
     showToast('テーマを削除しました');
   };
-
   openEditModalUI();
 }
 
@@ -1622,14 +1595,12 @@ function openEditModalUI(){
   document.body.classList.add('modal-open');
   editModalOpenedAt = Date.now();
 }
-
 function closeEditModal(){
   $('#editModal').classList.remove('show');
   editing = { type: null, folderId: null, themeId: null };
   updateModalOpenState();
   updateDataTabBadge();
 }
-
 function updateModalOpenState(){
   var anyOpen = !!document.querySelector('.modal.show');
   document.body.classList.toggle('modal-open', anyOpen);
@@ -1638,7 +1609,6 @@ function updateModalOpenState(){
 function bindEditModalInputs(){
   var nameEl = $('#editModalName');
   var textEl = $('#editModalText');
-
   nameEl.addEventListener('input', function(){
     if(editing.type === 'folder'){
       var f = state.prompts.find(function(p){ return p.id === editing.folderId; });
@@ -1651,7 +1621,6 @@ function bindEditModalInputs(){
     }
     updateDataTabBadge();
   });
-
   textEl.addEventListener('input', function(){
     if(editing.type === 'folder'){
       var f = state.prompts.find(function(p){ return p.id === editing.folderId; });
@@ -1664,7 +1633,6 @@ function bindEditModalInputs(){
     }
     updateDataTabBadge();
   });
-
   $('#editModalClose').addEventListener('click', closeEditModal);
   $('#editModal').addEventListener('click', function(e){
     if(e.target === $('#editModal')){
@@ -1674,11 +1642,10 @@ function bindEditModalInputs(){
   });
 }
 
-/* ── Long-press to edit（長押し判定の瞬間に開く） ── */
+/* ── Long-press to edit（長押しした瞬間に開く） ── */
 function openEditFromMain(kind, id){
-  if(kind === 'folder'){
-    openFolderEdit(id);
-  } else if(kind === 'theme'){
+  if(kind === 'folder'){ openFolderEdit(id); }
+  else if(kind === 'theme'){
     var f = findFolderByThemeId(id);
     if(f) openThemeEdit(f.id, id);
   }
@@ -1701,10 +1668,8 @@ function initTagInteractions(){
     if(btn.closest('#promptTags')) kind = 'folder';
     else if(btn.closest('#tags')) kind = 'theme';
     if(!kind) return;
-
     startX = e.clientX; startY = e.clientY;
-    pendingBtn = btn;
-    pendingKind = kind;
+    pendingBtn = btn; pendingKind = kind;
     clearTimeout(pressTimer);
     pressTimer = setTimeout(function(){
       pressTimer = null;
@@ -1727,9 +1692,7 @@ function initTagInteractions(){
     clearTimeout(pressTimer); pressTimer = null;
     pendingBtn = null; pendingKind = null;
   });
-
   document.addEventListener('pointercancel', reset);
-
   document.addEventListener('click', function(e){
     if(Date.now() < suppressClickUntil){
       e.preventDefault();
@@ -1737,7 +1700,6 @@ function initTagInteractions(){
       if(e.stopImmediatePropagation) e.stopImmediatePropagation();
     }
   }, true);
-
   document.addEventListener('contextmenu', function(e){
     if(e.target && e.target.closest && e.target.closest('button.tag')) e.preventDefault();
   });
@@ -1750,10 +1712,8 @@ function fallbackCopy(text){
   ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
   document.body.appendChild(ta);
   ta.focus(); ta.select();
-  var ok = false;
-  try{ ok = document.execCommand('copy'); }catch(e){}
+  try{ document.execCommand('copy'); }catch(e){}
   ta.remove();
-  return ok;
 }
 function copyQuiet(text){
   if(navigator.clipboard && navigator.clipboard.writeText){
@@ -1768,7 +1728,6 @@ function openExternal(url){
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   var standalone = (window.navigator.standalone === true) ||
     (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
-
   if(isIOS && standalone){
     var navigated = false;
     var onVis = function(){ if(document.visibilityState === 'hidden') navigated = true; };
@@ -1781,16 +1740,10 @@ function openExternal(url){
     }, 1000);
     return;
   }
-
   var a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(function(){
-    if(a.parentNode) a.parentNode.removeChild(a);
-  }, 2000);
+  a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ if(a.parentNode) a.parentNode.removeChild(a); }, 2000);
 }
 
 /* ── Generate ── */
@@ -1800,8 +1753,7 @@ function buildPromptText(folder, theme){
   if(common) parts.push(common);
   var indiv = (folder.text || '').trim();
   if(indiv) parts.push(indiv);
-  var combined = parts.join('\n\n');
-  return combined.replace(/\{theme\}/g, theme.name || '');
+  return parts.join('\n\n').replace(/\{theme\}/g, theme.name || '');
 }
 
 async function handleGenerate(){
@@ -1828,16 +1780,14 @@ async function handleGenerate(){
     }
 
     var num;
-    if(reuseEntry){
-      num = reuseEntry.number;
-    } else {
-      num = state.nextNumber;
-    }
+    if(reuseEntry){ num = reuseEntry.number; }
+    else { num = state.nextNumber; }
 
-    var instruction = 'タイトルの頭に【' + formatNum(num) + '】を付けてください。';
+    // クリップボードコピー用：指示文は含めない
     var promptText = buildPromptText(folder, theme);
-    promptText = (promptText.trim() ? promptText + '\n\n' : '') + instruction;
 
+    // 受け渡し用テキスト（share）：指示文を含める
+    var instruction = 'タイトルの頭に【' + formatNum(num) + '】を付けてください。';
     var sourceText = ((theme.source || '').trim() || (theme.name || '').trim());
     sourceText = sourceText ? (sourceText + '\n\n' + instruction) : instruction;
 
@@ -1851,16 +1801,9 @@ async function handleGenerate(){
       reuseEntry.title = title;
     } else {
       var entry = {
-        id: uid(),
-        number: num,
-        title: title,
-        date: dateLabel,
-        time: nowMs,
-        read: false,
-        hasAudio: false,
-        audioDuration: 0,
-        folderName: folder.name,
-        themeName: theme.name
+        id: uid(), number: num, title: title, date: dateLabel, time: nowMs,
+        read: false, hasAudio: false, audioDuration: 0,
+        folderName: folder.name, themeName: theme.name
       };
       state.history.unshift(entry);
       state.lastGenId = entry.id;
@@ -1926,9 +1869,7 @@ function probeAudio(file){
 async function importAudioTo(entry, file, isNew){
   if(!entry || !file) return;
   if(!isAudioFile(file)){ return; }
-
   var dur = await probeAudio(file);
-
   try{
     if(db) await dbPutAudio(entry.id, file, file.name);
   }catch(e){
@@ -1936,22 +1877,16 @@ async function importAudioTo(entry, file, isNew){
     showToast('音声の保存に失敗しました');
     return;
   }
-
   if(audioUrls[entry.id]){
     try{ URL.revokeObjectURL(audioUrls[entry.id]); }catch(e){}
   }
   audioUrls[entry.id] = URL.createObjectURL(file);
-
   entry.hasAudio = true;
   entry.audioDuration = dur;
   entry.audioName = file.name;
-  if(isNew){
-    entry.title = cleanTitleFromFile(file.name);
-  }
-
+  if(isNew){ entry.title = cleanTitleFromFile(file.name); }
   audioPositions[entry.id] = 0;
   if(db) dbSavePos(entry.id, 0).catch(function(){});
-
   save();
   state.mainTab = 'unplayed';
   renderAll();
@@ -1975,82 +1910,82 @@ function pickFileFor(entryId){
   input.click();
 }
 
-/* ── Audio matching ── */
+/* ── Audio matching (containment-based) ── */
 function createEntryFromAudio(file){
   var num = state.nextNumber;
   var entry = {
-    id: uid(),
-    number: num,
-    title: cleanTitleFromFile(file.name),
-    date: formatDateLabel(new Date()),
-    time: Date.now(),
-    read: false,
-    hasAudio: false,
-    audioDuration: 0,
-    fromAudio: true
+    id: uid(), number: num, title: cleanTitleFromFile(file.name),
+    date: formatDateLabel(new Date()), time: Date.now(),
+    read: false, hasAudio: false, audioDuration: 0, fromAudio: true
   };
   state.history.unshift(entry);
   state.nextNumber = num + 1;
   return entry;
 }
 
-function getMatchCandidates(file){
+function getMatchingEntries(file){
   var baseName = cleanTitleFromFile(file.name);
-  return state.history
-    .filter(function(h){ return !h.hasAudio; })
-    .map(function(h){ return { entry: h, score: scoreEntryMatch(baseName, h) }; })
-    .filter(function(c){ return c.score >= MIN_CANDIDATE_SCORE; })
-    .sort(function(a, b){ return b.score - a.score; });
-}
-
-function decideTargetForFile(file){
-  var candidates = getMatchCandidates(file);
-
-  if(!candidates.length){
-    return Promise.resolve({ action: 'new' });
-  }
-
-  var best = candidates[0];
-  var second = candidates[1] || null;
-  var clear = best.score >= AUTO_MATCH_THRESHOLD &&
-              (!second || (best.score - second.score) >= AUTO_MATCH_MARGIN);
-
-  if(clear){
-    return Promise.resolve({ action: 'match', entry: best.entry });
-  }
-
-  return new Promise(function(resolve){
-    openMatchPicker(file, candidates, resolve);
+  var base = normalizeForMatch(baseName);
+  if(!base) return [];
+  return state.history.filter(function(h){
+    if(h.hasAudio) return false;
+    var themeName = normalizeForMatch(h.themeName);
+    if(!themeName || themeName.length < MIN_THEME_LEN) return false;
+    return base.indexOf(themeName) !== -1;
   });
 }
 
-function openMatchPicker(file, candidates, resolve){
-  var modal = $('#matchModal');
-  if(!modal){
-    resolve({ action: 'new' });
-    return;
+function decideTargetForFile(file){
+  var matches = getMatchingEntries(file);
+  if(matches.length === 1){
+    return Promise.resolve({ action: 'match', entry: matches[0] });
   }
+  var allGenerating = state.history.filter(function(h){ return !h.hasAudio; });
+  return new Promise(function(resolve){
+    openMatchPicker(file, allGenerating, matches, resolve);
+  });
+}
+
+function openMatchPicker(file, allEntries, matchedEntries, resolve){
+  var modal = $('#matchModal');
+  if(!modal){ resolve({ action: 'new' }); return; }
   pendingMatchResolve = resolve;
 
   $('#matchFileName').textContent = file.name;
+  var hintEl = $('#matchFileHint');
+  if(hintEl){
+    if(matchedEntries.length > 1) hintEl.textContent = 'テーマ名に複数一致しました。選択してください';
+    else if(matchedEntries.length === 0) hintEl.textContent = 'テーマ名を含むデータが見つかりません';
+    else hintEl.textContent = '紐づける生成中データを選択してください';
+  }
+
+  var matchedIds = matchedEntries.map(function(h){ return h.id; });
+  var sorted = allEntries.slice().sort(function(a, b){
+    var aM = matchedIds.indexOf(a.id) !== -1;
+    var bM = matchedIds.indexOf(b.id) !== -1;
+    if(aM && !bM) return -1;
+    if(!aM && bM) return 1;
+    return (b.time || 0) - (a.time || 0);
+  });
 
   var listEl = $('#matchCandidates');
   listEl.innerHTML = '';
-  if(!candidates.length){
-    listEl.innerHTML = '<div class="match-empty">該当する生成中データが見つかりません</div>';
+  if(!sorted.length){
+    listEl.innerHTML = '<div class="match-empty">生成中のデータがありません</div>';
   } else {
-    candidates.forEach(function(c){
+    sorted.forEach(function(entry){
+      var isMatch = matchedIds.indexOf(entry.id) !== -1;
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'match-cand';
       btn.innerHTML =
         '<div class="match-cand-text">' +
-          '<div class="match-cand-title">' + numPill(c.entry.number) + esc(c.entry.title || '(無題)') + '</div>' +
-          '<div class="match-cand-sub">' + esc(c.entry.date || '') + '</div>' +
+          '<div class="match-cand-title">' + numPill(entry.number) + esc(entry.title || '(無題)') + '</div>' +
+          '<div class="match-cand-sub">' + esc(entry.date || '') + '</div>' +
         '</div>' +
-        '<span class="match-cand-score">' + Math.round(c.score * 100) + '%</span>';
+        (isMatch ? '<span class="match-cand-badge">テーマ一致</span>' : '');
       btn.addEventListener('click', function(){
-        finishMatch({ action: 'match', entry: c.entry });
+        finishMatch({ action: 'match', entry: entry });
       });
       listEl.appendChild(btn);
     });
@@ -2084,20 +2019,13 @@ async function handleAudioDrops(files){
   for(var i=0; i<list.length; i++){
     var file = list[i];
     var result = await decideTargetForFile(file);
-
     if(result.action === 'skip'){ skipped++; continue; }
-
-    var target;
-    var isNew = false;
+    var target; var isNew = false;
     if(result.action === 'new'){
-      target = createEntryFromAudio(file);
-      isNew = true;
-      added++;
+      target = createEntryFromAudio(file); isNew = true; added++;
     } else {
-      target = result.entry;
-      matched++;
+      target = result.entry; matched++;
     }
-
     await importAudioTo(target, file, isNew);
     if(!firstImportedId) firstImportedId = target.id;
   }
@@ -2108,22 +2036,18 @@ async function handleAudioDrops(files){
     showToast(skipped + ' 件をスキップしました');
     return;
   }
-
   var parts = [];
   if(matched) parts.push(matched + ' 件紐づけ');
   if(added) parts.push(added + ' 件追加');
   if(skipped) parts.push(skipped + ' 件スキップ');
   if(parts.length) showToast(parts.join(' / '));
-
-  if(firstImportedId){
-    setTimeout(function(){ playEntry(firstImportedId); }, 400);
-  }
+  if(firstImportedId){ setTimeout(function(){ playEntry(firstImportedId); }, 400); }
 }
 
 /* ── Playback ── */
 var audio = document.getElementById('audio');
-var playerEl, seekEl, pTitle, pSub, pCurrent, pTotal, playBtn, headBtn, back15Btn, fwd5Btn, fwd15Btn,
-    repBtn, repNum, speedSlider, speedValue, resetSpeedBtn;
+var playerEl, seekEl, pTitle, pSub, pCurrent, pTotal, playBtn, headBtn, back15Btn, fwd15Btn,
+    timerBtn, repBtn, repNum, playAllBtn, speedSlider, speedValue, resetSpeedBtn;
 
 function cachePlayerEls(){
   playerEl = $('#player');
@@ -2135,10 +2059,11 @@ function cachePlayerEls(){
   playBtn = $('#playBtn');
   headBtn = $('#headBtn');
   back15Btn = $('#back15Btn');
-  fwd5Btn = $('#fwd5Btn');
   fwd15Btn = $('#fwd15Btn');
+  timerBtn = $('#timerBtn');
   repBtn = $('#repeatBtn');
   repNum = $('#repNum');
+  playAllBtn = $('#playAllBtn');
   speedSlider = $('#speedSlider');
   speedValue = $('#speedValue');
   resetSpeedBtn = $('#resetSpeedBtn');
@@ -2219,6 +2144,16 @@ function seekToStart(){
   updatePositionState();
 }
 
+/* ── Play all unplayed ── */
+function playAllUnplayed(){
+  var unplayed = state.history.filter(function(h){ return h.hasAudio && !h.read; });
+  if(!unplayed.length){ showToast('未再生のファイルがありません'); return; }
+  var sorted = unplayed.slice().sort(function(a,b){ return (a.time||0) - (b.time||0); });
+  playQueue = sorted.map(function(h){ return h.id; });
+  var firstId = playQueue.shift();
+  if(firstId) playEntry(firstId);
+}
+
 function onEnded(){
   var entry = getEntry(currentId);
   if(!entry){ renderHistory(); return; }
@@ -2232,6 +2167,16 @@ function onEnded(){
   if(!entry.read){
     entry.read = true;
     save();
+  }
+
+  // Play-all-unplayed queue
+  while(playQueue.length){
+    var nextId = playQueue.shift();
+    var nextEntry = getEntry(nextId);
+    if(nextEntry && nextEntry.hasAudio && !nextEntry.read){
+      playEntry(nextId);
+      return;
+    }
   }
 
   var withAudio = state.history.filter(function(h){ return h.hasAudio; });
@@ -2300,13 +2245,51 @@ function setRepeat(mode){
   save();
 }
 
+/* ── Timer (30 min) ── */
+function toggleTimer(){
+  if(timerEndAt > 0){ cancelTimer(); showToast('タイマーを解除しました'); }
+  else { startTimer(TIMER_DURATION_MS); showToast('30分タイマーを開始しました'); }
+}
+function startTimer(ms){
+  cancelTimer();
+  timerEndAt = Date.now() + ms;
+  updateTimerBtn();
+  timerInterval = setInterval(function(){
+    if(Date.now() >= timerEndAt){
+      cancelTimer();
+      if(audio.src && !audio.paused) audio.pause();
+      showToast('タイマーが終了しました');
+    } else {
+      updateTimerBtn();
+    }
+  }, 500);
+}
+function cancelTimer(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
+  timerEndAt = 0;
+  updateTimerBtn();
+}
+function updateTimerBtn(){
+  if(!timerBtn) return;
+  if(timerEndAt > 0){
+    var remain = Math.max(0, timerEndAt - Date.now());
+    var totalSec = Math.ceil(remain / 1000);
+    var min = Math.floor(totalSec / 60);
+    var sec = totalSec % 60;
+    timerBtn.innerHTML = '<span class="timer-text">' + min + ':' + String(sec).padStart(2,'0') + '</span>';
+    timerBtn.classList.add('active');
+    timerBtn.setAttribute('aria-label', 'タイマー残り' + min + '分' + sec + '秒（タップで解除）');
+  } else {
+    timerBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+    timerBtn.classList.remove('active');
+    timerBtn.setAttribute('aria-label', '30分タイマー開始');
+  }
+}
+
 /* ── Media Session ── */
 function updateMediaSession(entry){
   if(!('mediaSession' in navigator)) return;
-  if(!entry){
-    try{ navigator.mediaSession.metadata = null; }catch(e){}
-    return;
-  }
+  if(!entry){ try{ navigator.mediaSession.metadata = null; }catch(e){} return; }
   try{
     navigator.mediaSession.metadata = new MediaMetadata({
       title: numTag(entry.number) + entry.title,
@@ -2352,7 +2335,6 @@ function deleteHistory(id){
   var entry = getEntry(id);
   if(!entry) return;
   if(!confirm('このCastを削除しますか？（音声も削除されます）')) return;
-
   if(currentId === id){
     audio.pause();
     audio.removeAttribute('src');
@@ -2361,13 +2343,9 @@ function deleteHistory(id){
     if(playerEl) playerEl.classList.remove('show');
     updateMediaSession(null);
   }
-  if(audioUrls[id]){
-    try{ URL.revokeObjectURL(audioUrls[id]); }catch(e){}
-    delete audioUrls[id];
-  }
+  if(audioUrls[id]){ try{ URL.revokeObjectURL(audioUrls[id]); }catch(e){} delete audioUrls[id]; }
   delete audioPositions[id];
   if(db){ dbDelAudio(id).catch(function(){}); dbDelPos(id).catch(function(){}); }
-
   state.history = state.history.filter(function(h){ return h.id !== id; });
   if(state.lastGenId === id) state.lastGenId = null;
   save();
@@ -2379,20 +2357,15 @@ function clearPlayed(){
   var played = state.history.filter(function(h){ return h.hasAudio && h.read; });
   if(!played.length){ showToast('再生済みの項目がありません'); return; }
   if(!confirm('再生済みの ' + played.length + ' 件をすべて削除しますか？\nこの操作は取り消せません。')) return;
-
   played.forEach(function(h){
     if(currentId === h.id){
-      audio.pause();
-      audio.removeAttribute('src');
+      audio.pause(); audio.removeAttribute('src');
       try{ audio.load(); }catch(e){}
       currentId = null;
       if(playerEl) playerEl.classList.remove('show');
       updateMediaSession(null);
     }
-    if(audioUrls[h.id]){
-      try{ URL.revokeObjectURL(audioUrls[h.id]); }catch(e){}
-      delete audioUrls[h.id];
-    }
+    if(audioUrls[h.id]){ try{ URL.revokeObjectURL(audioUrls[h.id]); }catch(e){} delete audioUrls[h.id]; }
     delete audioPositions[h.id];
     if(db){ dbDelAudio(h.id).catch(function(){}); dbDelPos(h.id).catch(function(){}); }
   });
@@ -2430,10 +2403,7 @@ function switchSettingsTab(name, direction){
 function startAutoScrollLoop(){
   if(settingsAutoScrollRAF) return;
   var step = function(){
-    if(!settingsDrag || !settingsDrag.active){
-      settingsAutoScrollRAF = null;
-      return;
-    }
+    if(!settingsDrag || !settingsDrag.active){ settingsAutoScrollRAF = null; return; }
     if(settingsDrag.autoScrollDir){
       var scroller = $('.tab-scroll');
       if(scroller) scroller.scrollTop += settingsDrag.autoScrollDir * 10;
@@ -2450,21 +2420,15 @@ function initSettingsDrag(){
     var isFolder = grip.hasAttribute('data-drag-folder');
     var container = isFolder ? grip.closest('[data-folder-id]') : grip.closest('[data-theme-id]');
     if(!container) return;
-
     var folderEl = isFolder ? container : container.closest('[data-folder-id]');
     if(!folderEl) return;
-
     e.preventDefault();
     settingsDrag = {
       kind: isFolder ? 'folder' : 'theme',
       folderId: folderEl.dataset.folderId,
       themeId: isFolder ? null : container.dataset.themeId,
-      startX: e.clientX,
-      startY: e.clientY,
-      active: false,
-      ghost: null,
-      originalEl: container,
-      dropTarget: null,
+      startX: e.clientX, startY: e.clientY,
+      active: false, ghost: null, originalEl: container, dropTarget: null,
       autoScrollDir: 0,
       name: isFolder
         ? (folderEl.querySelector('.folder-name-label') || {}).textContent
@@ -2490,7 +2454,6 @@ function initSettingsDrag(){
     settingsDrag.ghost.style.left = (e.clientX + 12) + 'px';
     settingsDrag.ghost.style.top = (e.clientY + 12) + 'px';
     updateSettingsDropTarget(e.clientX, e.clientY);
-
     var scroller = $('.tab-scroll');
     if(scroller){
       var rect = scroller.getBoundingClientRect();
@@ -2501,14 +2464,11 @@ function initSettingsDrag(){
     }
   });
 
-  document.addEventListener('pointerup', function(e){
+  document.addEventListener('pointerup', function(){
     if(!settingsDrag) return;
-    if(settingsDrag.active){
-      performSettingsDrop();
-    }
+    if(settingsDrag.active) performSettingsDrop();
     cleanupSettingsDrag();
   });
-
   document.addEventListener('pointercancel', cleanupSettingsDrag);
 }
 
@@ -2517,7 +2477,6 @@ function updateSettingsDropTarget(x, y){
     el.classList.remove('drop-before', 'drop-after', 'drop-over');
   });
   settingsDrag.dropTarget = null;
-
   var el = document.elementFromPoint(x, y);
   if(!el) return;
   if(settingsDrag.ghost && settingsDrag.ghost.contains(el)) return;
@@ -2539,7 +2498,9 @@ function updateSettingsDropTarget(x, y){
   var targetTheme = el.closest('[data-theme-id]');
   if(targetTheme && targetTheme.dataset.themeId !== settingsDrag.themeId){
     var r2 = targetTheme.getBoundingClientRect();
-    if(y < r2.top + r2.height / 2){
+    // 2列表示なので左右位置で判定
+    var midX = r2.left + r2.width / 2;
+    if(x < midX){
       targetTheme.classList.add('drop-before');
     } else {
       targetTheme.classList.add('drop-after');
@@ -2565,10 +2526,8 @@ function performSettingsDrop(){
     var targetFolderId = dt.el.dataset.folderId;
     var targetIdx = state.prompts.findIndex(function(p){ return p.id === targetFolderId; });
     if(targetIdx === -1) return;
-
     var insertBefore = dt.el.classList.contains('drop-before');
     var folder = state.prompts.splice(srcIdx, 1)[0];
-
     var finalIdx;
     if(insertBefore){
       finalIdx = (srcIdx < targetIdx) ? targetIdx - 1 : targetIdx;
@@ -2577,10 +2536,7 @@ function performSettingsDrop(){
     }
     finalIdx = Math.max(0, Math.min(state.prompts.length, finalIdx));
     state.prompts.splice(finalIdx, 0, folder);
-    save();
-    renderFoldersEditor();
-    renderPromptTags();
-    updateDataTabBadge();
+    save(); renderFoldersEditor(); renderPromptTags(); updateDataTabBadge();
     return;
   }
 
@@ -2597,11 +2553,8 @@ function performSettingsDrop(){
     if(!targetFolder) return;
     var targetThemeIdx = targetFolder.themes.findIndex(function(t){ return t.id === targetThemeId; });
     if(targetThemeIdx === -1) return;
-
     var insertBefore2 = dt.el.classList.contains('drop-before');
-
     srcFolder.themes.splice(srcThemeIdx, 1);
-
     var finalIdx2;
     if(srcFolder === targetFolder){
       if(insertBefore2){
@@ -2615,9 +2568,7 @@ function performSettingsDrop(){
       finalIdx2 = insertBefore2 ? targetThemeIdx : targetThemeIdx + 1;
       finalIdx2 = Math.max(0, Math.min(targetFolder.themes.length, finalIdx2));
       targetFolder.themes.splice(finalIdx2, 0, theme);
-      if(state.selectedThemeId === theme.id){
-        state.selectedPromptId = targetFolder.id;
-      }
+      if(state.selectedThemeId === theme.id){ state.selectedPromptId = targetFolder.id; }
     }
   } else if(dt.type === 'folder-as-theme'){
     var targetFolderId3 = dt.el.dataset.folderId;
@@ -2626,17 +2577,10 @@ function performSettingsDrop(){
     if(targetFolder3 === srcFolder) return;
     srcFolder.themes.splice(srcThemeIdx, 1);
     targetFolder3.themes.push(theme);
-    if(state.selectedThemeId === theme.id){
-      state.selectedPromptId = targetFolder3.id;
-    }
+    if(state.selectedThemeId === theme.id){ state.selectedPromptId = targetFolder3.id; }
   }
 
-  save();
-  renderFoldersEditor();
-  renderPromptTags();
-  renderThemeTags();
-  renderShareBtn();
-  updateDataTabBadge();
+  save(); renderFoldersEditor(); renderPromptTags(); renderThemeTags(); renderShareBtn(); updateDataTabBadge();
 }
 
 function cleanupSettingsDrag(){
@@ -2644,10 +2588,7 @@ function cleanupSettingsDrag(){
     if(settingsDrag.ghost && settingsDrag.ghost.parentNode) settingsDrag.ghost.parentNode.removeChild(settingsDrag.ghost);
     if(settingsDrag.originalEl) settingsDrag.originalEl.style.opacity = '';
   }
-  if(settingsAutoScrollRAF){
-    cancelAnimationFrame(settingsAutoScrollRAF);
-    settingsAutoScrollRAF = null;
-  }
+  if(settingsAutoScrollRAF){ cancelAnimationFrame(settingsAutoScrollRAF); settingsAutoScrollRAF = null; }
   $$('.drop-before, .drop-after, .drop-over').forEach(function(el){
     el.classList.remove('drop-before', 'drop-after', 'drop-over');
   });
@@ -2657,38 +2598,26 @@ function cleanupSettingsDrag(){
 /* ── Export / Import ── */
 function exportData(){
   var data = {
-    app: 'MyCast',
-    version: 4,
-    exportedAt: new Date().toISOString(),
+    app: 'MyCast', version: 4, exportedAt: new Date().toISOString(),
     commonPrompt: state.commonPrompt,
     prompts: state.prompts,
     selectedPromptId: state.selectedPromptId,
     selectedThemeId: state.selectedThemeId,
     nextNumber: state.nextNumber,
-    rate: state.rate,
-    repeatMode: state.repeatMode,
-    mainTab: state.mainTab
+    rate: state.rate, repeatMode: state.repeatMode, mainTab: state.mainTab
   };
   var json = JSON.stringify(data, null, 2);
   var blob = new Blob([json], { type: 'application/json' });
   var url = URL.createObjectURL(blob);
-  var name = 'mycast-backup.json';
-
   var a = document.createElement('a');
-  a.href = url;
-  a.download = name;
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
+  a.href = url; a.download = 'mycast-backup.json'; a.rel = 'noopener';
+  document.body.appendChild(a); a.click();
   setTimeout(function(){
     if(a.parentNode) a.parentNode.removeChild(a);
     URL.revokeObjectURL(url);
   }, 5000);
-
   state.lastExportSnapshot = computeDataSnapshot();
-  save();
-  updateDataTabBadge();
-
+  save(); updateDataTabBadge();
   showToast('エクスポートしました');
 }
 
@@ -2707,11 +2636,8 @@ function importData(file){
     state.prompts = data.prompts;
 
     if(Array.isArray(data.history)){
-      Object.keys(audioUrls).forEach(function(k){
-        try{ URL.revokeObjectURL(audioUrls[k]); }catch(e){}
-      });
-      audioUrls = {};
-      audioPositions = {};
+      Object.keys(audioUrls).forEach(function(k){ try{ URL.revokeObjectURL(audioUrls[k]); }catch(e){} });
+      audioUrls = {}; audioPositions = {};
       state.history = data.history.map(function(h){
         return {
           id: safeId(h.id) ? h.id : uid(),
@@ -2719,8 +2645,7 @@ function importData(file){
           title: typeof h.title === 'string' ? h.title : '',
           date: typeof h.date === 'string' ? h.date : '',
           time: typeof h.time === 'number' ? h.time : 0,
-          read: !!h.read,
-          hasAudio: false,
+          read: !!h.read, hasAudio: false,
           audioDuration: (typeof h.audioDuration === 'number') ? h.audioDuration : 0,
           folderName: typeof h.folderName === 'string' ? h.folderName : '',
           themeName: typeof h.themeName === 'string' ? h.themeName : ''
@@ -2735,15 +2660,11 @@ function importData(file){
     if(typeof data.repeatMode === 'string') state.repeatMode = data.repeatMode;
     if(typeof data.mainTab === 'string') state.mainTab = data.mainTab;
 
-    migrateSchema();
-    normalize();
+    migrateSchema(); normalize();
     state.lastExportSnapshot = computeDataSnapshot();
     save();
-    renderAll();
-    renderFoldersEditor();
-    renderCommonPrompt();
-    setRate(state.rate);
-    setRepeat(state.repeatMode);
+    renderAll(); renderFoldersEditor(); renderCommonPrompt();
+    setRate(state.rate); setRepeat(state.repeatMode);
     switchMainTab(state.mainTab);
     updateDataTabBadge();
     showToast('インポートしました');
@@ -2758,7 +2679,6 @@ document.addEventListener('DOMContentLoaded', async function(){
   cachePlayerEls();
 
   load();
-
   if(!state.lastExportSnapshot){
     state.lastExportSnapshot = computeDataSnapshot();
     save();
@@ -2783,6 +2703,7 @@ document.addEventListener('DOMContentLoaded', async function(){
   setRate(state.rate);
   setRepeat(state.repeatMode);
   updateDataTabBadge();
+  updateTimerBtn();
 
   if(speedSlider){
     var p0 = ((state.rate - 0.5) / 2.5) * 100;
@@ -2790,7 +2711,6 @@ document.addEventListener('DOMContentLoaded', async function(){
     speedSlider.value = state.rate;
   }
 
-  // ─── プロンプトタグ ───
   var promptTagsEl = $('#promptTags');
   if(promptTagsEl){
     promptTagsEl.addEventListener('click', function(e){
@@ -2804,33 +2724,26 @@ document.addEventListener('DOMContentLoaded', async function(){
           state.selectedThemeId = folder.themes[0] ? folder.themes[0].id : null;
         }
       }
-      save();
-      renderPromptTags();
-      renderThemeTags();
+      save(); renderPromptTags(); renderThemeTags();
     });
   }
 
-  // ─── テーマタグ ───
   var tagsEl = $('#tags');
   if(tagsEl){
     tagsEl.addEventListener('click', function(e){
       var btn = e.target.closest('button.tag');
       if(!btn || !btn.dataset.id) return;
       state.selectedThemeId = btn.dataset.id;
-      save();
-      renderThemeTags();
+      save(); renderThemeTags();
     });
   }
 
-  // ─── 生成 ───
   var shareBtn = $('#shareBtn');
   if(shareBtn) shareBtn.addEventListener('click', handleGenerate);
 
-  // ─── Notebook ───
   var notebookBtn = $('#notebookBtn');
   if(notebookBtn) notebookBtn.addEventListener('click', function(){ openExternal(NOTEBOOK_URL); });
 
-  // ─── 設定 ───
   var settingsBtn = $('#settingsBtn');
   if(settingsBtn) settingsBtn.addEventListener('click', function(){
     renderFoldersEditor();
@@ -2857,7 +2770,6 @@ document.addEventListener('DOMContentLoaded', async function(){
     b.addEventListener('click', function(e){ switchSettingsTab(e.currentTarget.dataset.tab); });
   });
 
-  // ─── 共通プロンプト ───
   var commonInput = $('#commonPromptInput');
   if(commonInput) commonInput.addEventListener('input', function(e){
     state.commonPrompt = e.target.value;
@@ -2865,20 +2777,15 @@ document.addEventListener('DOMContentLoaded', async function(){
     updateDataTabBadge();
   });
 
-  // ─── 個別プロンプト追加 ───
   var addFolderBtn = $('#addFolderBtn');
   if(addFolderBtn) addFolderBtn.addEventListener('click', function(){
     var f = { id: uid(), name: '新規プロンプト', text: state.commonPrompt || DEFAULT_PROMPT,
       themes: [{ id: uid(), name: '新規テーマ', source: '' }], open: true };
     state.prompts.push(f);
-    save();
-    renderFoldersEditor();
-    renderPromptTags();
-    updateDataTabBadge();
+    save(); renderFoldersEditor(); renderPromptTags(); updateDataTabBadge();
     setTimeout(function(){ openFolderEdit(f.id); }, 80);
   });
 
-  // ─── エクスポート / インポート ───
   var exportBtn = $('#exportBtn');
   if(exportBtn) exportBtn.addEventListener('click', exportData);
   var importBtn = $('#importBtn');
@@ -2890,7 +2797,6 @@ document.addEventListener('DOMContentLoaded', async function(){
     if(f) importData(f);
   });
 
-  // ─── マッチ選択モーダル ───
   var matchModalEl = $('#matchModal');
   if(matchModalEl){
     matchModalEl.addEventListener('click', function(e){
@@ -2898,7 +2804,6 @@ document.addEventListener('DOMContentLoaded', async function(){
     });
   }
 
-  // ─── メインタブ ───
   var mainTabsEl = $('#mainTabs');
   if(mainTabsEl){
     mainTabsEl.addEventListener('click', function(e){
@@ -2908,11 +2813,9 @@ document.addEventListener('DOMContentLoaded', async function(){
     });
   }
 
-  // ─── 再生済み一括削除 ───
   var clearPlayedBtn = $('#clearPlayedBtn');
   if(clearPlayedBtn) clearPlayedBtn.addEventListener('click', clearPlayed);
 
-  // ─── 履歴操作 ───
   ['#listGenerating', '#listUnplayed', '#listPlayed'].forEach(function(sel){
     var el = $(sel);
     if(!el) return;
@@ -2928,22 +2831,23 @@ document.addEventListener('DOMContentLoaded', async function(){
       var id = row.dataset.id;
       var entry = getEntry(id);
       if(!entry) return;
+      playQueue = [];
       if(entry.hasAudio) playEntry(id);
       else pickFileFor(id);
     });
   });
 
-  // ─── プレイヤー ───
   if(playBtn) playBtn.addEventListener('click', togglePlay);
   if(headBtn) headBtn.addEventListener('click', seekToStart);
   if(back15Btn) back15Btn.addEventListener('click', function(){ skip(-15); });
-  if(fwd5Btn) fwd5Btn.addEventListener('click', function(){ skip(5); });
   if(fwd15Btn) fwd15Btn.addEventListener('click', function(){ skip(15); });
+  if(timerBtn) timerBtn.addEventListener('click', toggleTimer);
   if(repBtn) repBtn.addEventListener('click', function(){
     var n = state.repeatMode === 'off' ? 'all'
           : state.repeatMode === 'all' ? 'one' : 'off';
     setRepeat(n);
   });
+  if(playAllBtn) playAllBtn.addEventListener('click', playAllUnplayed);
   if(speedSlider) speedSlider.addEventListener('input', function(){
     setRate(parseFloat(speedSlider.value), false);
   });
@@ -2975,18 +2879,15 @@ document.addEventListener('DOMContentLoaded', async function(){
     });
   }
 
-  // ─── Audio events ───
   audio.addEventListener('play', function(){
     document.body.classList.add('is-playing');
     if('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
-    renderHistory();
-    updatePlayer();
+    renderHistory(); updatePlayer();
   });
   audio.addEventListener('pause', function(){
     document.body.classList.remove('is-playing');
     if('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-    renderHistory();
-    updatePlayer();
+    renderHistory(); updatePlayer();
     if(currentId){
       audioPositions[currentId] = audio.currentTime || 0;
       if(db) dbSavePos(currentId, audioPositions[currentId]).catch(function(){});
@@ -2998,12 +2899,10 @@ document.addEventListener('DOMContentLoaded', async function(){
       if(entry && isFinite(audio.duration) && audio.duration > 0 &&
          Math.abs((entry.audioDuration || 0) - audio.duration) > 0.5){
         entry.audioDuration = audio.duration;
-        save();
-        renderHistory();
+        save(); renderHistory();
       }
     }
-    setSeekUI();
-    updatePositionState();
+    setSeekUI(); updatePositionState();
   });
   audio.addEventListener('timeupdate', function(){
     if(currentId) audioPositions[currentId] = audio.currentTime;
@@ -3036,7 +2935,6 @@ document.addEventListener('DOMContentLoaded', async function(){
 
   setupMediaSession();
 
-  // ─── ドラッグ&ドロップ ───
   var dragDepth = 0;
   var overlay = $('#dropOverlay');
   window.addEventListener('dragenter', function(e){
@@ -3062,7 +2960,6 @@ document.addEventListener('DOMContentLoaded', async function(){
   document.addEventListener('dragover', function(e){ e.preventDefault(); });
   document.addEventListener('drop', function(e){ e.preventDefault(); });
 
-  // ダブルタップズーム抑止
   var lastTouch = 0;
   document.addEventListener('touchend', function(e){
     var now = Date.now();
