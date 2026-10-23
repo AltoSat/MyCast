@@ -28,7 +28,7 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
-    min-height:100%;overscroll-behavior:none}
+    min-height:100%;overscroll-behavior:none;overflow-x:hidden}
   body{
     padding:calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 280px);
     max-width:480px;margin:0 auto;min-height:100dvh;
@@ -45,21 +45,36 @@
   }
   .app-wrap{position:relative;z-index:1}
 
-  /* ── Number pill (【009】の代替) ── */
+  /* ── Number pill (視認性UP: ソリッドグラデ + 白文字) ── */
   .num-pill{
     display:inline-flex;align-items:center;justify-content:center;
-    min-width:30px;height:18px;padding:0 8px;margin-right:6px;
+    min-width:32px;height:19px;padding:0 9px;margin-right:6px;
     border-radius:99px;
-    background:var(--accent-soft);
-    color:var(--accent);
-    font-size:11px;font-weight:800;
+    background:var(--grad);
+    color:#fff;
+    font-size:11.5px;font-weight:800;
     font-variant-numeric:tabular-nums;letter-spacing:.03em;
     vertical-align:middle;position:relative;top:-1px;
     line-height:1;
+    box-shadow:0 1px 4px rgba(91,108,255,.35);
   }
-  .history-item.playing .num-pill{background:rgba(255,255,255,.22);color:#fff}
-  .genBtn .num-pill{background:rgba(255,255,255,.28);color:#fff}
+  .history-item.playing .num-pill,
+  .genBtn .num-pill{
+    background:rgba(255,255,255,.95);
+    color:#5b6cff;
+    box-shadow:0 1px 3px rgba(0,0,0,.2);
+  }
   .ptitle .num-pill{margin-right:5px}
+
+  /* ── Panel slide animations ── */
+  @keyframes slideInFromRight{
+    from{opacity:0;transform:translateX(36px)}
+    to{opacity:1;transform:translateX(0)}
+  }
+  @keyframes slideInFromLeft{
+    from{opacity:0;transform:translateX(-36px)}
+    to{opacity:1;transform:translateX(0)}
+  }
 
   /* ── Topbar ── */
   .topbar{display:flex;align-items:center;justify-content:space-between;padding:4px 0 14px;gap:12px}
@@ -179,9 +194,7 @@
   .history-title{
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
     font-size:14px;font-weight:600;line-height:1.35;word-break:break-word;
-    align-items:center;
   }
-  .history-title .num-pill{vertical-align:middle}
   .history-sub{
     display:flex;justify-content:space-between;align-items:baseline;gap:10px;
     font-size:11.5px;color:var(--text2);
@@ -189,14 +202,6 @@
   }
   .history-time{
     flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-  .history-gen{
-    display:inline-block;font-size:9.5px;font-weight:600;
-    color:var(--text3);
-    background:rgba(255,255,255,.07);
-    padding:0 5px;border-radius:4px;margin-left:5px;
-    vertical-align:middle;position:relative;top:-1px;
-    letter-spacing:.02em;
   }
   .history-dur{
     flex:0 0 auto;text-align:right;font-weight:600;color:var(--text2);
@@ -609,6 +614,7 @@
       <svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72c0 .8.87 1.29 1.56.9l10.9-6.86a1.05 1.05 0 0 0 0-1.8L9.56 4.24A1.05 1.05 0 0 0 8 5.14Z"/></svg>
       <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4.6" height="15" rx="1.7"/><rect x="13.4" y="4.5" width="4.6" height="15" rx="1.7"/></svg>
     </button>
+    <button class="skipBtn" id="fwd5Btn" aria-label="5秒進む">+5</button>
     <button class="skipBtn" id="fwd15Btn" aria-label="15秒進む">+15</button>
   </div>
   <div class="pfoot">
@@ -734,6 +740,7 @@ var LONG_PRESS_MS = 550;
 var DEFAULT_PROMPT = '以下のソースを参考に、テーマ「{theme}」について音声でわかりやすく解説してください。';
 var ICON_FILE = 'icon.png';
 var TABS = ['new', 'generating', 'unplayed', 'played'];
+var SETTINGS_TABS = ['folders', 'common', 'data'];
 
 var AUTO_MATCH_THRESHOLD = 0.62;
 var AUTO_MATCH_MARGIN = 0.12;
@@ -771,6 +778,7 @@ var settingsAutoScrollRAF = null;
 var editing = { type: null, folderId: null, themeId: null };
 var generatingLock = false;
 var pendingMatchResolve = null;
+var editModalOpenedAt = 0;
 
 /* ── Utils ── */
 function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
@@ -1213,8 +1221,19 @@ function updateMainTabCounts(){
   });
 }
 
-function switchMainTab(tab){
+function animatePanel(panel, direction){
+  if(!panel || !direction || direction === 'none') return;
+  panel.style.animation = 'none';
+  void panel.offsetHeight;
+  panel.style.animation = (direction === 'left' ? 'slideInFromRight' : 'slideInFromLeft') + ' .30s cubic-bezier(.22,.61,.36,1)';
+}
+
+function switchMainTab(tab, direction){
   if(TABS.indexOf(tab) === -1) return;
+  var prevIdx = TABS.indexOf(state.mainTab);
+  var newIdx = TABS.indexOf(tab);
+  var dir = direction || (newIdx > prevIdx ? 'left' : newIdx < prevIdx ? 'right' : 'none');
+
   state.mainTab = tab;
   save();
   $$('.main-tab').forEach(function(b){ b.classList.toggle('is-active', b.dataset.tab === tab); });
@@ -1223,43 +1242,77 @@ function switchMainTab(tab){
   $('#panelUnplayed').hidden = tab !== 'unplayed';
   $('#panelPlayed').hidden = tab !== 'played';
   renderHistory();
+
+  var panelMap = {
+    new: $('#panelNew'),
+    generating: $('#panelGenerating'),
+    unplayed: $('#panelUnplayed'),
+    played: $('#panelPlayed')
+  };
+  animatePanel(panelMap[tab], dir);
+
   try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){ window.scrollTo(0, 0); }
 }
 
-/* ── Swipe tabs ── */
-function initSwipeTabs(){
-  var mainEl = document.querySelector('main');
-  if(!mainEl) return;
+/* ── Swipe navigation (anywhere) ── */
+function initSwipeNavigation(){
   var startX = 0, startY = 0, tracking = false, startT = 0;
 
-  mainEl.addEventListener('touchstart', function(e){
+  document.addEventListener('touchstart', function(e){
     if(e.touches.length !== 1){ tracking = false; return; }
+    if(settingsDrag && settingsDrag.active){ tracking = false; return; }
     var tgt = e.target;
-    if(tgt && tgt.closest && tgt.closest('input,textarea,[data-no-swipe]')){ tracking = false; return; }
+    if(tgt && tgt.closest){
+      if(tgt.closest('input,textarea,select,.seek,.spdRange,[data-drag-folder],[data-drag-theme]')){
+        tracking = false; return;
+      }
+      if(tgt.closest('.player .btn, .player .skipBtn, .player .repBtn, .player .miniBtn')){
+        tracking = false; return;
+      }
+    }
     tracking = true;
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     startT = Date.now();
   }, {passive:true});
 
-  mainEl.addEventListener('touchend', function(e){
+  document.addEventListener('touchend', function(e){
     if(!tracking) return;
     tracking = false;
-    if(Date.now() - startT > 800) return;
+    if(Date.now() - startT > 900) return;
     var t = e.changedTouches[0];
     var dx = t.clientX - startX;
     var dy = t.clientY - startY;
     if(Math.abs(dx) < 60) return;
     if(Math.abs(dy) > Math.abs(dx) * 0.8) return;
-    var idx = TABS.indexOf(state.mainTab);
-    var newIdx = dx < 0 ? Math.min(TABS.length - 1, idx + 1) : Math.max(0, idx - 1);
-    if(newIdx !== idx){
-      suppressClickUntil = Date.now() + 400;
-      switchMainTab(TABS[newIdx]);
+
+    var swipeDir = dx < 0 ? 'left' : 'right';
+
+    var settingsOpen = $('#settingsModal').classList.contains('show');
+    if(settingsOpen){
+      var curBtn = document.querySelector('.tab-btn.is-active');
+      if(!curBtn) return;
+      var cur = curBtn.dataset.tab;
+      var idx = SETTINGS_TABS.indexOf(cur);
+      var newIdx = dx < 0 ? Math.min(SETTINGS_TABS.length - 1, idx + 1) : Math.max(0, idx - 1);
+      if(newIdx !== idx){
+        suppressClickUntil = Date.now() + 350;
+        switchSettingsTab(SETTINGS_TABS[newIdx], swipeDir);
+      }
+      return;
+    }
+
+    if(document.querySelector('.modal.show')) return;
+
+    var idx2 = TABS.indexOf(state.mainTab);
+    var newIdx2 = dx < 0 ? Math.min(TABS.length - 1, idx2 + 1) : Math.max(0, idx2 - 1);
+    if(newIdx2 !== idx2){
+      suppressClickUntil = Date.now() + 350;
+      switchMainTab(TABS[newIdx2], swipeDir);
     }
   }, {passive:true});
 
-  mainEl.addEventListener('touchcancel', function(){ tracking = false; }, {passive:true});
+  document.addEventListener('touchcancel', function(){ tracking = false; }, {passive:true});
 }
 
 /* ── Render tags ── */
@@ -1344,7 +1397,7 @@ function makeHistoryRow(h){
     '<div class="history-text">' +
       '<div class="history-title">' + numPill(h.number) + esc(h.title) + '</div>' +
       '<div class="history-sub">' +
-        '<span class="history-time">' + esc(timePart) + '<span class="history-gen">生成</span></span>' +
+        '<span class="history-time">' + esc(timePart) + ' 生成</span>' +
         '<span class="history-dur">' + esc(durTxt) + '</span>' +
       '</div>' +
     '</div>' +
@@ -1567,6 +1620,7 @@ function openThemeEdit(folderId, themeId){
 function openEditModalUI(){
   $('#editModal').classList.add('show');
   document.body.classList.add('modal-open');
+  editModalOpenedAt = Date.now();
 }
 
 function closeEditModal(){
@@ -1613,11 +1667,14 @@ function bindEditModalInputs(){
 
   $('#editModalClose').addEventListener('click', closeEditModal);
   $('#editModal').addEventListener('click', function(e){
-    if(e.target === $('#editModal')) closeEditModal();
+    if(e.target === $('#editModal')){
+      if(Date.now() - editModalOpenedAt < 400) return;
+      closeEditModal();
+    }
   });
 }
 
-/* ── Long-press to edit ── */
+/* ── Long-press to edit（長押し判定の瞬間に開く） ── */
 function openEditFromMain(kind, id){
   if(kind === 'folder'){
     openFolderEdit(id);
@@ -1651,7 +1708,13 @@ function initTagInteractions(){
     clearTimeout(pressTimer);
     pressTimer = setTimeout(function(){
       pressTimer = null;
+      var id = pendingBtn && pendingBtn.dataset.id;
+      var k = pendingKind;
+      pendingBtn = null; pendingKind = null;
+      if(!id || !k) return;
+      suppressClickUntil = Date.now() + 800;
       if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(err){} }
+      openEditFromMain(k, id);
     }, LONG_PRESS_MS);
   }, { passive:true });
 
@@ -1661,17 +1724,8 @@ function initTagInteractions(){
   }, { passive:true });
 
   document.addEventListener('pointerup', function(){
-    var wasPressed = pressTimer === null && pendingBtn && pendingKind;
     clearTimeout(pressTimer); pressTimer = null;
-    if(wasPressed){
-      var id = pendingBtn.dataset.id;
-      var kind = pendingKind;
-      pendingBtn = null; pendingKind = null;
-      suppressClickUntil = Date.now() + 800;
-      openEditFromMain(kind, id);
-    } else {
-      pendingBtn = null; pendingKind = null;
-    }
+    pendingBtn = null; pendingKind = null;
   });
 
   document.addEventListener('pointercancel', reset);
@@ -1835,7 +1889,7 @@ async function handleGenerate(){
     showToast(
       formatNum(num) + (reuseEntry ? ' を更新しました' : ' を生成中に追加しました'),
       '生成中を見る',
-      function(){ switchMainTab('generating'); },
+      function(){ switchMainTab('generating', 'left'); },
       6000
     );
   } finally {
@@ -2068,7 +2122,7 @@ async function handleAudioDrops(files){
 
 /* ── Playback ── */
 var audio = document.getElementById('audio');
-var playerEl, seekEl, pTitle, pSub, pCurrent, pTotal, playBtn, headBtn, back15Btn, fwd15Btn,
+var playerEl, seekEl, pTitle, pSub, pCurrent, pTotal, playBtn, headBtn, back15Btn, fwd5Btn, fwd15Btn,
     repBtn, repNum, speedSlider, speedValue, resetSpeedBtn;
 
 function cachePlayerEls(){
@@ -2081,6 +2135,7 @@ function cachePlayerEls(){
   playBtn = $('#playBtn');
   headBtn = $('#headBtn');
   back15Btn = $('#back15Btn');
+  fwd5Btn = $('#fwd5Btn');
   fwd15Btn = $('#fwd15Btn');
   repBtn = $('#repeatBtn');
   repNum = $('#repNum');
@@ -2348,7 +2403,12 @@ function clearPlayed(){
 }
 
 /* ── Settings tabs ── */
-function switchSettingsTab(name){
+function switchSettingsTab(name, direction){
+  if(SETTINGS_TABS.indexOf(name) === -1) return;
+  var curBtn = document.querySelector('.tab-btn.is-active');
+  var cur = curBtn ? curBtn.dataset.tab : null;
+  var dir = direction || (cur ? (SETTINGS_TABS.indexOf(name) > SETTINGS_TABS.indexOf(cur) ? 'left' : 'right') : 'none');
+
   $$('.tab-btn').forEach(function(b){ b.classList.toggle('is-active', b.dataset.tab === name); });
   var panels = { folders: $('#tabFolders'), common: $('#tabCommon'), data: $('#tabData') };
   Object.keys(panels).forEach(function(k){
@@ -2357,6 +2417,13 @@ function switchSettingsTab(name){
   if(name === 'data') updateDataTabBadge();
   var scroller = $('.tab-scroll');
   if(scroller) scroller.scrollTop = 0;
+
+  var panel = panels[name];
+  if(panel && dir && dir !== 'none'){
+    panel.style.animation = 'none';
+    void panel.offsetHeight;
+    panel.style.animation = (dir === 'left' ? 'slideInFromRight' : 'slideInFromLeft') + ' .30s cubic-bezier(.22,.61,.36,1)';
+  }
 }
 
 /* ── Settings drag + auto-scroll ── */
@@ -2589,7 +2656,6 @@ function cleanupSettingsDrag(){
 
 /* ── Export / Import ── */
 function exportData(){
-  // 履歴は含めない。プロンプト・テーマのみバックアップ対象。
   var data = {
     app: 'MyCast',
     version: 4,
@@ -2640,8 +2706,6 @@ function importData(file){
     state.commonPrompt = (typeof data.commonPrompt === 'string') ? data.commonPrompt : '';
     state.prompts = data.prompts;
 
-    // 履歴はファイルに含まれないため、既存履歴を保持する。
-    // ファイルに history がある場合のみ取り込む（後方互換）。
     if(Array.isArray(data.history)){
       Object.keys(audioUrls).forEach(function(k){
         try{ URL.revokeObjectURL(audioUrls[k]); }catch(e){}
@@ -2695,7 +2759,6 @@ document.addEventListener('DOMContentLoaded', async function(){
 
   load();
 
-  // 初回スナップショット：これ以降の編集差分をカウントする基準とする
   if(!state.lastExportSnapshot){
     state.lastExportSnapshot = computeDataSnapshot();
     save();
@@ -2712,10 +2775,10 @@ document.addEventListener('DOMContentLoaded', async function(){
 
   initTagInteractions();
   initSettingsDrag();
-  initSwipeTabs();
+  initSwipeNavigation();
   bindEditModalInputs();
 
-  switchMainTab(state.mainTab);
+  switchMainTab(state.mainTab, 'none');
   renderAll();
   setRate(state.rate);
   setRepeat(state.repeatMode);
@@ -2773,7 +2836,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     renderFoldersEditor();
     renderCommonPrompt();
     updateDataTabBadge();
-    switchSettingsTab('folders');
+    switchSettingsTab('folders', 'none');
     $('#settingsModal').classList.add('show');
     document.body.classList.add('modal-open');
   });
@@ -2827,7 +2890,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     if(f) importData(f);
   });
 
-  // ─── マッチ選択モーダル（バックドロップ） ───
+  // ─── マッチ選択モーダル ───
   var matchModalEl = $('#matchModal');
   if(matchModalEl){
     matchModalEl.addEventListener('click', function(e){
@@ -2874,6 +2937,7 @@ document.addEventListener('DOMContentLoaded', async function(){
   if(playBtn) playBtn.addEventListener('click', togglePlay);
   if(headBtn) headBtn.addEventListener('click', seekToStart);
   if(back15Btn) back15Btn.addEventListener('click', function(){ skip(-15); });
+  if(fwd5Btn) fwd5Btn.addEventListener('click', function(){ skip(5); });
   if(fwd15Btn) fwd15Btn.addEventListener('click', function(){ skip(15); });
   if(repBtn) repBtn.addEventListener('click', function(){
     var n = state.repeatMode === 'off' ? 'all'
@@ -2972,7 +3036,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
   setupMediaSession();
 
-  // ─── ドラッグ&ドロップ（複数音声） ───
+  // ─── ドラッグ&ドロップ ───
   var dragDepth = 0;
   var overlay = $('#dropOverlay');
   window.addEventListener('dragenter', function(e){
