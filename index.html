@@ -312,6 +312,7 @@
     color:var(--accent);border:1px solid var(--border);font-size:15px;font-weight:600;
     font-family:inherit;cursor:pointer;margin-bottom:10px;-webkit-appearance:none;appearance:none}
   .data-btn:active{background:rgba(108,123,255,.28)}
+  .data-btn.skip-style{background:transparent;color:var(--text2);border:1px solid var(--border)}
 
   /* ── Settings folder view (compact) ── */
   .settings-folder{
@@ -413,6 +414,34 @@
     -webkit-appearance:none;appearance:none}
   .delete-btn:active{background:rgba(255,69,58,.25)}
   .edit-modal-scroll textarea{min-height:220px}
+
+  /* ── Match modal (audio file picker) ── */
+  .match-modal{z-index:120}
+  .match-scroll{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:0 16px calc(var(--safe-bottom) + 20px);
+    overscroll-behavior:contain;touch-action:pan-y}
+  .match-file-info{background:var(--card);border:1px solid var(--border);
+    border-radius:12px;padding:12px;margin-bottom:14px}
+  .match-file-name{font-size:14px;font-weight:600;line-height:1.4;word-break:break-word}
+  .match-file-hint{font-size:11.5px;color:var(--text2);margin-top:4px}
+  .match-candidates{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+  .match-cand{display:flex;align-items:center;gap:10px;padding:10px 12px;
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    text-align:left;font-family:inherit;color:var(--text);cursor:pointer;
+    -webkit-appearance:none;appearance:none;width:100%;
+    transition:background .12s,border-color .12s,transform .1s}
+  .match-cand:active{background:var(--card2);transform:scale(.99)}
+  .match-cand-num{color:var(--accent);font-weight:800;
+    font-variant-numeric:tabular-nums;flex:0 0 auto;font-size:13px}
+  .match-cand-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .match-cand-title{font-size:13.5px;font-weight:600;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .match-cand-sub{font-size:11px;color:var(--text2);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .match-cand-score{flex:0 0 auto;font-size:11px;font-weight:700;color:var(--accent);
+    font-variant-numeric:tabular-nums;background:var(--accent-soft);
+    padding:2px 8px;border-radius:99px}
+  .match-empty{color:var(--text3);font-size:12.5px;padding:16px 0;text-align:center}
 
   /* ── Drag ghost ── */
   .drag-ghost{position:fixed;pointer-events:none;z-index:1000;opacity:.92;
@@ -608,8 +637,27 @@
   </div>
 </div>
 
+<!-- 音声ファイル紐づけ選択モーダル -->
+<div id="matchModal" class="modal match-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>音声ファイルの紐づけ</h2>
+      <button id="matchModalClose" type="button" class="icon-btn" aria-label="閉じる">✕</button>
+    </div>
+    <div class="match-scroll">
+      <div class="match-file-info">
+        <div class="match-file-name" id="matchFileName"></div>
+        <div class="match-file-hint">紐づける生成中データを選択してください</div>
+      </div>
+      <div id="matchCandidates" class="match-candidates"></div>
+      <button id="matchNewBtn" type="button" class="data-btn">新規として追加</button>
+      <button id="matchSkipBtn" type="button" class="data-btn skip-style">スキップ（このファイルを無視）</button>
+    </div>
+  </div>
+</div>
+
 <div class="drop-overlay" id="dropOverlay">
-  <div>音声ファイルをドロップ<small>複数ファイル対応・【番号】で自動マッチ</small></div>
+  <div>音声ファイルをドロップ<small>複数ファイル対応・名前の一致率で自動紐づけ</small></div>
 </div>
 <div id="toast" class="toast"></div>
 
@@ -633,6 +681,11 @@ var LONG_PRESS_MS = 550;
 var DEFAULT_PROMPT = '以下のソースを参考に、テーマ「{theme}」について音声でわかりやすく解説してください。';
 var ICON_FILE = 'icon.png';
 var TABS = ['new', 'generating', 'unplayed', 'played'];
+
+// 自動紐づけの閾値
+var AUTO_MATCH_THRESHOLD = 0.62; // これ以上で自動マッチ
+var AUTO_MATCH_MARGIN = 0.12;    // 2位との差がこれ以上で確定
+var MIN_CANDIDATE_SCORE = 0.15;  // これ未満は候補から除外
 
 function $(s, r){ return (r||document).querySelector(s); }
 function $$(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); }
@@ -665,6 +718,7 @@ var settingsDrag = null;
 var settingsAutoScrollRAF = null;
 var editing = { type: null, folderId: null, themeId: null };
 var generatingLock = false;
+var pendingMatchResolve = null;
 
 /* ── Utils ── */
 function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
@@ -714,18 +768,54 @@ function hideToast(){
 }
 
 /* ── Filename helpers ── */
-function extractNumberFromFilename(name){
-  var base = String(name || '').replace(/\.[^.]+$/, '');
-  var m = base.match(/【(\d{1,4})】/);
-  if(m) return parseInt(m[1], 10);
-  m = base.match(/^(\d{1,4})[\s_\-\.]/);
-  if(m) return parseInt(m[1], 10);
-  m = base.match(/[\s_\-](\d{1,4})$/);
-  if(m) return parseInt(m[1], 10);
-  return null;
-}
 function cleanTitleFromFile(name){
   return String(name || '').replace(/\.[^.]+$/, '').trim() || '(無題)';
+}
+
+/* ── テキスト類似度（Dice 係数 + 包含ボーナス） ── */
+function normalizeForMatch(s){
+  return String(s || '')
+    .replace(/【\d+】/g, ' ')
+    .replace(/[\s\u3000_\-\.\u30fb\u30fc\uff0d\/／・、。！？!?,]/g, '')
+    .replace(/[「」『』（）()\[\]【】]/g, '')
+    .toLowerCase();
+}
+function bigrams(s){
+  var arr = [];
+  var len = s.length;
+  if(len === 0) return arr;
+  if(len === 1){ arr.push(s); return arr; }
+  for(var i=0; i<len-1; i++) arr.push(s.slice(i, i+2));
+  return arr;
+}
+function diceCoefficient(a, b){
+  var A = bigrams(a), B = bigrams(b);
+  if(!A.length || !B.length) return 0;
+  var countB = {};
+  B.forEach(function(g){ countB[g] = (countB[g]||0) + 1; });
+  var inter = 0;
+  A.forEach(function(g){
+    if(countB[g] > 0){ inter++; countB[g]--; }
+  });
+  return (2 * inter) / (A.length + B.length);
+}
+function scoreEntryMatch(baseName, entry){
+  var base = normalizeForMatch(baseName);
+  if(!base) return 0;
+  var fields = [entry.themeName, entry.title, entry.folderName].filter(Boolean);
+  var best = 0;
+  fields.forEach(function(f){
+    var n = normalizeForMatch(f);
+    if(!n) return;
+    var s = diceCoefficient(base, n);
+    if(n.length >= 3 && base.length >= 3){
+      if(n.indexOf(base) !== -1 || base.indexOf(n) !== -1){
+        s = Math.max(s, 0.75);
+      }
+    }
+    if(s > best) best = s;
+  });
+  return best;
 }
 
 /* ── Icons ── */
@@ -1424,7 +1514,6 @@ function bindEditModalInputs(){
     }
   });
 
-  // バッジ更新（編集確定時）
   nameEl.addEventListener('change', updateDataTabBadge);
   textEl.addEventListener('change', updateDataTabBadge);
 
@@ -1597,7 +1686,7 @@ async function handleGenerate(){
       num = state.nextNumber;
     }
 
-    var instruction = '音声解説のタイトルおよび生成される音声ファイル名の先頭に、必ず「【' + formatNum(num) + '】」を付けてください。';
+    var instruction = 'タイトルの頭に【' + formatNum(num) + '】を付けてください。';
     var promptText = buildPromptText(folder, theme);
     promptText = (promptText.trim() ? promptText + '\n\n' : '') + instruction;
 
@@ -1686,7 +1775,7 @@ function probeAudio(file){
   });
 }
 
-async function importAudioTo(entry, file){
+async function importAudioTo(entry, file, isNew){
   if(!entry || !file) return;
   if(!isAudioFile(file)){ return; }
 
@@ -1708,12 +1797,8 @@ async function importAudioTo(entry, file){
   entry.hasAudio = true;
   entry.audioDuration = dur;
   entry.audioName = file.name;
-  entry.title = cleanTitleFromFile(file.name);
-
-  var num = extractNumberFromFilename(file.name);
-  if(num !== null){
-    entry.number = num;
-    if(state.nextNumber <= num) state.nextNumber = num + 1;
+  if(isNew){
+    entry.title = cleanTitleFromFile(file.name);
   }
 
   audioPositions[entry.id] = 0;
@@ -1734,7 +1819,7 @@ function pickFileFor(entryId){
     var f = input.files && input.files[0];
     input.value = '';
     if(!f) return;
-    importAudioTo(entry, f).then(function(){
+    importAudioTo(entry, f, false).then(function(){
       showToast(numTag(entry.number) + ' に音声を取り込みました');
       setTimeout(function(){ playEntry(entry.id); }, 300);
     });
@@ -1742,62 +1827,150 @@ function pickFileFor(entryId){
   input.click();
 }
 
+/* ── Audio matching ── */
+function createEntryFromAudio(file){
+  var num = state.nextNumber;
+  var entry = {
+    id: uid(),
+    number: num,
+    title: cleanTitleFromFile(file.name),
+    date: formatDateLabel(new Date()),
+    time: Date.now(),
+    read: false,
+    hasAudio: false,
+    audioDuration: 0,
+    fromAudio: true
+  };
+  state.history.unshift(entry);
+  state.nextNumber = num + 1;
+  return entry;
+}
+
+function getMatchCandidates(file){
+  var baseName = cleanTitleFromFile(file.name);
+  return state.history
+    .filter(function(h){ return !h.hasAudio; })
+    .map(function(h){ return { entry: h, score: scoreEntryMatch(baseName, h) }; })
+    .filter(function(c){ return c.score >= MIN_CANDIDATE_SCORE; })
+    .sort(function(a, b){ return b.score - a.score; });
+}
+
+function decideTargetForFile(file){
+  var candidates = getMatchCandidates(file);
+
+  if(!candidates.length){
+    return Promise.resolve({ action: 'new' });
+  }
+
+  var best = candidates[0];
+  var second = candidates[1] || null;
+  var clear = best.score >= AUTO_MATCH_THRESHOLD &&
+              (!second || (best.score - second.score) >= AUTO_MATCH_MARGIN);
+
+  if(clear){
+    return Promise.resolve({ action: 'match', entry: best.entry });
+  }
+
+  return new Promise(function(resolve){
+    openMatchPicker(file, candidates, resolve);
+  });
+}
+
+function openMatchPicker(file, candidates, resolve){
+  var modal = $('#matchModal');
+  if(!modal){
+    resolve({ action: 'new' });
+    return;
+  }
+  pendingMatchResolve = resolve;
+
+  $('#matchFileName').textContent = file.name;
+
+  var listEl = $('#matchCandidates');
+  listEl.innerHTML = '';
+  if(!candidates.length){
+    listEl.innerHTML = '<div class="match-empty">該当する生成中データが見つかりません</div>';
+  } else {
+    candidates.forEach(function(c){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'match-cand';
+      btn.innerHTML =
+        '<span class="match-cand-num">' + esc(numTag(c.entry.number)) + '</span>' +
+        '<div class="match-cand-text">' +
+          '<div class="match-cand-title">' + esc(c.entry.title || '(無題)') + '</div>' +
+          '<div class="match-cand-sub">' + esc(c.entry.date || '') + '</div>' +
+        '</div>' +
+        '<span class="match-cand-score">' + Math.round(c.score * 100) + '%</span>';
+      btn.addEventListener('click', function(){
+        finishMatch({ action: 'match', entry: c.entry });
+      });
+      listEl.appendChild(btn);
+    });
+  }
+
+  $('#matchNewBtn').onclick = function(){ finishMatch({ action: 'new' }); };
+  $('#matchSkipBtn').onclick = function(){ finishMatch({ action: 'skip' }); };
+  $('#matchModalClose').onclick = function(){ finishMatch({ action: 'skip' }); };
+
+  modal.classList.add('show');
+  document.body.classList.add('modal-open');
+}
+
+function finishMatch(result){
+  var resolve = pendingMatchResolve;
+  pendingMatchResolve = null;
+  var modal = $('#matchModal');
+  if(modal) modal.classList.remove('show');
+  updateModalOpenState();
+  if(resolve) resolve(result);
+}
+
 /* ── Multiple audio drop ── */
 async function handleAudioDrops(files){
   var list = Array.from(files || []).filter(isAudioFile);
   if(!list.length){ showToast('音声ファイルが見つかりません'); return; }
 
-  var added = 0;
-  var matched = 0;
+  var added = 0, matched = 0, skipped = 0;
+  var firstImportedId = null;
 
   for(var i=0; i<list.length; i++){
     var file = list[i];
-    var num = extractNumberFromFilename(file.name);
-    var target = null;
+    var result = await decideTargetForFile(file);
 
-    if(num !== null){
-      target = state.history.find(function(h){
-        return h.number === num && !h.hasAudio;
-      });
-    }
+    if(result.action === 'skip'){ skipped++; continue; }
 
-    if(!target){
-      var assignNum = (num !== null) ? num : state.nextNumber;
-      target = {
-        id: uid(),
-        number: assignNum,
-        title: cleanTitleFromFile(file.name),
-        date: formatDateLabel(new Date()),
-        time: Date.now(),
-        read: false,
-        hasAudio: false,
-        audioDuration: 0,
-        fromAudio: true
-      };
-      state.history.unshift(target);
-      if(assignNum >= state.nextNumber) state.nextNumber = assignNum + 1;
+    var target;
+    var isNew = false;
+    if(result.action === 'new'){
+      target = createEntryFromAudio(file);
+      isNew = true;
       added++;
     } else {
+      target = result.entry;
       matched++;
     }
 
-    await importAudioTo(target, file);
+    await importAudioTo(target, file, isNew);
+    if(!firstImportedId) firstImportedId = target.id;
   }
 
   save();
-  if(list.length === 1){
-    showToast(matched ? numTag(list[0] && '') : '音声を取り込みました');
-  } else {
-    showToast(list.length + ' 件の音声を取り込みました');
+
+  if(!firstImportedId && skipped){
+    showToast(skipped + ' 件をスキップしました');
+    return;
   }
 
-  var firstNum = extractNumberFromFilename(list[0].name);
-  var firstEntry = null;
-  if(firstNum !== null){
-    firstEntry = state.history.find(function(h){ return h.number === firstNum; });
+  var parts = [];
+  if(matched) parts.push(matched + ' 件紐づけ');
+  if(added) parts.push(added + ' 件追加');
+  if(skipped) parts.push(skipped + ' 件スキップ');
+  if(parts.length) showToast(parts.join(' / '));
+
+  if(firstImportedId){
+    setTimeout(function(){ playEntry(firstImportedId); }, 400);
   }
-  if(!firstEntry && state.history.length) firstEntry = state.history[0];
-  if(firstEntry) setTimeout(function(){ playEntry(firstEntry.id); }, 400);
 }
 
 /* ── Playback ── */
@@ -2148,7 +2321,6 @@ function initSettingsDrag(){
     settingsDrag.ghost.style.top = (e.clientY + 12) + 'px';
     updateSettingsDropTarget(e.clientX, e.clientY);
 
-    // 自動スクロール判定（常に更新、ループは active 中は動き続ける）
     var scroller = $('.tab-scroll');
     if(scroller){
       var rect = scroller.getBoundingClientRect();
@@ -2403,7 +2575,6 @@ function importData(file){
 
     migrateSchema();
     normalize();
-    // インポート直後はデータが一致している状態とみなす
     state.lastExportSnapshot = computeDataSnapshot();
     save();
     renderAll();
@@ -2552,6 +2723,14 @@ document.addEventListener('DOMContentLoaded', async function(){
     e.target.value = '';
     if(f) importData(f);
   });
+
+  // ─── マッチ選択モーダル（バックドロップ） ───
+  var matchModalEl = $('#matchModal');
+  if(matchModalEl){
+    matchModalEl.addEventListener('click', function(e){
+      if(e.target === matchModalEl) finishMatch({ action: 'skip' });
+    });
+  }
 
   // ─── メインタブ ───
   var mainTabsEl = $('#mainTabs');
