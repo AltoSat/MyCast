@@ -35,6 +35,7 @@
     -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
     touch-action:manipulation;
   }
+  body.modal-open{overflow:hidden;overscroll-behavior:none}
   input,textarea{-webkit-user-select:text;user-select:text}
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
@@ -117,6 +118,15 @@
 
   /* ── History ── */
   .history{display:flex;flex-direction:column;gap:8px}
+  .history-date-header{
+    font-size:12.5px;font-weight:700;color:var(--text2);
+    padding:14px 4px 6px;letter-spacing:.02em;
+    display:flex;align-items:center;gap:10px;
+  }
+  .history-date-header:first-child{padding-top:4px}
+  .history-date-header::after{
+    content:"";flex:1;height:1px;background:var(--border);
+  }
   .history-item{
     display:flex;align-items:center;gap:10px;padding:10px 12px;
     background:var(--card);border-radius:16px;border:1px solid var(--border);
@@ -137,15 +147,25 @@
   .history-item .thumb:active{transform:scale(.92)}
   .history-item.playing .thumb{background:var(--grad);color:#fff;border-color:transparent}
   .history-item .thumb svg{width:18px;height:18px}
-  .history-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .history-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
   .history-title{
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
     font-size:14px;font-weight:600;line-height:1.35;word-break:break-word;
   }
   .history-num{color:var(--accent);font-weight:800;margin-right:3px;font-variant-numeric:tabular-nums}
   .history-item.playing .history-num{color:#c8cfff}
-  .history-sub{font-size:11.5px;color:var(--text2);overflow:hidden;
-    text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .history-sub{
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    font-size:11.5px;color:var(--text2);
+    font-variant-numeric:tabular-nums;
+  }
+  .history-time{
+    flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .history-dur{
+    flex:0 0 auto;text-align:right;font-weight:600;color:var(--text2);
+    white-space:nowrap;
+  }
   .history-del{flex:0 0 32px;width:32px;height:32px;border-radius:50%;background:transparent;
     border:none;color:var(--text2);font-size:14px;display:flex;align-items:center;justify-content:center;
     cursor:pointer;font-family:inherit;padding:0;-webkit-appearance:none;appearance:none;
@@ -247,10 +267,12 @@
 
   /* ── Modal (settings) ── */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;z-index:100;
-    opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility .2s}
+    opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility .2s;
+    overscroll-behavior:contain;touch-action:none}
   .modal.show{opacity:1;visibility:visible;pointer-events:auto}
   .modal-card{width:100%;height:92vh;max-height:92vh;background:var(--bg2);
-    border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden}
+    border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden;
+    touch-action:auto;overscroll-behavior:contain}
   .modal-head{display:flex;align-items:center;justify-content:space-between;
     padding:20px 16px 14px;flex:0 0 auto}
   .modal-head h2{font-size:20px;font-weight:700;margin:0}
@@ -259,11 +281,22 @@
     margin:0 16px 14px;flex:0 0 auto}
   .tab-btn{flex:1;padding:10px;border-radius:9px;border:none;background:transparent;color:var(--text2);
     font-size:13.5px;font-weight:600;font-family:inherit;cursor:pointer;
-    -webkit-appearance:none;appearance:none}
+    -webkit-appearance:none;appearance:none;position:relative;
+    display:inline-flex;align-items:center;justify-content:center;gap:5px}
   .tab-btn.is-active{background:var(--accent);color:#fff}
+  .tab-badge{
+    display:none;background:var(--red);color:#fff;
+    font-size:9.5px;font-weight:700;
+    padding:1px 5px;border-radius:99px;
+    min-width:16px;text-align:center;
+    font-variant-numeric:tabular-nums;
+    line-height:1.2;
+  }
+  .tab-badge.show{display:inline-block}
   .tab-panel[hidden]{display:none}
   .tab-scroll{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;
-    padding:0 16px calc(var(--safe-bottom) + 20px);overscroll-behavior:contain}
+    padding:0 16px calc(var(--safe-bottom) + 20px);overscroll-behavior:contain;
+    touch-action:pan-y}
 
   .field{margin-bottom:20px}
   .field label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px}
@@ -368,9 +401,10 @@
   /* ── Edit modal (large sheet) ── */
   .edit-modal{z-index:110}
   .edit-modal-card{width:100%;height:90vh;max-height:90vh;background:var(--bg2);
-    border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden}
+    border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden;
+    touch-action:auto;overscroll-behavior:contain}
   .edit-modal-scroll{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;
-    padding:0 16px;overscroll-behavior:contain}
+    padding:0 16px;overscroll-behavior:contain;touch-action:pan-y}
   .edit-modal-foot{padding:16px;padding-bottom:calc(var(--safe-bottom) + 16px);
     border-top:1px solid var(--border);flex-shrink:0}
   .delete-btn{width:100%;padding:14px;border-radius:12px;
@@ -521,7 +555,7 @@
     <div class="tabs">
       <button type="button" class="tab-btn is-active" data-tab="folders">個別プロンプト</button>
       <button type="button" class="tab-btn" data-tab="common">共通プロンプト</button>
-      <button type="button" class="tab-btn" data-tab="data">データ</button>
+      <button type="button" class="tab-btn" data-tab="data">データ<span class="tab-badge" id="dataTabBadge"></span></button>
     </div>
 
     <div class="tab-scroll">
@@ -616,7 +650,7 @@ var state = {
   rate: 1,
   repeatMode: 'off',
   mainTab: 'new',
-  commonThemesOpen: false
+  lastExportSnapshot: null
 };
 
 var currentId = null;
@@ -861,7 +895,9 @@ function normalize(){
   if(typeof state.rate !== 'number' || state.rate < 0.5 || state.rate > 3) state.rate = 1;
   if(['off','all','one'].indexOf(state.repeatMode) === -1) state.repeatMode = 'off';
   if(TABS.indexOf(state.mainTab) === -1) state.mainTab = 'new';
-  if(typeof state.commonThemesOpen !== 'boolean') state.commonThemesOpen = false;
+  if(!state.lastExportSnapshot || typeof state.lastExportSnapshot !== 'object'){
+    state.lastExportSnapshot = null;
+  }
 
   var selectedFolder = state.prompts.find(function(p){ return p.id === state.selectedPromptId; });
   if(!selectedFolder){
@@ -912,7 +948,9 @@ function load(){
     if(typeof parsed.nextNumber === 'number') state.nextNumber = parsed.nextNumber;
     if(typeof parsed.rate === 'number') state.rate = parsed.rate;
     if(typeof parsed.repeatMode === 'string') state.repeatMode = parsed.repeatMode;
-    if(typeof parsed.commonThemesOpen === 'boolean') state.commonThemesOpen = parsed.commonThemesOpen;
+    if(parsed.lastExportSnapshot && typeof parsed.lastExportSnapshot === 'object'){
+      state.lastExportSnapshot = parsed.lastExportSnapshot;
+    }
     var tab = parsed.mainTab || parsed.audioTab;
     if(typeof tab === 'string') state.mainTab = tab;
   }
@@ -937,6 +975,65 @@ function findFolderByThemeId(themeId){
   return state.prompts.find(function(p){
     return p.themes.some(function(t){ return t.id === themeId; });
   }) || null;
+}
+
+/* ── Export diff tracking ── */
+function computeDataSnapshot(){
+  return {
+    prompts: state.prompts.map(function(f){
+      return {
+        id: f.id, name: f.name, text: f.text,
+        themes: f.themes.map(function(t){
+          return { id: t.id, name: t.name, source: t.source };
+        })
+      };
+    })
+  };
+}
+
+function countDataChanges(){
+  if(!state.lastExportSnapshot) return 0;
+  var last = state.lastExportSnapshot;
+  var lastFolders = {};
+  (last.prompts || []).forEach(function(f){ lastFolders[f.id] = f; });
+  var currentFolders = {};
+  state.prompts.forEach(function(f){ currentFolders[f.id] = f; });
+
+  var count = 0;
+  state.prompts.forEach(function(f){
+    var prev = lastFolders[f.id];
+    if(!prev){ count++; return; }
+    var changed = (prev.name !== f.name) || (prev.text !== f.text);
+    if(!changed){
+      var prevThemes = {};
+      (prev.themes || []).forEach(function(t){ prevThemes[t.id] = t; });
+      if((prev.themes || []).length !== f.themes.length){
+        changed = true;
+      } else {
+        f.themes.forEach(function(t){
+          var pt = prevThemes[t.id];
+          if(!pt || pt.name !== t.name || pt.source !== t.source) changed = true;
+        });
+      }
+    }
+    if(changed) count++;
+  });
+  (last.prompts || []).forEach(function(f){
+    if(!currentFolders[f.id]) count++;
+  });
+  return count;
+}
+
+function updateDataTabBadge(){
+  var el = $('#dataTabBadge');
+  if(!el) return;
+  var n = countDataChanges();
+  if(n > 0){
+    el.textContent = n > 99 ? '99+' : String(n);
+    el.classList.add('show');
+  } else {
+    el.classList.remove('show');
+  }
 }
 
 /* ── Tab classification ── */
@@ -1045,10 +1142,10 @@ function makeHistoryRow(h){
   }
 
   var durTxt = '';
-  if(h.hasAudio && h.audioDuration > 0) durTxt = ' · ' + fmtTime(h.audioDuration);
-  else if(h.hasAudio) durTxt = ' · 音声あり';
-  else durTxt = ' · 音声未登録';
-  var sub = (h.date || '') + durTxt;
+  if(h.hasAudio && h.audioDuration > 0) durTxt = fmtTime(h.audioDuration);
+  else if(h.hasAudio) durTxt = '音声あり';
+  else durTxt = '音声未登録';
+  var timePart = (h.date || '').split(' ').pop() || '';
 
   var pct = 0;
   if(h.id === currentId && h.audioDuration > 0){
@@ -1061,7 +1158,10 @@ function makeHistoryRow(h){
     '<button type="button" class="thumb" aria-label="' + (h.hasAudio ? '再生' : '音声を取り込む') + '">' + thumb + '</button>' +
     '<div class="history-text">' +
       '<div class="history-title"><span class="history-num">' + esc(numTag(h.number)) + '</span>' + esc(h.title) + '</div>' +
-      '<div class="history-sub">' + esc(sub) + '</div>' +
+      '<div class="history-sub">' +
+        '<span class="history-time">' + esc(timePart) + '</span>' +
+        '<span class="history-dur">' + esc(durTxt) + '</span>' +
+      '</div>' +
     '</div>' +
     '<button type="button" class="history-del" aria-label="削除">✕</button>' +
     (pct > 0.5 ? '<div class="history-bar" style="width:' + pct.toFixed(1) + '%"></div>' : '');
@@ -1092,7 +1192,18 @@ function renderHistory(){
     listEl.innerHTML = '<div class="empty">' + (msgs[tab] || '項目はありません') + '</div>';
   } else {
     listEl.innerHTML = '';
-    visible.forEach(function(h){ listEl.appendChild(makeHistoryRow(h)); });
+    var lastDateKey = null;
+    visible.forEach(function(h){
+      var dateKey = (h.date || '').split(' ')[0] || '日付なし';
+      if(dateKey !== lastDateKey){
+        var header = document.createElement('div');
+        header.className = 'history-date-header';
+        header.textContent = dateKey;
+        listEl.appendChild(header);
+        lastDateKey = dateKey;
+      }
+      listEl.appendChild(makeHistoryRow(h));
+    });
   }
 
   var clearWrap = $('#clearPlayedWrap');
@@ -1188,6 +1299,7 @@ function renderFoldersEditor(){
       save();
       renderFoldersEditor();
       if(folder.id === state.selectedPromptId) renderThemeTags();
+      updateDataTabBadge();
       setTimeout(function(){ openThemeEdit(folder.id, newTheme.id); }, 60);
     });
 
@@ -1225,10 +1337,11 @@ function openFolderEdit(folderId){
     renderPromptTags();
     renderThemeTags();
     renderShareBtn();
+    updateDataTabBadge();
     showToast('個別プロンプトを削除しました');
   };
 
-  $('#editModal').classList.add('show');
+  openEditModalUI();
 }
 
 function openThemeEdit(folderId, themeId){
@@ -1259,15 +1372,28 @@ function openThemeEdit(folderId, themeId){
     renderFoldersEditor();
     if(folder.id === state.selectedPromptId) renderThemeTags();
     renderShareBtn();
+    updateDataTabBadge();
     showToast('テーマを削除しました');
   };
 
+  openEditModalUI();
+}
+
+function openEditModalUI(){
   $('#editModal').classList.add('show');
+  document.body.classList.add('modal-open');
 }
 
 function closeEditModal(){
   $('#editModal').classList.remove('show');
   editing = { type: null, folderId: null, themeId: null };
+  updateModalOpenState();
+  updateDataTabBadge();
+}
+
+function updateModalOpenState(){
+  var anyOpen = !!document.querySelector('.modal.show');
+  document.body.classList.toggle('modal-open', anyOpen);
 }
 
 function bindEditModalInputs(){
@@ -1297,6 +1423,10 @@ function bindEditModalInputs(){
       if(t){ t.source = textEl.value; save(); }
     }
   });
+
+  // バッジ更新（編集確定時）
+  nameEl.addEventListener('change', updateDataTabBadge);
+  textEl.addEventListener('change', updateDataTabBadge);
 
   $('#editModalClose').addEventListener('click', closeEditModal);
   $('#editModal').addEventListener('click', function(e){
@@ -1452,7 +1582,6 @@ async function handleGenerate(){
     var now = new Date();
     var nowMs = now.getTime();
 
-    // 30秒以内の上書き判定
     var reuseEntry = null;
     if(state.lastGenId && state.lastGenAt && (nowMs - state.lastGenAt) < REUSE_WINDOW_MS){
       var candidate = getEntry(state.lastGenId);
@@ -1463,12 +1592,12 @@ async function handleGenerate(){
 
     var num;
     if(reuseEntry){
-      num = reuseEntry.number; // 番号は既存のものを維持（増やさない）
+      num = reuseEntry.number;
     } else {
       num = state.nextNumber;
     }
 
-    var instruction = 'タイトルの頭に【' + formatNum(num) + '】を付けてください。';
+    var instruction = '音声解説のタイトルおよび生成される音声ファイル名の先頭に、必ず「【' + formatNum(num) + '】」を付けてください。';
     var promptText = buildPromptText(folder, theme);
     promptText = (promptText.trim() ? promptText + '\n\n' : '') + instruction;
 
@@ -1662,7 +1791,6 @@ async function handleAudioDrops(files){
     showToast(list.length + ' 件の音声を取り込みました');
   }
 
-  // 最初のファイルを再生
   var firstNum = extractNumberFromFilename(list[0].name);
   var firstEntry = null;
   if(firstNum !== null){
@@ -1950,6 +2078,7 @@ function switchSettingsTab(name){
   Object.keys(panels).forEach(function(k){
     if(panels[k]) panels[k].hidden = (k !== name);
   });
+  if(name === 'data') updateDataTabBadge();
   var scroller = $('.tab-scroll');
   if(scroller) scroller.scrollTop = 0;
 }
@@ -2019,7 +2148,7 @@ function initSettingsDrag(){
     settingsDrag.ghost.style.top = (e.clientY + 12) + 'px';
     updateSettingsDropTarget(e.clientX, e.clientY);
 
-    // 自動スクロール判定
+    // 自動スクロール判定（常に更新、ループは active 中は動き続ける）
     var scroller = $('.tab-scroll');
     if(scroller){
       var rect = scroller.getBoundingClientRect();
@@ -2109,6 +2238,7 @@ function performSettingsDrop(){
     save();
     renderFoldersEditor();
     renderPromptTags();
+    updateDataTabBadge();
     return;
   }
 
@@ -2164,6 +2294,7 @@ function performSettingsDrop(){
   renderPromptTags();
   renderThemeTags();
   renderShareBtn();
+  updateDataTabBadge();
 }
 
 function cleanupSettingsDrag(){
@@ -2203,8 +2334,7 @@ function exportData(){
     nextNumber: state.nextNumber,
     rate: state.rate,
     repeatMode: state.repeatMode,
-    mainTab: state.mainTab,
-    commonThemesOpen: state.commonThemesOpen
+    mainTab: state.mainTab
   };
   var json = JSON.stringify(data, null, 2);
   var blob = new Blob([json], { type: 'application/json' });
@@ -2221,6 +2351,11 @@ function exportData(){
     if(a.parentNode) a.parentNode.removeChild(a);
     URL.revokeObjectURL(url);
   }, 5000);
+
+  state.lastExportSnapshot = computeDataSnapshot();
+  save();
+  updateDataTabBadge();
+
   showToast('エクスポートしました');
 }
 
@@ -2265,10 +2400,11 @@ function importData(file){
     state.rate = (typeof data.rate === 'number') ? data.rate : 1;
     state.repeatMode = (typeof data.repeatMode === 'string') ? data.repeatMode : 'off';
     state.mainTab = (typeof data.mainTab === 'string') ? data.mainTab : 'new';
-    state.commonThemesOpen = (typeof data.commonThemesOpen === 'boolean') ? data.commonThemesOpen : false;
 
     migrateSchema();
     normalize();
+    // インポート直後はデータが一致している状態とみなす
+    state.lastExportSnapshot = computeDataSnapshot();
     save();
     renderAll();
     renderFoldersEditor();
@@ -2276,6 +2412,7 @@ function importData(file){
     setRate(state.rate);
     setRepeat(state.repeatMode);
     switchMainTab(state.mainTab);
+    updateDataTabBadge();
     showToast('インポートしました');
   };
   reader.onerror = function(){ showToast('読み込めませんでした'); };
@@ -2306,6 +2443,7 @@ document.addEventListener('DOMContentLoaded', async function(){
   renderAll();
   setRate(state.rate);
   setRepeat(state.repeatMode);
+  updateDataTabBadge();
 
   if(speedSlider){
     var p0 = ((state.rate - 0.5) / 2.5) * 100;
@@ -2358,14 +2496,22 @@ document.addEventListener('DOMContentLoaded', async function(){
   if(settingsBtn) settingsBtn.addEventListener('click', function(){
     renderFoldersEditor();
     renderCommonPrompt();
+    updateDataTabBadge();
     switchSettingsTab('folders');
     $('#settingsModal').classList.add('show');
+    document.body.classList.add('modal-open');
   });
   var closeBtn = $('#closeSettings');
-  if(closeBtn) closeBtn.addEventListener('click', function(){ $('#settingsModal').classList.remove('show'); });
+  if(closeBtn) closeBtn.addEventListener('click', function(){
+    $('#settingsModal').classList.remove('show');
+    updateModalOpenState();
+  });
   var modal = $('#settingsModal');
   if(modal) modal.addEventListener('click', function(e){
-    if(e.target === modal) modal.classList.remove('show');
+    if(e.target === modal){
+      modal.classList.remove('show');
+      updateModalOpenState();
+    }
   });
 
   $$('.tab-btn').forEach(function(b){
@@ -2374,10 +2520,13 @@ document.addEventListener('DOMContentLoaded', async function(){
 
   // ─── 共通プロンプト ───
   var commonInput = $('#commonPromptInput');
-  if(commonInput) commonInput.addEventListener('input', function(e){
-    state.commonPrompt = e.target.value;
-    save();
-  });
+  if(commonInput){
+    commonInput.addEventListener('input', function(e){
+      state.commonPrompt = e.target.value;
+      save();
+    });
+    commonInput.addEventListener('change', updateDataTabBadge);
+  }
 
   // ─── 個別プロンプト追加 ───
   var addFolderBtn = $('#addFolderBtn');
@@ -2388,6 +2537,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     save();
     renderFoldersEditor();
     renderPromptTags();
+    updateDataTabBadge();
     setTimeout(function(){ openFolderEdit(f.id); }, 80);
   });
 
@@ -2515,7 +2665,6 @@ document.addEventListener('DOMContentLoaded', async function(){
   audio.addEventListener('ended', onEnded);
   audio.addEventListener('error', function(){ showToast('この音声を再生できませんでした'); });
 
-  // アプリ復帰時にMediaSession状態を同期（iOSワークアラウンド）
   document.addEventListener('visibilitychange', function(){
     if(document.visibilityState === 'visible'){
       if(currentId){
