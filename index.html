@@ -45,7 +45,6 @@
   }
   .app-wrap{position:relative;z-index:1}
 
-  /* hidden属性を確実に効かせる */
   [hidden]{display:none !important}
 
   /* ── Number pill ── */
@@ -69,6 +68,91 @@
     box-shadow:0 1px 3px rgba(0,0,0,.2);
   }
   .ptitle .num-pill{margin-right:5px}
+
+  /* ── Reset status card ── */
+  .reset-status{
+    position:relative;z-index:1;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:10px 12px;
+    margin-bottom:14px;
+  }
+  .reset-row{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    font-size:12.5px;min-height:22px;
+  }
+  .reset-label{
+    font-size:11px;font-weight:700;color:var(--text2);
+    letter-spacing:.04em;flex:0 0 auto;
+  }
+  .reset-value{
+    font-size:13.5px;font-weight:700;color:var(--text);
+    font-variant-numeric:tabular-nums;flex:0 0 auto;
+  }
+  .reset-remain{
+    font-size:11.5px;font-weight:600;color:var(--text2);
+    font-variant-numeric:tabular-nums;flex:0 0 auto;
+  }
+  .reset-badge{
+    font-size:10px;font-weight:700;
+    padding:2px 8px;border-radius:99px;white-space:nowrap;
+    flex:0 0 auto;
+    background:rgba(255,255,255,.08);
+    color:var(--text3);
+  }
+  .reset-badge.ok{
+    background:rgba(48,209,88,.16);
+    color:var(--green);
+  }
+  .reset-badge.ng{
+    background:rgba(255,69,58,.18);
+    color:#ff7878;
+  }
+  .reset-edit{
+    margin-left:auto;
+    width:28px;height:28px;
+    border-radius:8px;background:transparent;border:none;
+    color:var(--text2);font-size:14px;
+    display:grid;place-items:center;cursor:pointer;
+    flex:0 0 auto;
+    transition:background .12s,color .12s;
+    -webkit-appearance:none;appearance:none;font-family:inherit;
+  }
+  .reset-edit:active{background:var(--accent-soft);color:var(--accent)}
+  .reset-alert{
+    margin-top:8px;
+    padding:8px 10px;
+    border-radius:10px;
+    background:rgba(255,69,58,.12);
+    border:1px solid rgba(255,69,58,.28);
+    color:#ff8a80;
+    font-size:11.5px;
+    font-weight:600;
+    line-height:1.45;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  .reset-alert[hidden]{display:none}
+  .reset-alert .alert-time{
+    font-size:10.5px;font-weight:500;color:#ff9a90;
+    font-variant-numeric:tabular-nums;
+  }
+
+  input[type="datetime-local"]{
+    width:100%;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    color:var(--text);
+    padding:12px;
+    font-size:15px;
+    font-family:inherit;
+    outline:none;
+    box-sizing:border-box;
+    line-height:1.5;
+    color-scheme:dark;
+  }
+  input[type="datetime-local"]:focus{border-color:var(--accent)}
 
   /* ── Panel slide animations ── */
   @keyframes slideInFromRight{
@@ -538,6 +622,11 @@
   .close-btn:active{background:var(--accent2);transform:scale(.97)}
   .edit-modal-scroll textarea{min-height:220px}
 
+  /* ── Reset modal ── */
+  .reset-modal{z-index:105}
+  .reset-modal .modal-card{height:auto;max-height:75vh}
+  .reset-modal-body{padding:0 16px calc(var(--safe-bottom) + 20px)}
+
   /* ── Match modal ── */
   .match-modal{z-index:120}
   .match-scroll{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;
@@ -616,6 +705,21 @@
       <button id="settingsBtn" type="button" class="icon-btn" aria-label="設定">⚙<span class="icon-badge" id="settingsBadge"></span></button>
     </div>
   </header>
+
+  <!-- リセット時刻ステータス -->
+  <div class="reset-status" id="resetStatus">
+    <div class="reset-row">
+      <span class="reset-label">次回リセット</span>
+      <span class="reset-value" id="resetNextTime">未設定</span>
+      <span class="reset-remain" id="resetRemain"></span>
+      <span class="reset-badge" id="resetBadge"></span>
+      <button id="resetEditBtn" type="button" class="reset-edit" aria-label="次回リセット時刻を変更">✎</button>
+    </div>
+    <div class="reset-alert" id="resetAlert" hidden>
+      <span>⚠ 音声ファイルが未登録です</span>
+      <span class="alert-time" id="resetAlertTime"></span>
+    </div>
+  </div>
 
   <main>
     <div class="main-tabs" id="mainTabs">
@@ -759,6 +863,21 @@
   </div>
 </div>
 
+<div id="resetModal" class="modal reset-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>次回リセット時刻</h2>
+      <button id="resetModalClose" type="button" class="icon-btn" aria-label="閉じる">✕</button>
+    </div>
+    <div class="reset-modal-body">
+      <p class="note">Gemini Notebook のリセット予定時刻を入力してください。以降、5時間ごとの予定時刻を計算します。実際のリセット時刻が予定と異なる場合は、いつでもこの画面から修正できます。</p>
+      <input type="datetime-local" id="resetInput">
+      <button id="resetSaveBtn" type="button" class="data-btn" style="margin-top:16px">保存</button>
+      <button id="resetClearBtn" type="button" class="data-btn skip-style">クリア（未設定に戻す）</button>
+    </div>
+  </div>
+</div>
+
 <div id="matchModal" class="modal match-modal">
   <div class="modal-card">
     <div class="modal-head">
@@ -802,6 +921,7 @@ var SETTINGS_TABS = ['folders', 'common', 'data'];
 var TIMER_DURATION_MS = 30 * 60 * 1000;
 var MIN_THEME_LEN = 2;
 var REPEAT_MODES = ['off', 'all', 'one', 'unplayed'];
+var RESET_PERIOD_MS = 5 * 60 * 60 * 1000;
 
 function $(s, r){ return (r||document).querySelector(s); }
 function $$(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); }
@@ -818,7 +938,8 @@ var state = {
   rate: 1,
   repeatMode: 'off',
   mainTab: 'new',
-  lastExportSnapshot: null
+  lastExportSnapshot: null,
+  resetAnchorAt: null
 };
 
 var currentId = null;
@@ -837,6 +958,7 @@ var pendingMatchResolve = null;
 var editModalOpenedAt = 0;
 var timerInterval = null;
 var timerEndAt = 0;
+var resetTickerId = null;
 
 /* ── Utils ── */
 function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
@@ -863,6 +985,35 @@ function formatDateLabel(d){
     String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
 }
 function fmtRate(r){ return r.toFixed(1) + '×'; }
+
+function fmtDateTime(ms){
+  if(!isFinite(ms)) return '—';
+  var d = new Date(ms);
+  var days = ['日','月','火','水','木','金','土'];
+  return (d.getMonth()+1)+'/'+d.getDate()+'('+days[d.getDay()]+') '+
+    String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+
+function fmtRemain(ms){
+  if(!isFinite(ms)) return '';
+  if(ms <= 0) return 'まもなくリセット';
+  var totalMin = Math.ceil(ms / 60000);
+  if(totalMin <= 0) return 'まもなくリセット';
+  var h = Math.floor(totalMin / 60);
+  var m = totalMin % 60;
+  if(h > 0 && m > 0) return '残り ' + h + '時間' + m + '分';
+  if(h > 0) return '残り ' + h + '時間';
+  return '残り ' + m + '分';
+}
+
+function toLocalDatetimeString(ms){
+  var d = new Date(ms);
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0') + 'T' +
+    String(d.getHours()).padStart(2,'0') + ':' +
+    String(d.getMinutes()).padStart(2,'0');
+}
 
 function showToast(msg, actionLabel, actionFn, duration){
   var el = $('#toast'); if(!el) return;
@@ -901,6 +1052,86 @@ function normalizeForMatch(s){
     .replace(/[\s\u3000_\-\.\u30fb\u30fc\uff0d\/／・、。！？!?,]/g, '')
     .replace(/[「」『』（）()\[\]【】]/g, '')
     .toLowerCase();
+}
+
+/* ── Reset status ── */
+function getResetInfo(nowMs){
+  var anchor = (typeof state.resetAnchorAt === 'number' && isFinite(state.resetAnchorAt) && state.resetAnchorAt > 0)
+    ? state.resetAnchorAt : null;
+  if(anchor === null) return null;
+  var t = (typeof nowMs === 'number') ? nowMs : Date.now();
+  if(t < anchor){
+    return { currentPeriodStart: null, nextResetAt: anchor, hasPeriod: false };
+  }
+  var k = Math.floor((t - anchor) / RESET_PERIOD_MS);
+  var start = anchor + k * RESET_PERIOD_MS;
+  var end = start + RESET_PERIOD_MS;
+  return { currentPeriodStart: start, nextResetAt: end, hasPeriod: true };
+}
+
+function hasAudioInPeriod(start, end){
+  if(!isFinite(start) || !isFinite(end) || end <= start) return false;
+  for(var i=0; i<state.history.length; i++){
+    var h = state.history[i];
+    if(!h.hasAudio) continue;
+    var at = (typeof h.audioAddedAt === 'number' && h.audioAddedAt > 0) ? h.audioAddedAt : h.time;
+    if(!isFinite(at) || at <= 0) continue;
+    if(at >= start && at < end) return true;
+  }
+  return false;
+}
+
+function tickResetStatus(){
+  var nextEl = $('#resetNextTime');
+  if(!nextEl) return;
+  var remainEl = $('#resetRemain');
+  var badgeEl = $('#resetBadge');
+  var alertEl = $('#resetAlert');
+  var alertTimeEl = $('#resetAlertTime');
+
+  var info = getResetInfo();
+  if(!info){
+    nextEl.textContent = '未設定';
+    if(remainEl) remainEl.textContent = '';
+    if(badgeEl){ badgeEl.textContent = ''; badgeEl.className = 'reset-badge'; }
+    if(alertEl) alertEl.hidden = true;
+    return;
+  }
+
+  nextEl.textContent = fmtDateTime(info.nextResetAt);
+  if(remainEl) remainEl.textContent = fmtRemain(info.nextResetAt - Date.now());
+
+  if(!info.hasPeriod){
+    if(badgeEl){ badgeEl.textContent = '—'; badgeEl.className = 'reset-badge'; }
+    if(alertEl) alertEl.hidden = true;
+    return;
+  }
+
+  var registered = hasAudioInPeriod(info.currentPeriodStart, info.nextResetAt);
+  if(badgeEl){
+    if(registered){
+      badgeEl.textContent = '登録済み';
+      badgeEl.className = 'reset-badge ok';
+    } else {
+      badgeEl.textContent = '未登録';
+      badgeEl.className = 'reset-badge ng';
+    }
+  }
+  if(alertEl){
+    if(!registered){
+      if(alertTimeEl){
+        alertTimeEl.textContent = '(' + fmtDateTime(info.currentPeriodStart) + ' 開始)';
+      }
+      alertEl.hidden = false;
+    } else {
+      alertEl.hidden = true;
+    }
+  }
+}
+
+function startResetTicker(){
+  if(resetTickerId) return;
+  resetTickerId = setInterval(tickResetStatus, 1000);
 }
 
 /* ── Icons ── */
@@ -1028,6 +1259,10 @@ function normalize(){
   if(!Array.isArray(state.prompts)) state.prompts = [];
   if(!Array.isArray(state.history)) state.history = [];
 
+  if(typeof state.resetAnchorAt !== 'number' || !isFinite(state.resetAnchorAt) || state.resetAnchorAt <= 0){
+    state.resetAnchorAt = null;
+  }
+
   state.prompts.forEach(function(p){
     if(!safeId(p.id)) p.id = uid();
     if(typeof p.name !== 'string') p.name = '';
@@ -1060,6 +1295,9 @@ function normalize(){
     if(typeof h.read !== 'boolean') h.read = false;
     if(typeof h.hasAudio !== 'boolean') h.hasAudio = false;
     if(typeof h.audioDuration !== 'number') h.audioDuration = 0;
+    if(typeof h.audioAddedAt !== 'number' || !isFinite(h.audioAddedAt) || h.audioAddedAt < 0){
+      h.audioAddedAt = 0;
+    }
   });
 
   if(typeof state.nextNumber !== 'number' || !isFinite(state.nextNumber) || state.nextNumber < 1){
@@ -1123,6 +1361,9 @@ function load(){
     if(typeof parsed.nextNumber === 'number') state.nextNumber = parsed.nextNumber;
     if(typeof parsed.rate === 'number') state.rate = parsed.rate;
     if(typeof parsed.repeatMode === 'string') state.repeatMode = parsed.repeatMode;
+    if(typeof parsed.resetAnchorAt === 'number' && isFinite(parsed.resetAnchorAt) && parsed.resetAnchorAt > 0){
+      state.resetAnchorAt = parsed.resetAnchorAt;
+    }
     if(parsed.lastExportSnapshot && typeof parsed.lastExportSnapshot === 'object'){
       state.lastExportSnapshot = parsed.lastExportSnapshot;
     }
@@ -1480,6 +1721,7 @@ function renderAll(){
   renderShareBtn();
   renderHistory();
   updatePlayer();
+  tickResetStatus();
 }
 
 /* ── Settings editors ── */
@@ -1821,10 +2063,8 @@ async function handleGenerate(){
     if(reuseEntry){ num = reuseEntry.number; }
     else { num = state.nextNumber; }
 
-    // クリップボードコピー用：指示文は含めない
     var promptText = buildPromptText(folder, theme);
 
-    // 受け渡し用テキスト（share）：指示文を含める
     var instruction = 'タイトルの頭に【' + formatNum(num) + '】を付けてください。';
     var sourceText = ((theme.source || '').trim() || (theme.name || '').trim());
     sourceText = sourceText ? (sourceText + '\n\n' + instruction) : instruction;
@@ -1840,7 +2080,7 @@ async function handleGenerate(){
     } else {
       var entry = {
         id: uid(), number: num, title: title, date: dateLabel, time: nowMs,
-        read: false, hasAudio: false, audioDuration: 0,
+        read: false, hasAudio: false, audioDuration: 0, audioAddedAt: 0,
         folderName: folder.name, themeName: theme.name
       };
       state.history.unshift(entry);
@@ -1922,7 +2162,7 @@ async function importAudioTo(entry, file, isNew){
   entry.hasAudio = true;
   entry.audioDuration = dur;
   entry.audioName = file.name;
-  // 統合データ: 数字は履歴データのまま、タイトルは音声ファイル名を適用
+  entry.audioAddedAt = Date.now();
   entry.title = cleanTitleFromFile(file.name);
   audioPositions[entry.id] = 0;
   if(db) dbSavePos(entry.id, 0).catch(function(){});
@@ -1930,6 +2170,7 @@ async function importAudioTo(entry, file, isNew){
   state.mainTab = 'unplayed';
   renderAll();
   switchMainTab('unplayed');
+  tickResetStatus();
 }
 
 function pickFileFor(entryId){
@@ -1955,7 +2196,7 @@ function createEntryFromAudio(file){
   var entry = {
     id: uid(), number: num, title: cleanTitleFromFile(file.name),
     date: formatDateLabel(new Date()), time: Date.now(),
-    read: false, hasAudio: false, audioDuration: 0, fromAudio: true
+    read: false, hasAudio: false, audioDuration: 0, audioAddedAt: 0, fromAudio: true
   };
   state.history.unshift(entry);
   state.nextNumber = num + 1;
@@ -2395,6 +2636,7 @@ function deleteHistory(id){
   if(state.lastGenId === id) state.lastGenId = null;
   save();
   renderHistory();
+  tickResetStatus();
   showToast('削除しました');
 }
 
@@ -2417,6 +2659,7 @@ function clearPlayed(){
   state.history = state.history.filter(function(h){ return !(h.hasAudio && h.read); });
   save();
   renderHistory();
+  tickResetStatus();
   showToast(played.length + ' 件を削除しました');
 }
 
@@ -2648,7 +2891,8 @@ function exportData(){
     selectedPromptId: state.selectedPromptId,
     selectedThemeId: state.selectedThemeId,
     nextNumber: state.nextNumber,
-    rate: state.rate, repeatMode: state.repeatMode, mainTab: state.mainTab
+    rate: state.rate, repeatMode: state.repeatMode, mainTab: state.mainTab,
+    resetAnchorAt: (typeof state.resetAnchorAt === 'number') ? state.resetAnchorAt : null
   };
   var json = JSON.stringify(data, null, 2);
   var blob = new Blob([json], { type: 'application/json' });
@@ -2691,10 +2935,17 @@ function importData(file){
           time: typeof h.time === 'number' ? h.time : 0,
           read: !!h.read, hasAudio: false,
           audioDuration: (typeof h.audioDuration === 'number') ? h.audioDuration : 0,
+          audioAddedAt: 0,
           folderName: typeof h.folderName === 'string' ? h.folderName : '',
           themeName: typeof h.themeName === 'string' ? h.themeName : ''
         };
       });
+    }
+
+    if(typeof data.resetAnchorAt === 'number' && isFinite(data.resetAnchorAt) && data.resetAnchorAt > 0){
+      state.resetAnchorAt = data.resetAnchorAt;
+    } else if(data.resetAnchorAt === null){
+      state.resetAnchorAt = null;
     }
 
     state.selectedPromptId = data.selectedPromptId || null;
@@ -2711,10 +2962,31 @@ function importData(file){
     setRate(state.rate); setRepeat(state.repeatMode);
     switchMainTab(state.mainTab);
     updateDataTabBadge();
+    tickResetStatus();
     showToast('インポートしました');
   };
   reader.onerror = function(){ showToast('読み込めませんでした'); };
   reader.readAsText(file);
+}
+
+/* ── Reset modal ── */
+function openResetModal(){
+  var input = $('#resetInput');
+  if(!input) return;
+  if(typeof state.resetAnchorAt === 'number' && isFinite(state.resetAnchorAt) && state.resetAnchorAt > 0){
+    input.value = toLocalDatetimeString(state.resetAnchorAt);
+  } else {
+    var d = new Date();
+    d.setMinutes(d.getMinutes() + 30);
+    d.setSeconds(0, 0);
+    input.value = toLocalDatetimeString(d.getTime());
+  }
+  $('#resetModal').classList.add('show');
+  document.body.classList.add('modal-open');
+}
+function closeResetModal(){
+  $('#resetModal').classList.remove('show');
+  updateModalOpenState();
 }
 
 /* ── Init ── */
@@ -2748,12 +3020,44 @@ document.addEventListener('DOMContentLoaded', async function(){
   setRepeat(state.repeatMode);
   updateDataTabBadge();
   updateTimerBtn();
+  tickResetStatus();
+  startResetTicker();
 
   if(speedSlider){
     var p0 = ((state.rate - 0.5) / 2.5) * 100;
     speedSlider.style.setProperty('--p', p0 + '%');
     speedSlider.value = state.rate;
   }
+
+  // ─── リセット時刻ステータス ───
+  var resetEditBtn = $('#resetEditBtn');
+  if(resetEditBtn) resetEditBtn.addEventListener('click', openResetModal);
+  var resetModalClose = $('#resetModalClose');
+  if(resetModalClose) resetModalClose.addEventListener('click', closeResetModal);
+  var resetModalEl = $('#resetModal');
+  if(resetModalEl) resetModalEl.addEventListener('click', function(e){
+    if(e.target === resetModalEl) closeResetModal();
+  });
+  var resetSaveBtn = $('#resetSaveBtn');
+  if(resetSaveBtn) resetSaveBtn.addEventListener('click', function(){
+    var v = $('#resetInput').value;
+    if(!v){ showToast('時刻を入力してください'); return; }
+    var d = new Date(v);
+    if(!isFinite(d.getTime())){ showToast('正しい時刻を入力してください'); return; }
+    state.resetAnchorAt = d.getTime();
+    save();
+    closeResetModal();
+    tickResetStatus();
+    showToast('次回リセット時刻を保存しました');
+  });
+  var resetClearBtn = $('#resetClearBtn');
+  if(resetClearBtn) resetClearBtn.addEventListener('click', function(){
+    state.resetAnchorAt = null;
+    save();
+    closeResetModal();
+    tickResetStatus();
+    showToast('リセット時刻をクリアしました');
+  });
 
   var promptTagsEl = $('#promptTags');
   if(promptTagsEl){
@@ -2961,6 +3265,7 @@ document.addEventListener('DOMContentLoaded', async function(){
           navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
         }catch(e){}
       }
+      tickResetStatus();
     }
   });
 
