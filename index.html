@@ -81,7 +81,12 @@
   .reset-row{
     display:flex;align-items:center;gap:8px;flex-wrap:wrap;
     font-size:12.5px;min-height:22px;
+    cursor:pointer;-webkit-user-select:none;user-select:none;
+    border-radius:8px;
+    transition:background .12s;
   }
+  .reset-row:active{background:rgba(255,255,255,.04)}
+  .reset-row:active .reset-value{color:var(--accent)}
   .reset-label{
     font-size:11px;font-weight:700;color:var(--text2);
     letter-spacing:.04em;flex:0 0 auto;
@@ -89,6 +94,7 @@
   .reset-value{
     font-size:13.5px;font-weight:700;color:var(--text);
     font-variant-numeric:tabular-nums;flex:0 0 auto;
+    transition:color .12s;
   }
   .reset-remain{
     font-size:11.5px;font-weight:600;color:var(--text2);
@@ -109,17 +115,6 @@
     background:rgba(255,69,58,.18);
     color:#ff7878;
   }
-  .reset-edit{
-    margin-left:auto;
-    width:28px;height:28px;
-    border-radius:8px;background:transparent;border:none;
-    color:var(--text2);font-size:14px;
-    display:grid;place-items:center;cursor:pointer;
-    flex:0 0 auto;
-    transition:background .12s,color .12s;
-    -webkit-appearance:none;appearance:none;font-family:inherit;
-  }
-  .reset-edit:active{background:var(--accent-soft);color:var(--accent)}
   .reset-alert{
     margin-top:8px;
     padding:8px 10px;
@@ -337,8 +332,14 @@
     background:var(--grad);box-shadow:0 6px 16px rgba(91,108,255,.30)}
   .pmeta{flex:1;min-width:0}
   .ptitle{
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    display:flex;gap:5px;align-items:flex-start;
     font-size:14px;font-weight:650;line-height:1.35;
+    min-width:0;
+  }
+  .ptitle .num-pill{flex:0 0 auto;margin-right:0;position:static;top:auto}
+  .ptitle-text{
+    flex:1;min-width:0;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
     overflow-wrap:break-word;word-break:normal;
   }
   .psub{font-size:11px;color:var(--text2);margin-top:2px;font-variant-numeric:tabular-nums}
@@ -708,12 +709,11 @@
 
   <!-- リセット時刻ステータス -->
   <div class="reset-status" id="resetStatus">
-    <div class="reset-row">
+    <div class="reset-row" id="resetRow" role="button" tabindex="0" aria-label="次回リセット時刻を変更">
       <span class="reset-label">次回リセット</span>
       <span class="reset-value" id="resetNextTime">未設定</span>
       <span class="reset-remain" id="resetRemain"></span>
       <span class="reset-badge" id="resetBadge"></span>
-      <button id="resetEditBtn" type="button" class="reset-edit" aria-label="次回リセット時刻を変更">✎</button>
     </div>
     <div class="reset-alert" id="resetAlert" hidden>
       <span>⚠ 音声ファイルが未登録です</span>
@@ -1683,6 +1683,12 @@ function renderHistory(){
 
   var visible = state.history.filter(function(h){ return getEntryTab(h) === tab; });
 
+  if(tab === 'unplayed'){
+    visible.sort(function(a, b){ return (a.number || 0) - (b.number || 0); });
+  } else if(tab === 'played'){
+    visible.sort(function(a, b){ return (b.number || 0) - (a.number || 0); });
+  }
+
   if(!visible.length){
     var msgs = {
       generating: '生成中の項目はありません<small>「新規」タブから生成できます</small>',
@@ -2184,7 +2190,6 @@ function pickFileFor(entryId){
     if(!f) return;
     importAudioTo(entry, f, false).then(function(){
       showToast(formatNum(entry.number) + ' に音声を取り込みました');
-      setTimeout(function(){ playEntry(entry.id); }, 300);
     });
   };
   input.click();
@@ -2203,15 +2208,42 @@ function createEntryFromAudio(file){
   return entry;
 }
 
+function getThemeWords(themeName){
+  var raw = String(themeName || '').trim();
+  if(!raw) return [];
+  var parts = raw.split(/[\s\u3000_\-\/／・、。,.!?！？:：;；]+/);
+  var words = [];
+  var seen = Object.create(null);
+  parts.forEach(function(p){
+    var n = normalizeForMatch(p);
+    if(n && n.length >= MIN_THEME_LEN && !seen[n]){
+      seen[n] = true;
+      words.push(n);
+    }
+  });
+  return words;
+}
+
 function getMatchingEntries(file){
   var baseName = cleanTitleFromFile(file.name);
   var base = normalizeForMatch(baseName);
   if(!base) return [];
   return state.history.filter(function(h){
     if(h.hasAudio) return false;
-    var themeName = normalizeForMatch(h.themeName);
-    if(!themeName || themeName.length < MIN_THEME_LEN) return false;
-    return base.indexOf(themeName) !== -1;
+    var themeName = h.themeName;
+    if(!themeName) return false;
+
+    var themeNorm = normalizeForMatch(themeName);
+    if(themeNorm && themeNorm.length >= MIN_THEME_LEN && base.indexOf(themeNorm) !== -1){
+      return true;
+    }
+
+    var words = getThemeWords(themeName);
+    for(var i=0; i<words.length; i++){
+      if(base.indexOf(words[i]) !== -1) return true;
+    }
+
+    return false;
   });
 }
 
@@ -2294,7 +2326,6 @@ async function handleAudioDrops(files){
   if(!list.length){ showToast('音声ファイルが見つかりません'); return; }
 
   var added = 0, matched = 0, skipped = 0;
-  var firstImportedId = null;
 
   for(var i=0; i<list.length; i++){
     var file = list[i];
@@ -2307,12 +2338,11 @@ async function handleAudioDrops(files){
       target = result.entry; matched++;
     }
     await importAudioTo(target, file, isNew);
-    if(!firstImportedId) firstImportedId = target.id;
   }
 
   save();
 
-  if(!firstImportedId && skipped){
+  if(!added && !matched && skipped){
     showToast(skipped + ' 件をスキップしました');
     return;
   }
@@ -2321,7 +2351,6 @@ async function handleAudioDrops(files){
   if(added) parts.push(added + ' 件追加');
   if(skipped) parts.push(skipped + ' 件スキップ');
   if(parts.length) showToast(parts.join(' / '));
-  if(firstImportedId){ setTimeout(function(){ playEntry(firstImportedId); }, 400); }
 }
 
 /* ── Playback ── */
@@ -2441,7 +2470,7 @@ function onEnded(){
   if(state.repeatMode === 'unplayed'){
     var unplayed = state.history.filter(function(h){ return h.hasAudio && !h.read; });
     if(unplayed.length){
-      unplayed.sort(function(a,b){ return (a.time||0) - (b.time||0); });
+      unplayed.sort(function(a,b){ return (a.number||0) - (b.number||0); });
       playEntry(unplayed[0].id);
       return;
     }
@@ -2487,7 +2516,7 @@ function updatePlayer(){
   var entry = getEntry(currentId);
   if(!entry){ playerEl.classList.remove('show'); return; }
   playerEl.classList.add('show');
-  if(pTitle) pTitle.innerHTML = numPill(entry.number) + esc(entry.title);
+  if(pTitle) pTitle.innerHTML = numPill(entry.number) + '<span class="ptitle-text">' + esc(entry.title) + '</span>';
   if(pSub) pSub.textContent = entry.date || '';
   if(!scrubbing) setSeekUI();
 }
@@ -3030,8 +3059,8 @@ document.addEventListener('DOMContentLoaded', async function(){
   }
 
   // ─── リセット時刻ステータス ───
-  var resetEditBtn = $('#resetEditBtn');
-  if(resetEditBtn) resetEditBtn.addEventListener('click', openResetModal);
+  var resetRow = $('#resetRow');
+  if(resetRow) resetRow.addEventListener('click', openResetModal);
   var resetModalClose = $('#resetModalClose');
   if(resetModalClose) resetModalClose.addEventListener('click', closeResetModal);
   var resetModalEl = $('#resetModal');
