@@ -115,6 +115,59 @@
     background:rgba(255,69,58,.18);
     color:#ff7878;
   }
+
+  /* ── Reset numbers row ── */
+  .reset-numbers{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid var(--border);
+  }
+  .reset-num-item{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:3px 8px;
+    border-radius:8px;
+    font-size:11px;
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+    line-height:1.2;
+  }
+  .reset-num-item .num{
+    font-weight:800;
+    font-size:11.5px;
+  }
+  .reset-num-item .st{
+    font-size:10px;
+    font-weight:600;
+  }
+  .reset-num-item.done{
+    background:rgba(48,209,88,.16);
+    color:var(--green);
+  }
+  .reset-num-item.done .st{
+    font-size:11px;
+  }
+  .reset-num-item.pending-left{
+    background:rgba(255,69,58,.14);
+    color:#ff8a80;
+  }
+  .reset-num-item.pending-right{
+    background:rgba(255,255,255,.06);
+    color:var(--text2);
+  }
+  .reset-num-divider{
+    width:1px;
+    height:16px;
+    background:var(--border);
+    margin:0 2px;
+  }
+
   .reset-alert{
     margin-top:8px;
     padding:8px 10px;
@@ -125,13 +178,9 @@
     font-size:11.5px;
     font-weight:600;
     line-height:1.45;
-    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    text-align:center;
   }
   .reset-alert[hidden]{display:none}
-  .reset-alert .alert-time{
-    font-size:10.5px;font-weight:500;color:#ff9a90;
-    font-variant-numeric:tabular-nums;
-  }
 
   input[type="datetime-local"]{
     width:100%;
@@ -276,8 +325,12 @@
   .history-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
   .history-title{
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-    font-size:14px;font-weight:600;line-height:1.35;
+    font-size:14px;font-weight:600;line-height:1.5;
     overflow-wrap:break-word;word-break:normal;
+    padding-bottom:1px;
+  }
+  .history-title .num-pill{
+    height:18px;line-height:18px;top:0;
   }
   .history-sub{
     display:flex;justify-content:space-between;align-items:baseline;gap:10px;
@@ -333,14 +386,15 @@
   .pmeta{flex:1;min-width:0}
   .ptitle{
     display:flex;gap:5px;align-items:flex-start;
-    font-size:14px;font-weight:650;line-height:1.35;
+    font-size:14px;font-weight:650;line-height:1.5;
     min-width:0;
   }
-  .ptitle .num-pill{flex:0 0 auto;margin-right:0;position:static;top:auto}
+  .ptitle .num-pill{flex:0 0 auto;margin-right:0;position:static;top:auto;height:18px;line-height:18px}
   .ptitle-text{
     flex:1;min-width:0;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
     overflow-wrap:break-word;word-break:normal;
+    padding-bottom:1px;
   }
   .psub{font-size:11px;color:var(--text2);margin-top:2px;font-variant-numeric:tabular-nums}
 
@@ -715,9 +769,9 @@
       <span class="reset-remain" id="resetRemain"></span>
       <span class="reset-badge" id="resetBadge"></span>
     </div>
+    <div class="reset-numbers" id="resetNumbers" hidden></div>
     <div class="reset-alert" id="resetAlert" hidden>
       <span>⚠ 音声ファイルが未登録です</span>
-      <span class="alert-time" id="resetAlertTime"></span>
     </div>
   </div>
 
@@ -959,6 +1013,7 @@ var editModalOpenedAt = 0;
 var timerInterval = null;
 var timerEndAt = 0;
 var resetTickerId = null;
+var resetNumbersLastHtml = '';
 
 /* ── Utils ── */
 function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
@@ -1054,6 +1109,28 @@ function normalizeForMatch(s){
     .toLowerCase();
 }
 
+/* ── Entry display time ── */
+function getEntryTimeInfo(entry){
+  if(!entry) return { ms: 0, label: '' };
+  if(entry.hasAudio){
+    var ms = entry.audioCreatedAt;
+    if(!(typeof ms === 'number' && isFinite(ms) && ms > 0)){
+      ms = (entry.audioAddedAt && entry.audioAddedAt > 0) ? entry.audioAddedAt : entry.time;
+    }
+    return { ms: ms, label: '作成' };
+  }
+  return { ms: entry.time, label: 'ソース追加' };
+}
+
+function getEntryDisplayDate(h){
+  var ti = getEntryTimeInfo(h);
+  var ms = ti.ms;
+  if(!(isFinite(ms) && ms > 0)) ms = h.time;
+  var d = new Date(ms);
+  var days = ['日','月','火','水','木','金','土'];
+  return (d.getMonth()+1)+'月'+d.getDate()+'日('+days[d.getDay()]+')';
+}
+
 /* ── Reset status ── */
 function getResetInfo(nowMs){
   var anchor = (typeof state.resetAnchorAt === 'number' && isFinite(state.resetAnchorAt) && state.resetAnchorAt > 0)
@@ -1081,13 +1158,96 @@ function hasAudioInPeriod(start, end){
   return false;
 }
 
+function getPeriodNumberItems(){
+  var info = getResetInfo();
+  if(!info || !info.hasPeriod) return null;
+  var start = info.currentPeriodStart;
+
+  // 左: リセット前に作成され、リセット時点で生成中だった（または現在も生成中）項目
+  var leftCandidates = state.history.filter(function(h){
+    if(!(h.time < start)) return false;
+    if(!h.hasAudio) return true;
+    if(h.audioAddedAt && h.audioAddedAt >= start) return true;
+    return false;
+  }).sort(function(a, b){ return (b.time || 0) - (a.time || 0); });
+  var picked = leftCandidates.slice(0, 2);
+  picked.sort(function(a, b){ return (a.number || 0) - (b.number || 0); });
+  var leftItems = picked.map(function(h){
+    return { number: h.number, done: !!h.hasAudio };
+  });
+
+  // 右: リセット後に発行済みの番号 + 未発行の予定番号で最大2件
+  var issued = state.history.filter(function(h){
+    return (h.time >= start);
+  }).sort(function(a, b){ return (a.number || 0) - (b.number || 0); });
+  var rightItems = [];
+  var usedNums = {};
+  issued.forEach(function(h){
+    if(rightItems.length >= 2) return;
+    if(h.number <= 0) return;
+    if(usedNums[h.number]) return;
+    usedNums[h.number] = true;
+    rightItems.push({ number: h.number, done: true });
+  });
+  if(rightItems.length < 2){
+    var planned = state.nextNumber;
+    var guard = 0;
+    while(rightItems.length < 2 && guard < 50){
+      if(!usedNums[planned]){
+        usedNums[planned] = true;
+        rightItems.push({ number: planned, done: false });
+      }
+      planned++;
+      guard++;
+    }
+  }
+
+  return { left: leftItems, right: rightItems };
+}
+
+function renderResetNumbers(){
+  var el = $('#resetNumbers');
+  if(!el) return;
+  var data = getPeriodNumberItems();
+  if(!data || (!data.left.length && !data.right.length)){
+    if(resetNumbersLastHtml !== ''){
+      el.innerHTML = '';
+      resetNumbersLastHtml = '';
+    }
+    el.hidden = true;
+    return;
+  }
+  var html = '';
+  data.left.forEach(function(it){
+    html += '<span class="reset-num-item ' + (it.done ? 'done' : 'pending-left') + '">' +
+      '<span class="num">' + formatNum(it.number) + '</span>' +
+      '<span class="st">' + (it.done ? '✓' : '未登録') + '</span>' +
+      '</span>';
+  });
+  if(data.left.length && data.right.length){
+    html += '<span class="reset-num-divider"></span>';
+  }
+  data.right.forEach(function(it){
+    html += '<span class="reset-num-item ' + (it.done ? 'done' : 'pending-right') + '">' +
+      '<span class="num">' + formatNum(it.number) + '</span>' +
+      '<span class="st">' + (it.done ? '✓' : '未発行') + '</span>' +
+      '</span>';
+  });
+  if(resetNumbersLastHtml !== html){
+    el.innerHTML = html;
+    resetNumbersLastHtml = html;
+  }
+  el.hidden = false;
+}
+
 function tickResetStatus(){
+  renderResetNumbers();
+
   var nextEl = $('#resetNextTime');
   if(!nextEl) return;
   var remainEl = $('#resetRemain');
   var badgeEl = $('#resetBadge');
   var alertEl = $('#resetAlert');
-  var alertTimeEl = $('#resetAlertTime');
 
   var info = getResetInfo();
   if(!info){
@@ -1118,14 +1278,7 @@ function tickResetStatus(){
     }
   }
   if(alertEl){
-    if(!registered){
-      if(alertTimeEl){
-        alertTimeEl.textContent = '(' + fmtDateTime(info.currentPeriodStart) + ' 開始)';
-      }
-      alertEl.hidden = false;
-    } else {
-      alertEl.hidden = true;
-    }
+    alertEl.hidden = registered;
   }
 }
 
@@ -1297,6 +1450,9 @@ function normalize(){
     if(typeof h.audioDuration !== 'number') h.audioDuration = 0;
     if(typeof h.audioAddedAt !== 'number' || !isFinite(h.audioAddedAt) || h.audioAddedAt < 0){
       h.audioAddedAt = 0;
+    }
+    if(typeof h.audioCreatedAt !== 'number' || !isFinite(h.audioCreatedAt) || h.audioCreatedAt < 0){
+      h.audioCreatedAt = 0;
     }
   });
 
@@ -1645,7 +1801,12 @@ function makeHistoryRow(h){
   if(h.hasAudio && h.audioDuration > 0) durTxt = fmtTime(h.audioDuration);
   else if(h.hasAudio) durTxt = '音声あり';
   else durTxt = '音声未登録';
-  var timePart = (h.date || '').split(' ').pop() || '';
+
+  var ti = getEntryTimeInfo(h);
+  var td = new Date(ti.ms);
+  var timePart = isFinite(ti.ms) && ti.ms > 0
+    ? (String(td.getHours()).padStart(2,'0') + ':' + String(td.getMinutes()).padStart(2,'0'))
+    : '—';
 
   var pct = 0;
   if(h.id === currentId && h.audioDuration > 0){
@@ -1659,7 +1820,7 @@ function makeHistoryRow(h){
     '<div class="history-text">' +
       '<div class="history-title">' + numPill(h.number) + esc(h.title) + '</div>' +
       '<div class="history-sub">' +
-        '<span class="history-time">' + esc(timePart) + ' 生成</span>' +
+        '<span class="history-time">' + esc(timePart + ' ' + ti.label) + '</span>' +
         '<span class="history-dur">' + esc(durTxt) + '</span>' +
       '</div>' +
     '</div>' +
@@ -1700,7 +1861,7 @@ function renderHistory(){
     listEl.innerHTML = '';
     var lastDateKey = null;
     visible.forEach(function(h){
-      var dateKey = (h.date || '').split(' ')[0] || '日付なし';
+      var dateKey = getEntryDisplayDate(h) || '日付なし';
       if(dateKey !== lastDateKey){
         var header = document.createElement('div');
         header.className = 'history-date-header';
@@ -2169,6 +2330,8 @@ async function importAudioTo(entry, file, isNew){
   entry.audioDuration = dur;
   entry.audioName = file.name;
   entry.audioAddedAt = Date.now();
+  entry.audioCreatedAt = (file.lastModified && isFinite(file.lastModified) && file.lastModified > 0)
+    ? file.lastModified : Date.now();
   entry.title = cleanTitleFromFile(file.name);
   audioPositions[entry.id] = 0;
   if(db) dbSavePos(entry.id, 0).catch(function(){});
@@ -2517,7 +2680,14 @@ function updatePlayer(){
   if(!entry){ playerEl.classList.remove('show'); return; }
   playerEl.classList.add('show');
   if(pTitle) pTitle.innerHTML = numPill(entry.number) + '<span class="ptitle-text">' + esc(entry.title) + '</span>';
-  if(pSub) pSub.textContent = entry.date || '';
+  if(pSub){
+    var ti = getEntryTimeInfo(entry);
+    if(ti.ms > 0){
+      pSub.textContent = formatDateLabel(new Date(ti.ms));
+    } else {
+      pSub.textContent = entry.date || '';
+    }
+  }
   if(!scrubbing) setSeekUI();
 }
 
@@ -2964,7 +3134,7 @@ function importData(file){
           time: typeof h.time === 'number' ? h.time : 0,
           read: !!h.read, hasAudio: false,
           audioDuration: (typeof h.audioDuration === 'number') ? h.audioDuration : 0,
-          audioAddedAt: 0,
+          audioAddedAt: 0, audioCreatedAt: 0,
           folderName: typeof h.folderName === 'string' ? h.folderName : '',
           themeName: typeof h.themeName === 'string' ? h.themeName : ''
         };
