@@ -126,6 +126,28 @@
   .reset-num-row.pending-right{color:var(--text2)}
   .reset-num-row.pending-right .theme{color:var(--text3)}
 
+  /* ── Weekly reset ── */
+  .weekly-reset{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid var(--border);
+    cursor:pointer;
+    -webkit-user-select:none;user-select:none;
+    border-radius:8px;
+    transition:background .12s;
+  }
+  .weekly-reset:active{background:rgba(255,255,255,.04)}
+  .weekly-head{
+    display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  }
+  .weekly-head .reset-label{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.04em}
+  .weekly-head .reset-value{font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+  .weekly-head .reset-remain{font-size:11px;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums}
+  .weekly-progress{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .weekly-bar{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.10);overflow:hidden}
+  .weekly-bar-fill{height:100%;width:0%;border-radius:3px;background:var(--grad);transition:width .4s ease}
+  .weekly-count{font-size:11px;font-weight:700;color:var(--text2);font-variant-numeric:tabular-nums;flex:0 0 auto}
+
   input[type="datetime-local"]{
     width:100%;
     background:var(--card);
@@ -150,6 +172,13 @@
   @keyframes slideInFromLeft{
     from{opacity:0;transform:translateX(-36px)}
     to{opacity:1;transform:translateX(0)}
+  }
+  @keyframes floatInFromBottom{
+    from{opacity:0;transform:translateY(48px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  .history-item.just-added{
+    animation:floatInFromBottom .55s cubic-bezier(.22,.61,.36,1);
   }
 
   /* ── Topbar ── */
@@ -261,6 +290,15 @@
     font-family:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
   .clear-played-btn:active{background:rgba(255,69,58,.22)}
 
+  /* ── Unplayed summary ── */
+  .unplayed-summary{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 12px;margin-bottom:10px;
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    font-size:12.5px;color:var(--text2);font-weight:600;
+  }
+  .unplayed-summary .total{font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+
   /* ── History ── */
   .history{display:flex;flex-direction:column;gap:8px}
   .history-date-header{
@@ -330,6 +368,12 @@
     transition:background .12s,color .12s}
   .history-restore:active{background:rgba(108,123,255,.18);color:var(--accent)}
   .history-restore svg{width:16px;height:16px}
+  .history-move-played{flex:0 0 32px;width:32px;height:32px;border-radius:50%;background:transparent;
+    border:none;color:var(--text2);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-family:inherit;padding:0;-webkit-appearance:none;appearance:none;
+    transition:background .12s,color .12s}
+  .history-move-played:active{background:rgba(48,209,88,.18);color:var(--green)}
+  .history-move-played svg{width:16px;height:16px}
   .history-bar{position:absolute;left:0;bottom:0;height:2px;background:var(--grad);
     border-radius:0 1px 1px 0;transition:width .3s linear}
   .empty{color:var(--text3);font-size:13.5px;padding:24px 0;text-align:center}
@@ -660,7 +704,7 @@
 
   /* ── Reset modal ── */
   .reset-modal{z-index:105}
-  .reset-modal .modal-card{height:auto;max-height:75vh}
+  .reset-modal .modal-card{height:auto;max-height:85vh}
   .reset-modal-body{padding:0 16px calc(var(--safe-bottom) + 20px)}
 
   /* ── Match modal ── */
@@ -752,6 +796,17 @@
       </div>
       <div class="reset-right" id="resetNumbers" hidden></div>
     </div>
+    <div class="weekly-reset" id="weeklyReset" role="button" tabindex="0" aria-label="週間リセット時刻を変更">
+      <div class="weekly-head">
+        <span class="reset-label">週間リセット</span>
+        <span class="reset-value" id="weeklyNextTime">未設定</span>
+        <span class="reset-remain" id="weeklyRemain"></span>
+      </div>
+      <div class="weekly-progress">
+        <div class="weekly-bar"><div class="weekly-bar-fill" id="weeklyBarFill"></div></div>
+        <div class="weekly-count" id="weeklyCount">0 / 50</div>
+      </div>
+    </div>
   </div>
 
   <main>
@@ -788,6 +843,7 @@
     </div>
 
     <div id="panelUnplayed" class="main-panel" hidden>
+      <div id="unplayedSummary" class="unplayed-summary" hidden></div>
       <div id="listUnplayed" class="history"></div>
     </div>
 
@@ -902,12 +958,14 @@
 <div id="resetModal" class="modal reset-modal">
   <div class="modal-card">
     <div class="modal-head">
-      <h2>次回リセット時刻</h2>
+      <h2>リセット時刻設定</h2>
       <button id="resetModalClose" type="button" class="icon-btn" aria-label="閉じる">✕</button>
     </div>
     <div class="reset-modal-body">
-      <p class="note">Gemini Notebook のリセット予定時刻を入力してください。以降、5時間ごとの予定時刻を計算します。実際のリセット時刻が予定と異なる場合は、いつでもこの画面から修正できます。</p>
+      <p class="note">5時間ごとのリセット予定時刻を入力してください。以降、5時間ごとの予定時刻を計算します。実際のリセット時刻が予定と異なる場合は、いつでもこの画面から修正できます。</p>
       <input type="datetime-local" id="resetInput">
+      <p class="note" style="margin-top:16px">週間リセット（7日ごと）の開始時刻を入力してください。この期間に生成した音声解説の数が50個で100%になります。</p>
+      <input type="datetime-local" id="weeklyResetInput">
       <button id="resetSaveBtn" type="button" class="data-btn" style="margin-top:16px">保存</button>
       <button id="resetClearBtn" type="button" class="data-btn skip-style">クリア（未設定に戻す）</button>
     </div>
@@ -958,6 +1016,8 @@ var TIMER_DURATION_MS = 30 * 60 * 1000;
 var MIN_THEME_LEN = 2;
 var REPEAT_MODES = ['off', 'all', 'one', 'unplayed'];
 var RESET_PERIOD_MS = 5 * 60 * 60 * 1000;
+var WEEKLY_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
+var WEEKLY_GOAL = 50;
 
 function $(s, r){ return (r||document).querySelector(s); }
 function $$(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); }
@@ -975,7 +1035,9 @@ var state = {
   repeatMode: 'off',
   mainTab: 'new',
   lastExportSnapshot: null,
-  resetAnchorAt: null
+  resetAnchorAt: null,
+  weeklyAnchorAt: null,
+  lastPlayedId: null
 };
 
 var currentId = null;
@@ -996,6 +1058,8 @@ var timerInterval = null;
 var timerEndAt = 0;
 var resetTickerId = null;
 var resetNumbersLastHtml = '';
+var pendingRevealIds = [];
+var lastPosSaveAt = 0;
 
 /* ── Utils ── */
 function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
@@ -1128,12 +1192,37 @@ function getResetInfo(nowMs){
   return { currentPeriodStart: start, nextResetAt: end, hasPeriod: true };
 }
 
+function getWeeklyInfo(nowMs){
+  var anchor = (typeof state.weeklyAnchorAt === 'number' && isFinite(state.weeklyAnchorAt) && state.weeklyAnchorAt > 0)
+    ? state.weeklyAnchorAt : null;
+  if(anchor === null) return null;
+  var t = (typeof nowMs === 'number') ? nowMs : Date.now();
+  if(t < anchor){
+    return { currentPeriodStart: null, nextResetAt: anchor, hasPeriod: false };
+  }
+  var k = Math.floor((t - anchor) / WEEKLY_PERIOD_MS);
+  var start = anchor + k * WEEKLY_PERIOD_MS;
+  var end = start + WEEKLY_PERIOD_MS;
+  return { currentPeriodStart: start, nextResetAt: end, hasPeriod: true };
+}
+
+function countWeeklyGenerated(){
+  var info = getWeeklyInfo();
+  if(!info || !info.hasPeriod) return 0;
+  var start = info.currentPeriodStart;
+  var end = info.nextResetAt;
+  var count = 0;
+  state.history.forEach(function(h){
+    if(h.time >= start && h.time < end) count++;
+  });
+  return count;
+}
+
 function getPeriodNumberItems(){
   var info = getResetInfo();
   if(!info || !info.hasPeriod) return null;
   var start = info.currentPeriodStart;
 
-  // 左: リセット前に作成され、リセット時点で生成中だった（または現在も生成中）項目
   var leftCandidates = state.history.filter(function(h){
     if(!(h.time < start)) return false;
     if(!h.hasAudio) return true;
@@ -1151,7 +1240,6 @@ function getPeriodNumberItems(){
     };
   });
 
-  // 右: リセット後に発行済みの番号 + 未発行の予定番号で最大2件
   var issued = state.history.filter(function(h){
     return (h.time >= start);
   }).sort(function(a, b){ return (a.number || 0) - (b.number || 0); });
@@ -1212,8 +1300,31 @@ function renderResetNumbers(){
   el.hidden = false;
 }
 
+function renderWeeklyStatus(){
+  var nextEl = $('#weeklyNextTime');
+  var remainEl = $('#weeklyRemain');
+  var barEl = $('#weeklyBarFill');
+  var countEl = $('#weeklyCount');
+  if(!nextEl) return;
+  var info = getWeeklyInfo();
+  if(!info){
+    nextEl.textContent = '未設定';
+    if(remainEl) remainEl.textContent = '';
+    if(barEl) barEl.style.width = '0%';
+    if(countEl) countEl.textContent = '0 / ' + WEEKLY_GOAL;
+    return;
+  }
+  nextEl.textContent = fmtDateTime(info.nextResetAt);
+  if(remainEl) remainEl.textContent = fmtRemain(info.nextResetAt - Date.now());
+  var count = countWeeklyGenerated();
+  var pct = Math.min(100, (count / WEEKLY_GOAL) * 100);
+  if(barEl) barEl.style.width = pct.toFixed(1) + '%';
+  if(countEl) countEl.textContent = count + ' / ' + WEEKLY_GOAL + '（' + Math.round(pct) + '%）';
+}
+
 function tickResetStatus(){
   renderResetNumbers();
+  renderWeeklyStatus();
 
   var nextEl = $('#resetNextTime');
   if(!nextEl) return;
@@ -1363,6 +1474,10 @@ function normalize(){
   if(typeof state.resetAnchorAt !== 'number' || !isFinite(state.resetAnchorAt) || state.resetAnchorAt <= 0){
     state.resetAnchorAt = null;
   }
+  if(typeof state.weeklyAnchorAt !== 'number' || !isFinite(state.weeklyAnchorAt) || state.weeklyAnchorAt <= 0){
+    state.weeklyAnchorAt = null;
+  }
+  if(typeof state.lastPlayedId !== 'string') state.lastPlayedId = null;
 
   state.prompts.forEach(function(p){
     if(!safeId(p.id)) p.id = uid();
@@ -1468,6 +1583,10 @@ function load(){
     if(typeof parsed.resetAnchorAt === 'number' && isFinite(parsed.resetAnchorAt) && parsed.resetAnchorAt > 0){
       state.resetAnchorAt = parsed.resetAnchorAt;
     }
+    if(typeof parsed.weeklyAnchorAt === 'number' && isFinite(parsed.weeklyAnchorAt) && parsed.weeklyAnchorAt > 0){
+      state.weeklyAnchorAt = parsed.weeklyAnchorAt;
+    }
+    if(typeof parsed.lastPlayedId === 'string') state.lastPlayedId = parsed.lastPlayedId;
     if(parsed.lastExportSnapshot && typeof parsed.lastExportSnapshot === 'object'){
       state.lastExportSnapshot = parsed.lastExportSnapshot;
     }
@@ -1599,6 +1718,8 @@ function switchMainTab(tab, direction){
   var newIdx = TABS.indexOf(tab);
   var dir = direction || (newIdx > prevIdx ? 'left' : newIdx < prevIdx ? 'right' : 'none');
 
+  var revealPending = (tab === 'unplayed' && pendingRevealIds.length > 0);
+
   state.mainTab = tab;
   save();
   $$('.main-tab').forEach(function(b){ b.classList.toggle('is-active', b.dataset.tab === tab); });
@@ -1616,7 +1737,17 @@ function switchMainTab(tab, direction){
   };
   animatePanel(panelMap[tab], dir);
 
-  try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){ window.scrollTo(0, 0); }
+  if(revealPending){
+    requestAnimationFrame(function(){
+      try{
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }catch(e){
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+    });
+  } else {
+    try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){ window.scrollTo(0, 0); }
+  }
 }
 
 /* ── Swipe navigation ── */
@@ -1782,8 +1913,9 @@ function addNewThemeToSelected(){
 var SVG_IMPORT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>';
 var SVG_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72c0 .8.87 1.29 1.56.9l10.9-6.86a1.05 1.05 0 0 0 0-1.8L9.56 4.24A1.05 1.05 0 0 0 8 5.14Z"/></svg>';
 var SVG_RESTORE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>';
+var SVG_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
 
-function makeHistoryRow(h){
+function makeHistoryRow(h, tab){
   var isPlaying = (h.id === currentId) && !audio.paused && !audio.ended;
   var row = document.createElement('div');
   row.className = 'history-item' +
@@ -1820,7 +1952,9 @@ function makeHistoryRow(h){
   }
 
   var actionHtml;
-  if(h.hasAudio && h.read){
+  if(tab === 'unplayed' && h.hasAudio && !h.read){
+    actionHtml = '<button type="button" class="history-move-played" aria-label="再生済みに移動">' + SVG_CHECK + '</button>';
+  } else if(h.hasAudio && h.read){
     actionHtml = '<button type="button" class="history-restore" aria-label="未再生に戻す">' + SVG_RESTORE + '</button>';
   } else {
     actionHtml = '<button type="button" class="history-del" aria-label="削除">✕</button>';
@@ -1855,7 +1989,9 @@ function renderHistory(){
 
   var visible = state.history.filter(function(h){ return getEntryTab(h) === tab; });
 
-  if(tab === 'unplayed'){
+  if(tab === 'generating'){
+    visible.sort(function(a, b){ return (a.number || 0) - (b.number || 0); });
+  } else if(tab === 'unplayed'){
     visible.sort(function(a, b){ return (a.number || 0) - (b.number || 0); });
   } else if(tab === 'played'){
     visible.sort(function(a, b){ return (b.number || 0) - (a.number || 0); });
@@ -1880,8 +2016,37 @@ function renderHistory(){
         listEl.appendChild(header);
         lastDateKey = dateKey;
       }
-      listEl.appendChild(makeHistoryRow(h));
+      listEl.appendChild(makeHistoryRow(h, tab));
     });
+  }
+
+  // Unplayed total duration
+  var summaryEl = $('#unplayedSummary');
+  if(summaryEl){
+    if(tab === 'unplayed' && visible.length){
+      var total = 0;
+      visible.forEach(function(h){ total += (h.audioDuration || 0); });
+      summaryEl.innerHTML = '合計再生時間 <span class="total">' + fmtTime(total) + '</span> ・ ' + visible.length + '件';
+      summaryEl.hidden = false;
+    } else {
+      summaryEl.hidden = true;
+    }
+  }
+
+  // Reveal animation for newly added audio
+  if(tab === 'unplayed' && pendingRevealIds.length && !$('#panelUnplayed').hidden){
+    var ids = pendingRevealIds.slice();
+    pendingRevealIds.length = 0;
+    var animated = [];
+    ids.forEach(function(id){
+      var row = listEl.querySelector('.history-item[data-id="' + id + '"]');
+      if(row){ row.classList.add('just-added'); animated.push(row); }
+    });
+    if(animated.length){
+      setTimeout(function(){
+        animated.forEach(function(r){ r.classList.remove('just-added'); });
+      }, 1200);
+    }
   }
 
   var clearWrap = $('#clearPlayedWrap');
@@ -2348,8 +2513,8 @@ async function importAudioTo(entry, file, isNew){
   audioPositions[entry.id] = 0;
   if(db) dbSavePos(entry.id, 0).catch(function(){});
   save();
+  pendingRevealIds.push(entry.id);
   state.mainTab = 'unplayed';
-  renderAll();
   switchMainTab('unplayed');
   tickResetStatus();
 }
@@ -2576,6 +2741,8 @@ async function playEntry(id){
   if(!url){ showToast('音声が見つかりません'); return; }
 
   currentId = id;
+  state.lastPlayedId = id;
+  save();
   audio.src = url;
   audio.playbackRate = state.rate;
   if('preservesPitch' in audio) audio.preservesPitch = true;
@@ -2597,6 +2764,37 @@ async function playEntry(id){
   else audio.addEventListener('loadedmetadata', applyPos, { once: true });
 
   audio.play().catch(function(){});
+}
+
+async function loadEntryPaused(id){
+  var entry = getEntry(id);
+  if(!entry || !entry.hasAudio) return;
+  var url = await ensureAudioUrl(id);
+  if(!url) return;
+
+  currentId = id;
+  state.lastPlayedId = id;
+  save();
+  audio.src = url;
+  audio.playbackRate = state.rate;
+  if('preservesPitch' in audio) audio.preservesPitch = true;
+  audio.pause();
+
+  updateMediaSession(entry);
+  if(playerEl) playerEl.classList.add('show');
+
+  var applyPos = function(){
+    var pos = audioPositions[id] || 0;
+    if(pos > 0.5 && audio.duration && pos < audio.duration - 1){
+      audio.currentTime = pos;
+    }
+    setSeekUI();
+    updatePlayer();
+    renderHistory();
+    updatePositionState();
+  };
+  if(audio.readyState >= 1) applyPos();
+  else audio.addEventListener('loadedmetadata', applyPos, { once: true });
 }
 
 function togglePlay(){
@@ -2627,7 +2825,7 @@ function seekToStart(){
   updatePositionState();
 }
 
-function onEnded(){
+async function onEnded(){
   var entry = getEntry(currentId);
   if(!entry){ renderHistory(); return; }
 
@@ -2667,8 +2865,19 @@ function onEnded(){
     }
   }
 
+  // 通常終了: 未再生の最小番号を表示（再生はしない）
   document.body.classList.remove('is-playing');
   if('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+
+  var nextUnplayed = state.history.filter(function(h){ return h.hasAudio && !h.read; });
+  if(nextUnplayed.length){
+    nextUnplayed.sort(function(a,b){ return (a.number||0) - (b.number||0); });
+    await loadEntryPaused(nextUnplayed[0].id);
+    renderHistory();
+    tickResetStatus();
+    return;
+  }
+
   renderHistory();
 }
 
@@ -2827,7 +3036,7 @@ function setupMediaSession(){
   });
 }
 
-/* ── Delete / Restore ── */
+/* ── Delete / Restore / Move to played ── */
 function deleteHistory(id){
   var entry = getEntry(id);
   if(!entry) return;
@@ -2846,6 +3055,7 @@ function deleteHistory(id){
   if(db){ dbDelAudio(id).catch(function(){}); dbDelPos(id).catch(function(){}); }
   state.history = state.history.filter(function(h){ return h.id !== id; });
   if(state.lastGenId === id) state.lastGenId = null;
+  if(state.lastPlayedId === id) state.lastPlayedId = null;
   if(wasGenerating){
     var maxNum = 0;
     state.history.forEach(function(h){ if(h.number > maxNum) maxNum = h.number; });
@@ -2867,6 +3077,17 @@ function restoreToUnplayed(id){
   showToast('未再生に戻しました');
 }
 
+function markAsPlayed(id){
+  var entry = getEntry(id);
+  if(!entry) return;
+  if(!confirm('このCastを再生済みに移動しますか？')) return;
+  entry.read = true;
+  save();
+  renderHistory();
+  tickResetStatus();
+  showToast('再生済みに移動しました');
+}
+
 function clearPlayed(){
   var played = state.history.filter(function(h){ return h.hasAudio && h.read; });
   if(!played.length){ showToast('再生済みの項目がありません'); return; }
@@ -2882,6 +3103,7 @@ function clearPlayed(){
     if(audioUrls[h.id]){ try{ URL.revokeObjectURL(audioUrls[h.id]); }catch(e){} delete audioUrls[h.id]; }
     delete audioPositions[h.id];
     if(db){ dbDelAudio(h.id).catch(function(){}); dbDelPos(h.id).catch(function(){}); }
+    if(state.lastPlayedId === h.id) state.lastPlayedId = null;
   });
   state.history = state.history.filter(function(h){ return !(h.hasAudio && h.read); });
   save();
@@ -3119,7 +3341,8 @@ function exportData(){
     selectedThemeId: state.selectedThemeId,
     nextNumber: state.nextNumber,
     rate: state.rate, repeatMode: state.repeatMode, mainTab: state.mainTab,
-    resetAnchorAt: (typeof state.resetAnchorAt === 'number') ? state.resetAnchorAt : null
+    resetAnchorAt: (typeof state.resetAnchorAt === 'number') ? state.resetAnchorAt : null,
+    weeklyAnchorAt: (typeof state.weeklyAnchorAt === 'number') ? state.weeklyAnchorAt : null
   };
   var json = JSON.stringify(data, null, 2);
   var blob = new Blob([json], { type: 'application/json' });
@@ -3174,6 +3397,11 @@ function importData(file){
     } else if(data.resetAnchorAt === null){
       state.resetAnchorAt = null;
     }
+    if(typeof data.weeklyAnchorAt === 'number' && isFinite(data.weeklyAnchorAt) && data.weeklyAnchorAt > 0){
+      state.weeklyAnchorAt = data.weeklyAnchorAt;
+    } else if(data.weeklyAnchorAt === null){
+      state.weeklyAnchorAt = null;
+    }
 
     state.selectedPromptId = data.selectedPromptId || null;
     state.selectedThemeId = data.selectedThemeId || null;
@@ -3199,6 +3427,7 @@ function importData(file){
 /* ── Reset modal ── */
 function openResetModal(){
   var input = $('#resetInput');
+  var weeklyInput = $('#weeklyResetInput');
   if(!input) return;
   var info = getResetInfo();
   if(info && info.nextResetAt && isFinite(info.nextResetAt)){
@@ -3208,6 +3437,12 @@ function openResetModal(){
     d.setMinutes(d.getMinutes() + 30);
     d.setSeconds(0, 0);
     input.value = toLocalDatetimeString(d.getTime());
+  }
+  var winfo = getWeeklyInfo();
+  if(winfo && winfo.nextResetAt && isFinite(winfo.nextResetAt)){
+    if(weeklyInput) weeklyInput.value = toLocalDatetimeString(winfo.nextResetAt);
+  } else if(weeklyInput){
+    weeklyInput.value = '';
   }
   $('#resetModal').classList.add('show');
   document.body.classList.add('modal-open');
@@ -3257,9 +3492,21 @@ document.addEventListener('DOMContentLoaded', async function(){
     speedSlider.value = state.rate;
   }
 
+  // 最後に再生していた項目を再開位置で表示
+  setTimeout(function(){
+    if(state.lastPlayedId){
+      var entry = getEntry(state.lastPlayedId);
+      if(entry && entry.hasAudio && (audioPositions[entry.id] || 0) > 1){
+        loadEntryPaused(entry.id);
+      }
+    }
+  }, 300);
+
   // ─── リセット時刻ステータス ───
   var resetRow = $('#resetRow');
   if(resetRow) resetRow.addEventListener('click', openResetModal);
+  var weeklyResetEl = $('#weeklyReset');
+  if(weeklyResetEl) weeklyResetEl.addEventListener('click', openResetModal);
   var resetModalClose = $('#resetModalClose');
   if(resetModalClose) resetModalClose.addEventListener('click', closeResetModal);
   var resetModalEl = $('#resetModal');
@@ -3269,18 +3516,23 @@ document.addEventListener('DOMContentLoaded', async function(){
   var resetSaveBtn = $('#resetSaveBtn');
   if(resetSaveBtn) resetSaveBtn.addEventListener('click', function(){
     var v = $('#resetInput').value;
-    if(!v){ showToast('時刻を入力してください'); return; }
-    var d = new Date(v);
-    if(!isFinite(d.getTime())){ showToast('正しい時刻を入力してください'); return; }
-    state.resetAnchorAt = d.getTime();
+    var wv = $('#weeklyResetInput').value;
+    if(!v && !wv){ showToast('時刻を入力してください'); return; }
+    var d = v ? new Date(v) : null;
+    var wd = wv ? new Date(wv) : null;
+    if(v && !isFinite(d.getTime())){ showToast('正しい時刻を入力してください'); return; }
+    if(wv && !isFinite(wd.getTime())){ showToast('正しい時刻を入力してください'); return; }
+    state.resetAnchorAt = d ? d.getTime() : null;
+    state.weeklyAnchorAt = wd ? wd.getTime() : null;
     save();
     closeResetModal();
     tickResetStatus();
-    showToast('次回リセット時刻を保存しました');
+    showToast('リセット時刻を保存しました');
   });
   var resetClearBtn = $('#resetClearBtn');
   if(resetClearBtn) resetClearBtn.addEventListener('click', function(){
     state.resetAnchorAt = null;
+    state.weeklyAnchorAt = null;
     save();
     closeResetModal();
     tickResetStatus();
@@ -3407,6 +3659,12 @@ document.addEventListener('DOMContentLoaded', async function(){
         if(rr) restoreToUnplayed(rr.dataset.id);
         return;
       }
+      var movePlayed = e.target.closest('.history-move-played');
+      if(movePlayed){
+        var mr = movePlayed.closest('.history-item');
+        if(mr) markAsPlayed(mr.dataset.id);
+        return;
+      }
       var del = e.target.closest('.history-del');
       if(del){
         var r = del.closest('.history-item');
@@ -3489,12 +3747,22 @@ document.addEventListener('DOMContentLoaded', async function(){
     if(currentId) audioPositions[currentId] = audio.currentTime;
     if(!scrubbing) setSeekUI();
     updatePositionState();
+    var now = Date.now();
+    if(currentId && !audio.paused && now - lastPosSaveAt > 4000){
+      lastPosSaveAt = now;
+      if(db) dbSavePos(currentId, audio.currentTime || 0).catch(function(){});
+    }
   });
   audio.addEventListener('ended', onEnded);
   audio.addEventListener('error', function(){ showToast('この音声を再生できませんでした'); });
 
   document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState === 'visible'){
+    if(document.visibilityState === 'hidden'){
+      if(currentId){
+        audioPositions[currentId] = audio.currentTime || 0;
+        if(db) dbSavePos(currentId, audioPositions[currentId]).catch(function(){});
+      }
+    } else {
       if(currentId){
         var entry = getEntry(currentId);
         if(entry) updateMediaSession(entry);
