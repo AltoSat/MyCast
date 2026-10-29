@@ -88,14 +88,14 @@
   .reset-main:active .reset-value{color:var(--accent)}
   .reset-left{
     flex:0 0 auto;display:flex;flex-direction:column;justify-content:center;
-    gap:1px;min-width:118px;
+    gap:1px;min-width:96px;
   }
   .reset-label{
     font-size:11px;font-weight:700;color:var(--text2);
     letter-spacing:.04em;
   }
   .reset-value{
-    font-size:14px;font-weight:700;color:var(--text);
+    font-size:16px;font-weight:800;color:var(--text);
     font-variant-numeric:tabular-nums;
     transition:color .12s;white-space:nowrap;
   }
@@ -126,7 +126,7 @@
   .reset-num-row.pending-right{color:var(--text2)}
   .reset-num-row.pending-right .theme{color:var(--text3)}
 
-  /* ── Weekly reset ── */
+  /* ── Weekly reset (one line) ── */
   .weekly-reset{
     margin-top:10px;
     padding-top:10px;
@@ -135,18 +135,49 @@
     -webkit-user-select:none;user-select:none;
     border-radius:8px;
     transition:background .12s;
+    display:flex;
+    align-items:center;
+    gap:8px;
   }
   .weekly-reset:active{background:rgba(255,255,255,.04)}
-  .weekly-head{
-    display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  .weekly-label{
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--text2);
+    letter-spacing:.04em;
+    flex:0 0 auto;
   }
-  .weekly-head .reset-label{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.04em}
-  .weekly-head .reset-value{font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
-  .weekly-head .reset-remain{font-size:11px;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums}
-  .weekly-progress{display:flex;align-items:center;gap:8px;margin-top:6px}
-  .weekly-bar{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.10);overflow:hidden}
-  .weekly-bar-fill{height:100%;width:0%;border-radius:3px;background:var(--grad);transition:width .4s ease}
-  .weekly-count{font-size:11px;font-weight:700;color:var(--text2);font-variant-numeric:tabular-nums;flex:0 0 auto}
+  .weekly-time{
+    font-size:12px;
+    font-weight:700;
+    color:var(--text);
+    font-variant-numeric:tabular-nums;
+    flex:0 0 auto;
+    white-space:nowrap;
+  }
+  .weekly-bar{
+    flex:1;
+    height:5px;
+    border-radius:3px;
+    background:rgba(255,255,255,.10);
+    overflow:hidden;
+    min-width:30px;
+  }
+  .weekly-bar-fill{
+    height:100%;
+    width:0%;
+    border-radius:3px;
+    background:var(--grad);
+    transition:width .4s ease;
+  }
+  .weekly-count{
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--text2);
+    font-variant-numeric:tabular-nums;
+    flex:0 0 auto;
+    white-space:nowrap;
+  }
 
   input[type="datetime-local"]{
     width:100%;
@@ -185,7 +216,6 @@
   .topbar{display:flex;align-items:center;justify-content:space-between;padding:4px 0 14px;gap:12px}
   .titleWrap{min-width:0}
   .topbar h1{font-size:28px;font-weight:800;margin:0;letter-spacing:-.03em;line-height:1.1}
-  .subtitle{margin:4px 0 0;font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.02em}
   .topbar-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
   .icon-btn{width:48px;height:48px;border-radius:50%;background:var(--card);border:none;color:var(--text);
     font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;
@@ -778,7 +808,6 @@
   <header class="topbar">
     <div class="titleWrap">
       <h1>MyCast</h1>
-      <p class="subtitle" id="subtitle">音声解説 × プレイヤー</p>
     </div>
     <div class="topbar-actions">
       <button id="notebookBtn" type="button" class="icon-btn" aria-label="NotebookLM を開く" title="NotebookLM を開く">📓</button>
@@ -797,15 +826,10 @@
       <div class="reset-right" id="resetNumbers" hidden></div>
     </div>
     <div class="weekly-reset" id="weeklyReset" role="button" tabindex="0" aria-label="週間リセット時刻を変更">
-      <div class="weekly-head">
-        <span class="reset-label">週間リセット</span>
-        <span class="reset-value" id="weeklyNextTime">未設定</span>
-        <span class="reset-remain" id="weeklyRemain"></span>
-      </div>
-      <div class="weekly-progress">
-        <div class="weekly-bar"><div class="weekly-bar-fill" id="weeklyBarFill"></div></div>
-        <div class="weekly-count" id="weeklyCount">0 / 50</div>
-      </div>
+      <span class="weekly-label">週間</span>
+      <span class="weekly-time" id="weeklyNextTime">未設定</span>
+      <div class="weekly-bar"><div class="weekly-bar-fill" id="weeklyBarFill"></div></div>
+      <div class="weekly-count" id="weeklyCount">0/50</div>
     </div>
   </div>
 
@@ -962,9 +986,9 @@
       <button id="resetModalClose" type="button" class="icon-btn" aria-label="閉じる">✕</button>
     </div>
     <div class="reset-modal-body">
-      <p class="note">5時間ごとのリセット予定時刻を入力してください。以降、5時間ごとの予定時刻を計算します。実際のリセット時刻が予定と異なる場合は、いつでもこの画面から修正できます。</p>
+      <p class="note">Gemini Notebook の次回リセット予定時刻を入力してください。以降、5時間ごとの予定時刻を計算します。</p>
       <input type="datetime-local" id="resetInput">
-      <p class="note" style="margin-top:16px">週間リセット（7日ごと）の開始時刻を入力してください。この期間に生成した音声解説の数が50個で100%になります。</p>
+      <p class="note" style="margin-top:16px">週間リセット（7日ごと）の起点となる時刻を入力してください。この期間に生成した音声解説の数が50個で100%になります。</p>
       <input type="datetime-local" id="weeklyResetInput">
       <button id="resetSaveBtn" type="button" class="data-btn" style="margin-top:16px">保存</button>
       <button id="resetClearBtn" type="button" class="data-btn skip-style">クリア（未設定に戻す）</button>
@@ -1087,12 +1111,17 @@ function formatDateLabel(d){
 }
 function fmtRate(r){ return r.toFixed(1) + '×'; }
 
-function fmtDateTime(ms){
+function fmtTimeOnly(ms){
   if(!isFinite(ms)) return '—';
   var d = new Date(ms);
-  var days = ['日','月','火','水','木','金','土'];
-  return (d.getMonth()+1)+'/'+d.getDate()+'('+days[d.getDay()]+') '+
-    String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function fmtShortDateTime(ms){
+  if(!isFinite(ms)) return '—';
+  var d = new Date(ms);
+  return (d.getMonth()+1) + '/' + d.getDate() + ' ' +
+    String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
 }
 
 function fmtRemain(ms){
@@ -1183,13 +1212,16 @@ function getResetInfo(nowMs){
     ? state.resetAnchorAt : null;
   if(anchor === null) return null;
   var t = (typeof nowMs === 'number') ? nowMs : Date.now();
+  var period = RESET_PERIOD_MS;
+  var nextResetAt;
   if(t < anchor){
-    return { currentPeriodStart: null, nextResetAt: anchor, hasPeriod: false };
+    nextResetAt = anchor;
+  } else {
+    var k = Math.floor((t - anchor) / period) + 1;
+    nextResetAt = anchor + k * period;
   }
-  var k = Math.floor((t - anchor) / RESET_PERIOD_MS);
-  var start = anchor + k * RESET_PERIOD_MS;
-  var end = start + RESET_PERIOD_MS;
-  return { currentPeriodStart: start, nextResetAt: end, hasPeriod: true };
+  var currentPeriodStart = nextResetAt - period;
+  return { currentPeriodStart: currentPeriodStart, nextResetAt: nextResetAt, hasPeriod: true };
 }
 
 function getWeeklyInfo(nowMs){
@@ -1197,30 +1229,31 @@ function getWeeklyInfo(nowMs){
     ? state.weeklyAnchorAt : null;
   if(anchor === null) return null;
   var t = (typeof nowMs === 'number') ? nowMs : Date.now();
+  var period = WEEKLY_PERIOD_MS;
+  var nextResetAt;
   if(t < anchor){
-    return { currentPeriodStart: null, nextResetAt: anchor, hasPeriod: false };
+    nextResetAt = anchor;
+  } else {
+    var k = Math.floor((t - anchor) / period) + 1;
+    nextResetAt = anchor + k * period;
   }
-  var k = Math.floor((t - anchor) / WEEKLY_PERIOD_MS);
-  var start = anchor + k * WEEKLY_PERIOD_MS;
-  var end = start + WEEKLY_PERIOD_MS;
-  return { currentPeriodStart: start, nextResetAt: end, hasPeriod: true };
+  var currentPeriodStart = nextResetAt - period;
+  return { currentPeriodStart: currentPeriodStart, nextResetAt: nextResetAt, hasPeriod: true };
 }
 
 function countWeeklyGenerated(){
   var info = getWeeklyInfo();
-  if(!info || !info.hasPeriod) return 0;
-  var start = info.currentPeriodStart;
-  var end = info.nextResetAt;
+  if(!info) return 0;
   var count = 0;
   state.history.forEach(function(h){
-    if(h.time >= start && h.time < end) count++;
+    if(h.time >= info.currentPeriodStart && h.time < info.nextResetAt) count++;
   });
   return count;
 }
 
 function getPeriodNumberItems(){
   var info = getResetInfo();
-  if(!info || !info.hasPeriod) return null;
+  if(!info) return null;
   var start = info.currentPeriodStart;
 
   var leftCandidates = state.history.filter(function(h){
@@ -1302,24 +1335,21 @@ function renderResetNumbers(){
 
 function renderWeeklyStatus(){
   var nextEl = $('#weeklyNextTime');
-  var remainEl = $('#weeklyRemain');
   var barEl = $('#weeklyBarFill');
   var countEl = $('#weeklyCount');
   if(!nextEl) return;
   var info = getWeeklyInfo();
   if(!info){
     nextEl.textContent = '未設定';
-    if(remainEl) remainEl.textContent = '';
     if(barEl) barEl.style.width = '0%';
-    if(countEl) countEl.textContent = '0 / ' + WEEKLY_GOAL;
+    if(countEl) countEl.textContent = '0/' + WEEKLY_GOAL;
     return;
   }
-  nextEl.textContent = fmtDateTime(info.nextResetAt);
-  if(remainEl) remainEl.textContent = fmtRemain(info.nextResetAt - Date.now());
+  nextEl.textContent = fmtShortDateTime(info.nextResetAt);
   var count = countWeeklyGenerated();
   var pct = Math.min(100, (count / WEEKLY_GOAL) * 100);
   if(barEl) barEl.style.width = pct.toFixed(1) + '%';
-  if(countEl) countEl.textContent = count + ' / ' + WEEKLY_GOAL + '（' + Math.round(pct) + '%）';
+  if(countEl) countEl.textContent = count + '/' + WEEKLY_GOAL;
 }
 
 function tickResetStatus(){
@@ -1337,7 +1367,7 @@ function tickResetStatus(){
     return;
   }
 
-  nextEl.textContent = fmtDateTime(info.nextResetAt);
+  nextEl.textContent = fmtTimeOnly(info.nextResetAt);
   if(remainEl) remainEl.textContent = fmtRemain(info.nextResetAt - Date.now());
 }
 
